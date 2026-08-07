@@ -878,7 +878,8 @@ document.getElementById('cartClose').addEventListener('click', closeCart);
 document.getElementById('cartOverlay').addEventListener('click', closeCart);
 document.getElementById('cartCheckoutBtn').addEventListener('click', ()=>{
   if(CART.length===0){ showToast('Seu carrinho está vazio'); return; }
-  alert('Prévia: aqui abre o checkout — na Nuvemshop, esse fluxo já é nativo deles (só aplicamos marca/cores).');
+  const cartData = encodeURIComponent(JSON.stringify(CART));
+  window.location.href = 'checkout-redirect.html?cart=' + cartData;
 });
 renderCart();
 
