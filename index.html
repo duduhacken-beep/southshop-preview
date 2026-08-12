@@ -384,6 +384,25 @@ footer{background:#05080f;padding:60px 0 28px;}
 .search-suggest-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
 .search-suggest-chip{border:1px solid var(--line-2);padding:8px 16px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;background:transparent;}
 .search-suggest-chip:hover{border-color:var(--blue-2);color:var(--white);}
+
+/* ================= CART SHIPPING CALCULATOR ================= */
+.cart-shipping{padding:16px 24px;border-top:1px solid var(--line);}
+.cart-shipping-label{font-family:'Barlow Condensed',sans-serif;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.cart-shipping-row{display:flex;gap:8px;}
+.cart-shipping-row input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line-2);color:var(--white);padding:11px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;border-radius:1px;}
+.cart-shipping-row input:focus{outline:none;border-color:var(--blue);}
+.cart-shipping-row button{background:transparent;border:1px solid var(--line-2);color:var(--white);padding:0 16px;font-family:'Barlow Condensed',sans-serif;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;border-radius:1px;white-space:nowrap;transition:.15s;}
+.cart-shipping-row button:hover{border-color:var(--blue);color:var(--blue-2);}
+.cart-shipping-error{font-size:12px;color:var(--sale);margin-top:8px;display:none;}
+.cart-shipping-error.show{display:block;}
+.cart-shipping-result{margin-top:14px;display:none;}
+.cart-shipping-result.show{display:block;}
+.cart-shipping-opt{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px solid var(--line);font-size:13px;}
+.cart-shipping-opt:first-child{border-top:none;padding-top:0;}
+.cart-shipping-opt b{color:var(--white);font-weight:500;display:block;}
+.cart-shipping-opt .days{color:var(--muted-2);font-size:11.5px;}
+.cart-shipping-opt .price{color:var(--blue-2);font-family:'Barlow Condensed',sans-serif;font-size:14px;white-space:nowrap;}
+.cart-shipping-disclaimer{font-size:10.5px;color:var(--muted-2);margin-top:10px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -444,7 +463,7 @@ footer{background:#05080f;padding:60px 0 28px;}
     <div class="sec-head reveal">
       <h2 class="serif">Comprar por categoria</h2>
       <div class="head-right">
-        <div class="pill">Ver tudo</div>
+        <a href="categoria.html" class="pill" style="display:inline-block;">Ver tudo</a>
         <div class="arrows"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
       </div>
     </div>
@@ -459,7 +478,7 @@ footer{background:#05080f;padding:60px 0 28px;}
       <div class="quad-hero">
         <div class="quad-tag">Kit mais completo</div>
         <h3 class="cond">O kit que resolve<br>do zero ao brilho</h3>
-        <a href="#" class="btn btn-solid" style="margin-top:14px;">Comprar kit</a>
+        <a href="categoria.html" class="btn btn-solid" style="margin-top:14px;">Comprar kit</a>
       </div>
       <div class="quad-small"><span class="save">Economize 20%</span><div class="quad-mini-title cond">Vitrificação</div></div>
       <div class="quad-small"><span class="save">Novidade</span><div class="quad-mini-title cond">Linha PPF</div></div>
@@ -476,7 +495,7 @@ footer{background:#05080f;padding:60px 0 28px;}
         <div class="eyebrow">Linha Vitrificação</div>
         <h3>Proteção que reflete de verdade</h3>
         <p>Coatings cerâmicos CarPro com durabilidade profissional — o mesmo padrão aplicado nos carros que passam pela South Car.</p>
-        <a href="#" class="btn btn-solid">Conhecer a linha</a>
+        <a href="categoria.html" class="btn btn-solid">Conhecer a linha</a>
       </div>
     </div>
   </div>
@@ -549,7 +568,7 @@ footer{background:#05080f;padding:60px 0 28px;}
     <div class="sec-head reveal">
       <h2 class="serif">Mais vendidos</h2>
       <div class="head-right">
-        <div class="pill">Ver tudo</div>
+        <a href="categoria.html" class="pill" style="display:inline-block;">Ver tudo</a>
         <div class="arrows"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
       </div>
     </div>
@@ -565,7 +584,7 @@ footer{background:#05080f;padding:60px 0 28px;}
         <div class="eyebrow">Ideia inteligente</div>
         <h3 style="color:var(--white);">Monte seu kit completo</h3>
         <p style="margin:14px auto 22px;">Descontamine, corrija e proteja em sequência — combos CarPro montados pela South Car com margem melhor pra você.</p>
-        <a href="#" class="btn btn-solid">Ver kits</a>
+        <a href="categoria.html" class="btn btn-solid">Ver kits</a>
       </div>
     </div>
   </div>
@@ -623,7 +642,7 @@ footer{background:#05080f;padding:60px 0 28px;}
   <div class="wrap">
     <div class="sec-head reveal">
       <div><div class="eyebrow">Academia South Car</div><h2 class="serif">Aprenda com quem aplica todo dia</h2></div>
-      <div class="head-right"><div class="pill">Ver todos</div></div>
+      <div class="head-right"><div class="pill" style="cursor:default;">Em breve</div></div>
     </div>
     <div class="course-grid reveal" id="courseGrid"></div>
   </div>
@@ -658,7 +677,7 @@ footer{background:#05080f;padding:60px 0 28px;}
       <h3 class="serif">Dúvida técnica antes de comprar?</h3>
       <p>Fale direto com o time South Car — resposta em horário comercial.</p>
     </div>
-    <a class="wa" href="#"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>Chamar no WhatsApp</a>
+    <a class="wa" href="https://wa.me/554732241691" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>Chamar no WhatsApp</a>
   </div>
 </section>
 
@@ -690,6 +709,18 @@ footer{background:#05080f;padding:60px 0 28px;}
     <button class="cart-close" id="cartClose">&times;</button>
   </div>
   <div class="cart-items" id="cartItems"></div>
+  
+    <!-- SHIPPING CALCULATOR -->
+    <div class="cart-shipping">
+      <div class="cart-shipping-label">Calcular frete e prazo</div>
+      <div class="cart-shipping-row">
+        <input type="text" id="cepInput" placeholder="Seu CEP" inputmode="numeric" maxlength="9">
+        <button type="button" id="cepCalcBtn">Calcular</button>
+      </div>
+      <div class="cart-shipping-error" id="cepError">CEP inválido — digite os 8 números.</div>
+      <div class="cart-shipping-result" id="cepResult"></div>
+    </div>
+
   <div class="cart-footer" id="cartFooter">
     <div class="cart-subtotal"><span>Subtotal</span><span id="cartSubtotal">R$ 0,00</span></div>
     <button class="btn btn-solid cart-checkout-btn" id="cartCheckoutBtn">Finalizar compra</button>
@@ -840,6 +871,34 @@ function showToast(msg){
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
+// calculadora de frete (simulada — na Nuvemshop real isso usa a tabela do Nuvem Envio)
+const cepBtn = document.getElementById('cepCalcBtn');
+if(cepBtn){
+  cepBtn.addEventListener('click', ()=>{
+    const raw = document.getElementById('cepInput').value.replace(/\D/g,'');
+    const errEl = document.getElementById('cepError');
+    const resEl = document.getElementById('cepResult');
+    if(raw.length !== 8){
+      errEl.classList.add('show');
+      resEl.classList.remove('show');
+      return;
+    }
+    errEl.classList.remove('show');
+    const region = parseInt(raw[0], 10);
+    const dist = Math.abs(region - 8);
+    const eco = 19.9 + dist * 4.5;
+    const exp = eco * 1.8;
+    const ecoDays = Math.round(5 + dist * 1.5);
+    const expDays = Math.round(2 + dist * 0.8);
+    resEl.innerHTML = `
+      <div class="cart-shipping-opt"><div><b>PAC (Correios)</b><span class="days">até ${ecoDays} dias úteis</span></div><span class="price">${fmtBRL(eco)}</span></div>
+      <div class="cart-shipping-opt"><div><b>Expresso (Jadlog)</b><span class="days">até ${expDays} dias úteis</span></div><span class="price">${fmtBRL(exp)}</span></div>
+      <div class="cart-shipping-disclaimer">*Valores ilustrativos neste protótipo. Na Nuvemshop, o cálculo real usa a tabela do Nuvem Envio.</div>
+    `;
+    resEl.classList.add('show');
+  });
+}
+
 document.getElementById('cartIconBtn').addEventListener('click', openCart);
 document.getElementById('cartClose').addEventListener('click', closeCart);
 document.getElementById('cartOverlay').addEventListener('click', closeCart);
@@ -922,9 +981,10 @@ document.getElementById('courseGrid').innerHTML = COURSES.map(c=>`
   <div class="course-card">
     <div class="course-cover">
       <div class="blur-bg"></div>
+      <span class="badge">Em breve</span>
       <div class="course-overlay">
         <div class="course-lock">${lockSvg}</div>
-        <div class="course-buy">Comprar curso</div>
+        <div class="course-buy">Em breve</div>
       </div>
       <div class="course-duration">${c.dur}</div>
     </div>
@@ -940,7 +1000,7 @@ const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 document.querySelector('.burger').addEventListener('click',()=>alert('Menu mobile abre aqui no tema final.'));
 document.querySelectorAll('.course-cover').forEach(c=>{
-  c.addEventListener('click',()=>alert('Prévia: aqui abre o checkout do curso (plataforma própria, ainda não construída).'));
+  c.addEventListener('click',()=>alert('Em breve — a Academia South Car ainda está a caminho.'));
 });
 </script>
 </body>
