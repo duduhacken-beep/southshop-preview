@@ -79,7 +79,7 @@ nav.links a:hover{color:var(--white);}
 @media(max-width:900px){nav.links{display:none;}.burger{display:flex;}}
 
 /* ---------- HERO ---------- */
-.hero{position:relative;height:min(84vh,680px);min-height:480px;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(120deg,#0a0f1a 0%,#101d33 46%,#060a12 100%);}
+.hero{position:relative;height:calc(100vh - 65px);height:calc(100dvh - 65px);min-height:560px;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(120deg,#0a0f1a 0%,#101d33 46%,#060a12 100%);}
 @media(max-width:760px){.hero{height:58vh;min-height:440px;}}
 .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;background:transparent;}
 .hero-bg{position:absolute;inset:0;z-index:0;}
@@ -950,11 +950,11 @@ renderCart();
 
 
 const CATS = [
-  {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg'},{n:'Polimento', href:'#', img:'assets/img/cat-polimento.jpg'},{n:'Descontaminação', href:'#', img:'assets/img/cat-descontaminacao.jpg'},{n:'Manutenção', href:'#', img:'assets/img/cat-manutencao.jpg'},{n:'Rodas & Pneus', href:'#'},{n:'Acessórios', href:'#'}
+  {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg'},{n:'Polimento', href:'#', img:'assets/img/cat-polimento.jpg'},{n:'Descontaminação', href:'#', img:'assets/img/cat-descontaminacao.jpg'},{n:'Manutenção', href:'#', img:'assets/img/cat-manutencao.jpg'},{n:'Rodas & Pneus', href:'#', img:'assets/img/cat-rodas-pneus.jpg'},{n:'Acessórios', href:'#', img:'assets/img/cat-acessorios.jpg'}
 ];
 const hex = '<svg class="hexmark" viewBox="0 0 24 26" fill="none" stroke="#7b9de0" stroke-width="1.2"><path d="M12 1 L23 7.5 L23 19.5 L12 26 L1 19.5 L1 7.5 Z"/></svg>';
 document.getElementById('catStrip').innerHTML = CATS.map(c=>`
-  <a href="${c.href}" class="cat"><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${hex}<span>${c.n}</span></a>
+  <a href="${c.href}" class="cat"><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${c.img?'':hex}<span>${c.n}</span></a>
 `).join('');
 
 const PRODUCTS = [
