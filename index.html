@@ -98,16 +98,16 @@ nav.links a:hover{color:var(--white);}
   .hero-slide.slide-1{object-position:38% center;}
   .hero-slide.slide-2{object-position:68% center;}
 }
+.hero-dots{position:absolute;right:26px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:10px;}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:.2s;border:none;padding:0;}
+.hero-dot.active{background:var(--white);transform:scale(1.3);}
+@media(max-width:760px){.hero-dots{right:14px;flex-direction:row;top:auto;bottom:14px;transform:none;}}
 /* ---------- TESTE: hero exclusivo para mobile (remover este bloco + a tag .hero-mobile-only no HTML pra reverter) ---------- */
 .hero-mobile-only{display:none;}
 @media(max-width:760px){
   .hero-slides,.hero-dots{display:none;}
   .hero-mobile-only{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 12%;filter:saturate(1.04) contrast(1.02);z-index:0;}
 }
-.hero-dots{position:absolute;right:26px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:10px;}
-.hero-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:.2s;border:none;padding:0;}
-.hero-dot.active{background:var(--white);transform:scale(1.3);}
-@media(max-width:760px){.hero-dots{right:14px;flex-direction:row;top:auto;bottom:14px;transform:none;}}
 
 @keyframes sweep{0%{left:-40%}45%{left:135%}100%{left:135%}}
 .hero-fade{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(5,8,15,.92) 0%,rgba(5,8,15,.35) 34%,rgba(5,8,15,.18) 60%,rgba(5,8,15,.4) 100%);}
