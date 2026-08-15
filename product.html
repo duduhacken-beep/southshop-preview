@@ -1078,7 +1078,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 document.querySelector('.burger').addEventListener('click',()=>alert('Menu mobile abre aqui no tema final.'));
 document.querySelectorAll('.course-cover').forEach(c=>{

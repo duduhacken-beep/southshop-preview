@@ -1022,7 +1022,7 @@ document.getElementById('signupForm').addEventListener('submit', function(e){
   window.location.href = 'conta.html?name=' + encodeURIComponent(name.split(' ')[0]);
 });
 
-const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 document.querySelector('.burger').addEventListener('click',()=>alert('Menu mobile abre aqui no tema final.'));
 </script>
