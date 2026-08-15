@@ -438,6 +438,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 
 .listing{padding:40px 0 70px;}
 .listing-grid{display:grid;grid-template-columns:230px 1fr;gap:44px;align-items:flex-start;}
+.listing-grid.filters-hidden{grid-template-columns:1fr;}
 @media(max-width:860px){.listing-grid{grid-template-columns:1fr;}}
 
 /* filters sidebar */
@@ -1008,6 +1009,7 @@ if(searchQ){
   document.getElementById('breadcrumbCurrent').textContent = `Busca: "${searchQ}"`;
   document.getElementById('activePills').innerHTML = `<div class="active-pill">"${searchQ}" <span onclick="window.location.href='categoria.html'">×</span></div>`;
   document.querySelector('.filters').style.display = 'none';
+  document.querySelector('.listing-grid').classList.add('filters-hidden');
   renderListing(results);
 } else {
   renderListing(LISTING);
