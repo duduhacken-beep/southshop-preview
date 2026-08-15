@@ -445,7 +445,7 @@ footer{background:#05080f;padding:60px 0 28px;}
   <div class="wrap nav-row">
     <a href="index.html" class="logo-link"><img class="logo-img" src="assets/img/logo.png" alt="South Car Exclusive · CarPro"></a>
     <nav class="links">
-      <a href="#">PPF</a>
+      <a href="#">Descontaminação</a>
       <a href="categoria.html">Vitrificação</a>
       <a href="#">Polimento</a>
       <a href="#">Manutenção</a>
@@ -519,7 +519,7 @@ footer{background:#05080f;padding:60px 0 28px;}
         <a href="categoria.html" class="btn btn-solid" style="margin-top:14px;">Comprar kit</a>
       </div>
       <div class="quad-small"><span class="save">Economize 20%</span><div class="quad-mini-title cond">Vitrificação</div></div>
-      <div class="quad-small"><span class="save">Novidade</span><div class="quad-mini-title cond">Linha PPF</div></div>
+      <div class="quad-small"><span class="save">Novidade</span><div class="quad-mini-title cond">Rodas & Pneus</div></div>
       <div class="quad-small"><span class="save">Economize 15%</span><div class="quad-mini-title cond">Polimento</div></div>
     </div>
   </div>
@@ -727,7 +727,7 @@ footer{background:#05080f;padding:60px 0 28px;}
         <img class="logo-img footer-logo-img" src="assets/img/logo.png" alt="South Car Exclusive · CarPro">
         <p style="color:var(--muted);font-size:13px;line-height:1.65;max-width:280px;">Curadoria oficial CarPro pela South Car Exclusive. Estética automotiva premium, sem meio-termo.</p>
       </div>
-      <div><h4>Catálogo</h4><ul><li><a href="#">PPF</a></li><li><a href="categoria.html">Vitrificação</a></li><li><a href="#">Polimento</a></li><li><a href="#">Manutenção</a></li><li><a href="#">Kits</a></li></ul></div>
+      <div><h4>Catálogo</h4><ul><li><a href="#">Descontaminação</a></li><li><a href="categoria.html">Vitrificação</a></li><li><a href="#">Polimento</a></li><li><a href="#">Manutenção</a></li><li><a href="#">Kits</a></li></ul></div>
       <div><h4>Ajuda</h4><ul><li><a href="trocas-devolucoes.html">Trocas e devoluções</a></li><li><a href="prazo-entrega.html">Prazo de entrega</a></li><li><a href="formas-pagamento.html">Formas de pagamento</a></li><li><a href="fale-conosco.html">Fale conosco</a></li></ul></div>
       <div><h4>South Car</h4><ul><li><a href="sobre.html">South Car Exclusive</a></li><li><a href="https://www.instagram.com/southcarservice/" target="_blank" rel="noopener">@southcarservice</a></li><li><a href="sobre.html">Porsche Cup Brasil</a></li></ul></div>
     </div>
@@ -782,7 +782,7 @@ footer{background:#05080f;padding:60px 0 28px;}
     <div class="search-suggest-row">
       <div class="search-suggest-chip" data-q="CQuartz">CQuartz</div>
       <div class="search-suggest-chip" data-q="Vitrificação">Vitrificação</div>
-      <div class="search-suggest-chip" data-q="PPF">PPF</div>
+      <div class="search-suggest-chip" data-q="Rodas &amp; Pneus">Rodas &amp; Pneus</div>
       <div class="search-suggest-chip" data-q="Kit">Kit</div>
     </div>
   </div>
@@ -949,7 +949,7 @@ renderCart();
 
 
 const CATS = [
-  {n:'PPF', href:'#'},{n:'Vitrificação', href:'categoria.html'},{n:'Polimento', href:'#'},{n:'Descontaminação', href:'#'},{n:'Manutenção', href:'#'},{n:'Acessórios', href:'#'}
+  {n:'Vitrificação', href:'categoria.html'},{n:'Polimento', href:'#'},{n:'Descontaminação', href:'#'},{n:'Manutenção', href:'#'},{n:'Rodas & Pneus', href:'#'},{n:'Acessórios', href:'#'}
 ];
 const hex = '<svg class="hexmark" viewBox="0 0 24 26" fill="none" stroke="#7b9de0" stroke-width="1.2"><path d="M12 1 L23 7.5 L23 19.5 L12 26 L1 19.5 L1 7.5 Z"/></svg>';
 document.getElementById('catStrip').innerHTML = CATS.map(c=>`
@@ -957,9 +957,12 @@ document.getElementById('catStrip').innerHTML = CATS.map(c=>`
 `).join('');
 
 const PRODUCTS = [
-  {id:'cquartz-uk3', cat:'Vitrificação', name:'CarPro CQuartz — Vitrificador de Pintura', rate:'4.9 (312)', now:'R$ 429', badge:'Mais vendido'},
-  {id:'reload', cat:'Manutenção', name:'CarPro Reload — Selante Cerâmico Spray', rate:'4.8 (204)', now:'R$ 189'},
+  {id:'cquartz-uk3', cat:'Vitrificação', name:'CarPro CQuartz UK 3.0 — Vitrificador de Pintura', rate:'4.9 (312)', now:'R$ 429', badge:'Mais vendido'},
+  {id:'reload', cat:'Manutenção', name:'CarPro Reload — Selante Cerâmico Spray 500ml', rate:'4.8 (204)', now:'R$ 189'},
   {id:'iron-x', cat:'Descontaminação', name:'CarPro Iron X — Removedor Ferroso 500ml', rate:'4.9 (176)', now:'R$ 159', was:'R$ 189', off:'16% OFF', badge:'sale'},
+  {id:'essence', cat:'Polimento', name:'CarPro Essence — Lustrador Primer 250g', rate:'4.7 (89)', now:'R$ 274'},
+  {id:'wheelx', cat:'Rodas & Pneus', name:'CarPro WheelX — Limpador de Rodas 500ml', rate:'4.8 (63)', now:'R$ 171'},
+  {id:'pano-2face', cat:'Acessórios', name:'CarPro 2Face — Pano de Microfibra Edgeless 40x40cm', rate:'4.9 (127)', now:'R$ 40'},
   {id:'kit-vitrificacao', cat:'Kits', name:'Kit Vitrificação Completo CarPro', rate:'5.0 (98)', now:'R$ 899', badge:'Kit'},
 ];
 document.getElementById('prodGrid').innerHTML = PRODUCTS.map(p=>{
@@ -1000,7 +1003,7 @@ const TUTS = [
 const ARTS = [
   {slug:'vitrificacao-x-cera', tag:'Guia', title:'Vitrificação x cera: qual a diferença real?'},
   {slug:'erros-que-estragam-pintura', tag:'Cuidados', title:'5 erros que estragam a pintura do seu carro'},
-  {slug:'vale-a-pena-ppf', tag:'PPF', title:'Vale a pena aplicar PPF? Entenda a proteção'},
+  {slug:'rodas-pneus-como-cuidar', tag:'Rodas & Pneus', title:'Rodas e pneus: como manter o brilho sem ressecar a borracha'},
   {slug:'por-que-carpro', tag:'CarPro', title:'Por que a South Car escolheu a linha CarPro'},
 ];
 const rcardTut = a => a.map(x=>`<a href="tutorial.html?t=${x.slug}" class="rcard"><div class="rcard-media"></div><div class="rcard-body"><div class="rcard-tag">${x.tag}</div><div class="rcard-title">${x.title}</div></div></a>`).join('');
@@ -1012,7 +1015,7 @@ const lockSvg = `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="
 const COURSES = [
   {tag:'Vitrificação', title:'Vitrificação Cerâmica na Prática', lessons:'8 aulas', dur:'1h20', price:'R$ 197'},
   {tag:'Descontaminação', title:'Preparação e Descontaminação de Pintura', lessons:'5 aulas', dur:'45min', price:'R$ 97'},
-  {tag:'PPF', title:'PPF: Do Corte à Instalação', lessons:'12 aulas', dur:'2h10', price:'R$ 297'},
+  {tag:'Polimento', title:'Correção de Pintura: Polimento Passo a Passo', lessons:'9 aulas', dur:'1h45', price:'R$ 227'},
   {tag:'Interior', title:'Detalhamento de Interior Profissional', lessons:'6 aulas', dur:'55min', price:'R$ 127'},
 ];
 document.getElementById('courseGrid').innerHTML = COURSES.map(c=>`
