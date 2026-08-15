@@ -118,6 +118,7 @@ nav.links a:hover{color:var(--white);}
 @media(max-width:560px){.cat-strip{grid-template-columns:repeat(2,1fr);}}
 .cat{display:block;position:relative;aspect-ratio:3/4;border-radius:2px;overflow:hidden;cursor:pointer;border:1px solid var(--line);}
 .cat-img{position:absolute;inset:0;background:linear-gradient(155deg,#0f1a2e,#182a44);transition:transform .5s ease;}
+.cat-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;}
 .cat:hover .cat-img{transform:scale(1.06);}
 .cat::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(5,8,15,.9) 8%,transparent 55%);}
 .cat span{position:absolute;left:0;right:0;bottom:12px;text-align:center;z-index:2;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.06em;text-transform:uppercase;font-weight:500;}
@@ -931,11 +932,11 @@ renderCart();
 
 
 const CATS = [
-  {n:'Vitrificação', href:'categoria.html'},{n:'Polimento', href:'#'},{n:'Descontaminação', href:'#'},{n:'Manutenção', href:'#'},{n:'Rodas & Pneus', href:'#'},{n:'Acessórios', href:'#'}
+  {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg'},{n:'Polimento', href:'#'},{n:'Descontaminação', href:'#'},{n:'Manutenção', href:'#'},{n:'Rodas & Pneus', href:'#'},{n:'Acessórios', href:'#'}
 ];
 const hex = '<svg class="hexmark" viewBox="0 0 24 26" fill="none" stroke="#7b9de0" stroke-width="1.2"><path d="M12 1 L23 7.5 L23 19.5 L12 26 L1 19.5 L1 7.5 Z"/></svg>';
 document.getElementById('catStrip').innerHTML = CATS.map(c=>`
-  <a href="${c.href}" class="cat"><div class="cat-img"></div>${hex}<span>${c.n}</span></a>
+  <a href="${c.href}" class="cat"><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${hex}<span>${c.n}</span></a>
 `).join('');
 
 // TOC scroll-spy
