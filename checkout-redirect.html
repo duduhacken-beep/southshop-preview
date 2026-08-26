@@ -22,8 +22,10 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
   background-color:var(--bg);
-  background-image:var(--hex-tile);
-  background-size:28px 46px;
+  background-image:
+    radial-gradient(ellipse 1200px 650px at 50% -8%, rgba(255,255,255,.045) 0%, transparent 60%),
+    radial-gradient(ellipse 900px 500px at 88% 100%, rgba(58,95,176,.06) 0%, transparent 65%);
+  background-repeat:no-repeat;
   background-attachment:fixed;
   color:var(--white);
   font-family:'Barlow',sans-serif;
