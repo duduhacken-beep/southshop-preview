@@ -478,14 +478,24 @@ footer{background:#05080f;padding:60px 0 28px;}
 .cal-selected{font-size:14px;color:var(--muted);line-height:1.6;}
 .cal-selected b{color:var(--white);display:block;font-size:16px;margin-bottom:4px;}
 
-.price-card{max-width:520px;margin:0 auto;border:1px solid var(--line-2);border-radius:4px;background:linear-gradient(160deg,#0d1626,#141f34);overflow:hidden;}
-.price-card-inner{padding:44px 40px;text-align:center;}
-.price-card-inner h2{font-size:26px;font-weight:600;margin:8px 0 4px;}
-.price-card-inner p{color:var(--muted);font-size:14px;margin:10px 0 22px;}
-.price-tag{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:700;color:var(--white);margin-bottom:22px;}
-.price-tag span{display:block;font-size:12px;color:var(--muted-2);letter-spacing:.1em;text-transform:uppercase;font-weight:400;margin-top:4px;}
+.price-card{max-width:640px;margin:0 auto;border:1px solid var(--line-2);border-radius:4px;background:linear-gradient(160deg,#0d1626,#141f34);overflow:hidden;padding:40px 44px;}
+.price-card-head{text-align:center;margin-bottom:28px;}
+.price-card-head h2{font-size:26px;font-weight:600;margin:8px 0 0;}
+.price-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;}
+@media(max-width:560px){.price-card-grid{grid-template-columns:1fr;}}
+.price-info-box{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:4px;padding:20px 22px;}
+.price-info-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-2);margin-bottom:12px;}
+.price-info-list{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.price-info-list li{font-size:13.5px;color:var(--muted);padding-left:16px;position:relative;line-height:1.4;}
+.price-info-list li::before{content:'';position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--blue);}
+.price-boxes{display:flex;flex-direction:column;gap:10px;}
+.price-box{flex:1;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:4px;padding:16px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.price-box-alt{border-color:var(--line);opacity:.85;}
+.price-box-value{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--white);}
+.price-box-alt .price-box-value{font-size:19px;}
+.price-box-label{font-size:11px;color:var(--muted-2);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
 .price-btn{width:100%;padding:16px;font-size:15px;}
-.price-note{font-size:11.5px;color:var(--muted-2);margin-top:16px;}
+.price-note{font-size:11.5px;color:var(--muted-2);margin-top:16px;text-align:center;}
 
 .faq-list{border-top:1px solid var(--line);}
 .testi-marquee{overflow:hidden;position:relative;width:100vw;margin-left:calc(-50vw + 50%);-webkit-mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent);}
@@ -764,8 +774,8 @@ footer{background:#05080f;padding:60px 0 28px;}
   .spons-quote{font-size:16px;}
   .spons-stats div b{font-size:19px;}
   .incluso-item b,.contact-item .val{font-size:14.5px;}
-  .price-card-inner{padding:32px 22px;}
-  .price-card-inner h2{font-size:22px;}
+  .price-card{padding:28px 20px;}
+  .price-card-head h2{font-size:22px;}
   .price-tag{font-size:34px;}
   .cal-card{padding:16px;}
   .cal-side{padding:18px;}
@@ -958,14 +968,33 @@ footer{background:#05080f;padding:60px 0 28px;}
 <section class="sec" id="garantir">
   <div class="wrap reveal">
     <div class="price-card">
-      <div class="price-card-inner">
+      <div class="price-card-head">
         <div class="eyebrow" id="priceEyebrow">Ingresso + Ebook</div>
         <h2 class="serif">Treinamento Presencial</h2>
-        <p>Vaga garantida + ebook digital + certificado de participação.</p>
-        <div class="price-tag">R$ 897<span>à vista</span></div>
-        <button class="btn btn-solid price-btn" id="trainBuyBtn">Garantir minha vaga</button>
-        <div class="price-note">Pagamento processado com segurança no checkout South Shop.<br>Opções de parcelamento disponíveis no carrinho.</div>
       </div>
+      <div class="price-card-grid">
+        <div class="price-info-box">
+          <div class="price-info-label">O que você leva</div>
+          <ul class="price-info-list">
+            <li>Ingresso presencial</li>
+            <li>Ebook digital</li>
+            <li>Certificado de participação</li>
+            <li id="priceTurma">Turma: selecione uma data acima</li>
+          </ul>
+        </div>
+        <div class="price-boxes">
+          <div class="price-box">
+            <div class="price-box-value">R$ 897</div>
+            <div class="price-box-label">à vista</div>
+          </div>
+          <div class="price-box price-box-alt">
+            <div class="price-box-value">12x R$ 74,75</div>
+            <div class="price-box-label">no cartão</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-solid price-btn" id="trainBuyBtn">Garantir minha vaga</button>
+      <div class="price-note">Pagamento processado com segurança no checkout South Shop.</div>
     </div>
   </div>
 </section>
@@ -1257,7 +1286,7 @@ document.getElementById('faqList').addEventListener('click', (e)=>{
   var selectedDay = null;
   var selectedEl = document.getElementById('calSelected');
   var confirmBtn = document.getElementById('calConfirmBtn');
-  var priceEyebrow = document.getElementById('priceEyebrow');
+  var priceTurma = document.getElementById('priceTurma');
 
   grid.addEventListener('click', function(e){
     var day = e.target.closest('.cal-day.avail');
@@ -1271,7 +1300,7 @@ document.getElementById('faqList').addEventListener('click', (e)=>{
 
   confirmBtn.addEventListener('click', function(){
     if (!selectedDay) return;
-    priceEyebrow.textContent = 'Ingresso + Ebook · Turma de ' + selectedDay + '/10';
+    priceTurma.textContent = 'Turma: ' + selectedDay + ' de outubro de 2026';
     document.getElementById('garantir').scrollIntoView({behavior:'smooth', block:'center'});
   });
 })();
