@@ -116,10 +116,11 @@ nav.links a:hover{color:var(--white);}
 .arrow{width:34px;height:34px;border:1px solid var(--line-2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;}
 .arrow:hover{border-color:var(--blue);}
 .arrow svg{width:14px;height:14px;stroke:var(--white);fill:none;stroke-width:2;}
-.cat-strip{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;cursor:grab;scrollbar-width:none;-ms-overflow-style:none;user-select:none;}
+.cat-strip{display:flex;gap:12px;overflow-x:auto;cursor:grab;scrollbar-width:none;-ms-overflow-style:none;user-select:none;will-change:scroll-position;-webkit-overflow-scrolling:touch;}
 .cat-strip::-webkit-scrollbar{display:none;}
 .cat-strip.dragging{cursor:grabbing;}
-.cat-strip .cat{flex:0 0 200px;scroll-snap-align:start;}
+.cat-strip .cat{flex:0 0 200px;}
+.cat-strip .cat-img img{-webkit-user-drag:none;user-drag:none;-moz-user-drag:none;pointer-events:none;}
 @media(max-width:900px){.cat-strip .cat{flex:0 0 160px;}}
 @media(max-width:560px){.cat-strip .cat{flex:0 0 132px;}}
 .cat{display:block;position:relative;aspect-ratio:3/4;border-radius:2px;overflow:hidden;cursor:pointer;border:1px solid var(--line);}
@@ -1018,15 +1019,41 @@ document.getElementById('catStrip').innerHTML = CATS.map(c=>`
     if (arrowBtns[0]) arrowBtns[0].addEventListener('click', function(){ strip.scrollBy({left:-232, behavior:'smooth'}); });
     if (arrowBtns[1]) arrowBtns[1].addEventListener('click', function(){ strip.scrollBy({left:232, behavior:'smooth'}); });
   }
+  strip.addEventListener('dragstart', function(e){ e.preventDefault(); });
   var isDown=false, startX=0, startScroll=0, moved=false;
-  strip.addEventListener('mousedown', function(e){ isDown=true; moved=false; strip.classList.add('dragging'); startX=e.pageX; startScroll=strip.scrollLeft; });
-  window.addEventListener('mouseup', function(){ isDown=false; strip.classList.remove('dragging'); });
+  var lastX=0, lastT=0, velocity=0, rafId=null, pendingX=null;
+  function applyScroll(){
+    if (pendingX !== null) { strip.scrollLeft = pendingX; pendingX = null; }
+    rafId = null;
+  }
+  function momentumStep(){
+    velocity *= 0.94;
+    if (Math.abs(velocity) < 0.3) return;
+    strip.scrollLeft -= velocity;
+    requestAnimationFrame(momentumStep);
+  }
+  strip.addEventListener('mousedown', function(e){
+    isDown=true; moved=false; velocity=0;
+    strip.classList.add('dragging');
+    startX=e.pageX; startScroll=strip.scrollLeft;
+    lastX=e.pageX; lastT=performance.now();
+  });
+  window.addEventListener('mouseup', function(){
+    if (!isDown) return;
+    isDown=false; strip.classList.remove('dragging');
+    if (Math.abs(velocity) > 0.5) requestAnimationFrame(momentumStep);
+  });
   window.addEventListener('mousemove', function(e){
     if(!isDown) return;
     e.preventDefault();
     var dx = e.pageX - startX;
     if (Math.abs(dx) > 4) moved = true;
-    strip.scrollLeft = startScroll - dx;
+    pendingX = startScroll - dx;
+    if (rafId === null) rafId = requestAnimationFrame(applyScroll);
+    var now = performance.now();
+    var dt = now - lastT;
+    if (dt > 0) velocity = (e.pageX - lastX) / dt * 16;
+    lastX = e.pageX; lastT = now;
   });
   strip.querySelectorAll('a.cat').forEach(function(a){
     a.addEventListener('click', function(e){ if (moved) e.preventDefault(); });
