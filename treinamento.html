@@ -443,7 +443,7 @@ footer{background:#05080f;padding:60px 0 28px;}
   .cal-arrow svg{width:14px;height:14px;}
   .cal-grid{gap:8px;}
   .cal-weekdays span{font-size:12px;}
-  .cal-day{font-size:17px;border-radius:4px;}
+  .cal-day{font-size:15px;border-radius:4px;aspect-ratio:auto;height:38px;}
   .cal-legend{font-size:13px;margin-top:22px;}
 }
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
@@ -904,7 +904,7 @@ footer{background:#05080f;padding:60px 0 28px;}
         <p>Vaga garantida + ebook digital + certificado de participação.</p>
         <div class="price-tag">R$ 897<span>à vista</span></div>
         <button class="btn btn-solid price-btn" id="trainBuyBtn">Garantir minha vaga</button>
-        <div class="price-note">Pagamento processado com segurança no checkout South Shop.</div>
+        <div class="price-note">Pagamento processado com segurança no checkout South Shop.<br>Opções de parcelamento disponíveis no carrinho.</div>
       </div>
     </div>
   </div>
@@ -1205,7 +1205,7 @@ document.getElementById('faqList').addEventListener('click', (e)=>{
     document.querySelectorAll('.cal-day.selected').forEach(function(el){ el.classList.remove('selected'); });
     day.classList.add('selected');
     selectedDay = day.dataset.day;
-    selectedEl.innerHTML = '<b>' + selectedDay + ' de outubro de 2026</b>Vaga reservada por 15 minutos enquanto você finaliza a compra.';
+    selectedEl.innerHTML = '<b>' + selectedDay + ' de outubro de 2026</b><span style="color:var(--blue-2);font-weight:600;">⚠ Poucas vagas disponíveis nessa turma</span><br>Vaga reservada por 15 minutos enquanto você finaliza a compra.';
     confirmBtn.disabled = false;
   });
 
