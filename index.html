@@ -1060,15 +1060,17 @@ document.getElementById('catStrip').innerHTML = catCardsHtml + catCardsHtml;
     a.addEventListener('click', function(e){ if (moved) e.preventDefault(); });
   });
 
-  /* rolagem automatica continua, no mesmo espirito do marquee de depoimentos do treinamento: pausa no hover de verdade/arraste/toque e retoma sozinha, sem alterar layout, gap ou breakpoints existentes */
-  var lastPageScrollTs = 0;
-  window.addEventListener('scroll', function(){ lastPageScrollTs = performance.now(); }, {passive:true});
-  strip.addEventListener('mouseenter', function(){
-    /* ignora o "hover fantasma" que o navegador dispara quando a faixa entra embaixo do cursor parado por causa do scroll da pagina (nao por movimento real do mouse) */
-    if (performance.now() - lastPageScrollTs < 250) return;
+  /* rolagem automatica continua, no mesmo espirito do marquee de depoimentos do treinamento: pausa apenas quando o mouse realmente se MOVE em cima da faixa (nao em qualquer evento de "entrada" que o navegador possa disparar sozinho ao voltar de outra aba, apos scroll, etc) */
+  var hoverClearTimer = null;
+  strip.addEventListener('mousemove', function(){
     autoPaused = true;
+    clearTimeout(hoverClearTimer);
+    hoverClearTimer = setTimeout(function(){ if (!isDown) autoPaused = false; }, 700);
   });
-  strip.addEventListener('mouseleave', function(){ if(!isDown) autoPaused = false; });
+  strip.addEventListener('mouseleave', function(){
+    clearTimeout(hoverClearTimer);
+    if (!isDown) autoPaused = false;
+  });
   strip.addEventListener('touchstart', function(){ autoPaused = true; }, {passive:true});
   strip.addEventListener('touchend', function(){ pauseAutoTemp(); }, {passive:true});
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1076,7 +1078,7 @@ document.getElementById('catStrip').innerHTML = catCardsHtml + catCardsHtml;
     var lastTs = null, speed = 32; /* px/s, ritmo proximo ao marquee de depoimentos */
     function autoStep(ts){
       if (lastTs === null) lastTs = ts;
-      var dt = ts - lastTs;
+      var dt = Math.min(ts - lastTs, 100); /* evita pulo brusco se a aba ficou em segundo plano por um tempo */
       lastTs = ts;
       if (!autoPaused) {
         var half = strip.scrollWidth / 2;
