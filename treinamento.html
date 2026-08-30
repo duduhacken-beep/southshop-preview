@@ -488,6 +488,16 @@ footer{background:#05080f;padding:60px 0 28px;}
 .price-note{font-size:11.5px;color:var(--muted-2);margin-top:16px;}
 
 .faq-list{border-top:1px solid var(--line);}
+.testi-carousel{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:44px 56px;max-width:760px;margin:0 auto;min-height:150px;overflow:hidden;}
+@media(max-width:600px){.testi-carousel{padding:32px 24px;}}
+.testi-slide{display:none;text-align:center;opacity:0;transition:opacity .4s ease;}
+.testi-slide.active{display:block;opacity:1;}
+.testi-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;line-height:1.55;color:var(--white);}
+.testi-author{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.05em;color:var(--blue-2);text-transform:uppercase;}
+.testi-verified{width:14px;height:14px;stroke:var(--blue-2);fill:none;stroke-width:2;}
+.testi-dots{display:flex;justify-content:center;gap:6px;margin-top:20px;}
+.testi-dot{width:6px;height:6px;border-radius:50%;background:var(--line-2);cursor:pointer;transition:.2s;border:none;padding:0;}
+.testi-dot.active{background:var(--blue);transform:scale(1.4);}
 .faq-item{border-bottom:1px solid var(--line);}
 .faq-q{display:flex;justify-content:space-between;align-items:center;padding:20px 4px;cursor:pointer;font-size:15px;font-weight:500;}
 .faq-q svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.6;transition:transform .25s;flex-shrink:0;}
@@ -892,6 +902,19 @@ footer{background:#05080f;padding:60px 0 28px;}
       <img class="instr-slide active" src="assets/img/marcao-aplicando.jpg" alt="Marcão aplicando coating cerâmico com politriz Rupes" style="object-position:center 30%;">
       <img class="instr-slide" src="assets/img/marcao-credenciais.jpg" alt="Marcão, credenciais IDA e C.Quartz" style="object-position:center 15%;">
     </div>
+  </div>
+</section>
+
+<!-- AVALIAÇÕES SOBRE O MARCÃO -->
+<section class="sec" style="padding-top:0;background:#000;">
+  <div class="wrap reveal">
+    <div class="sec-head" style="margin-bottom:24px;justify-content:center;text-align:center;">
+      <div style="margin:0 auto;"><div class="eyebrow">Quem já trabalhou com ele</div><h2 class="serif">O que dizem sobre o Marcão</h2></div>
+    </div>
+    <div class="testi-carousel" id="testiCarousel">
+      <div class="testi-track" id="testiTrack"></div>
+    </div>
+    <div class="testi-dots" id="testiDots"></div>
   </div>
 </section>
 
@@ -1324,6 +1347,59 @@ if (trainBuyBtn) {
     i = (i + 1) % slides.length;
     slides[i].classList.add('active');
   }, 4000);
+})();
+
+(function(){
+  var TESTIMONIALS = [
+    {text:'Fomos agraciados com a chegada desse grande profissional do segmento automotivo. Sua presença fortalece ainda mais o nosso time, elevando a qualidade e a experiência que entregamos aos clientes que escolhem a South.', author:'@southcarservice', verified:true},
+    {text:'Eu mesmo presenciei que em todo lugar que o Marcão esteve, a empresa estava bem representada e em alta! Parabéns professor Marcão 🔥', author:'@opolidoroficial', verified:true},
+    {text:'Sucesso nessa nova etapa, Marcão. Conhecimento técnico, visão de mercado e anos elevando o nível do detalhamento no Brasil não se constroem por acaso. A South Car ganha um profissional que realmente entende de excelência.', author:'@garagem250studioautomotivo', verified:true},
+    {text:'A South sempre foi uma referência no setor de estética automotiva, justamente por sua capacidade técnica e profissionais dedicados. Hoje podemos dizer que essa referência será ainda maior trazendo o Marcão para fazer parte do time.', author:'@rudimarsobrinho', verified:true},
+    {text:'Você é um baita professor e técnico renomado.', author:'@gomescardetail', verified:false},
+    {text:'Excelente explicação! Parabéns!!!', author:'@bestboxcar', verified:false},
+    {text:'Referência no BR 🔥🙌👏', author:'@leandro.prodetailing', verified:true},
+    {text:'Mestre dos mestres! 🔥🔥👏👏👏', author:'@novixx.fv', verified:true},
+    {text:'Que aula, professor Marcão.', author:'@alansouth11', verified:true},
+    {text:'Marcão, você é um cara que merece todo sucesso que existe no mundo! Um excelente profissional e professor!!! Obrigado por tudo que fez por nós no eco e ProF.', author:'@juninhoargenta', verified:false}
+  ];
+  var verifiedSvg = '<svg class="testi-verified" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>';
+  var track = document.getElementById('testiTrack');
+  var dotsWrap = document.getElementById('testiDots');
+  if (!track) return;
+  track.innerHTML = TESTIMONIALS.map(function(t, idx){
+    return '<div class="testi-slide' + (idx===0?' active':'') + '"><p class="testi-quote">"' + t.text + '"</p><div class="testi-author">' + t.author + (t.verified ? verifiedSvg : '') + '</div></div>';
+  }).join('');
+  dotsWrap.innerHTML = TESTIMONIALS.map(function(_, idx){
+    return '<button class="testi-dot' + (idx===0?' active':'') + '" data-idx="' + idx + '" aria-label="Avaliação ' + (idx+1) + '"></button>';
+  }).join('');
+  var slidesT = track.querySelectorAll('.testi-slide');
+  var dots = dotsWrap.querySelectorAll('.testi-dot');
+  var idx = 0;
+  var timer = null;
+  function show(n){
+    slidesT[idx].classList.remove('active');
+    dots[idx].classList.remove('active');
+    idx = (n + slidesT.length) % slidesT.length;
+    slidesT[idx].classList.add('active');
+    dots[idx].classList.add('active');
+  }
+  function startAuto(){
+    timer = setInterval(function(){ show(idx + 1); }, 5000);
+  }
+  function stopAuto(){
+    if (timer) clearInterval(timer);
+  }
+  dots.forEach(function(d){
+    d.addEventListener('click', function(){
+      stopAuto();
+      show(parseInt(d.dataset.idx, 10));
+      startAuto();
+    });
+  });
+  var carousel = document.getElementById('testiCarousel');
+  carousel.addEventListener('mouseenter', stopAuto);
+  carousel.addEventListener('mouseleave', startAuto);
+  startAuto();
 })();
 
 (function(){
