@@ -492,7 +492,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 .faq-q svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.6;transition:transform .25s;flex-shrink:0;}
 .faq-item.open .faq-q svg{transform:rotate(45deg);}
 .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
-.faq-item.open .faq-a{max-height:200px;}
+.faq-item.open .faq-a{max-height:260px;}
 .faq-a p{color:var(--muted);font-size:14px;line-height:1.65;padding:0 4px 20px;max-width:600px;}
 
 /* ---------- COURSE / LOCKED CONTENT CARD ---------- */
@@ -1208,7 +1208,7 @@ const FAQS = [
   {q:'Preciso ter experiência prévia?', a:'Não. O treinamento foi pensado tanto pra quem está começando quanto pra quem já mexe com estética automotiva e quer padronizar a técnica com quem aplica profissionalmente todo dia.'},
   {q:'O que preciso levar no dia?', a:'Só disposição. Materiais, produtos de demonstração e equipamentos de proteção são fornecidos durante o treinamento.'},
   {q:'Quando recebo o ebook?', a:'O ebook digital chega automaticamente por e-mail assim que a compra é confirmada — não precisa esperar o dia do evento pra começar a estudar.'},
-  {q:'Como funciona a confirmação da vaga?', a:'Sua compra já garante a vaga — a confirmação do pedido na sua conta South Shop serve como registro oficial de inscrição, sem necessidade de ingresso físico.'},
+  {q:'Como funciona a confirmação da vaga?', a:'Sua compra já garante a vaga — a confirmação do pedido na sua conta South Shop serve como registro oficial de inscrição, sem necessidade de ingresso físico. Um e-mail com mais informações será enviado para o seu endereço de e-mail com detalhes sobre o treinamento.'},
 ];
 document.getElementById('faqList').innerHTML = FAQS.map((f,i)=>`
   <div class="faq-item${i===0?' open':''}" data-faq="${i}">
