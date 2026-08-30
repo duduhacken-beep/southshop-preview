@@ -398,7 +398,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 .rev-card p{font-size:14px;color:var(--white);line-height:1.6;margin-bottom:14px;}
 .rev-card span{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted-2);}
 /* ---------- TREINAMENTO — LANDING PAGE ---------- */
-.train-hero{position:relative;min-height:460px;overflow:hidden;border-bottom:1px solid var(--line);}
+.train-hero{position:relative;min-height:460px;overflow:hidden;}
 @media(max-width:800px){.train-hero{min-height:auto;}}
 .train-hero-flex{display:flex;align-items:stretch;min-height:460px;}
 @media(max-width:800px){.train-hero-flex{flex-direction:column;min-height:auto;}}
@@ -406,7 +406,11 @@ footer{background:#05080f;padding:60px 0 28px;}
 .train-hero-photo{flex:0 0 42%;position:relative;overflow:hidden;}
 @media(max-width:800px){.train-hero-photo{flex:none;height:320px;order:-1;}}
 .train-hero-photo::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(to right,#000 0%,rgba(0,0,0,0) 12%);}
-@media(max-width:800px){.train-hero-photo::before{background:linear-gradient(to bottom,#000 0%,rgba(0,0,0,0) 18%);}}
+.train-hero-photo::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(0,0,0,0) 78%,#000 100%);}
+@media(max-width:800px){
+  .train-hero-photo::before{background:linear-gradient(to bottom,#000 0%,rgba(0,0,0,0) 18%);}
+  .train-hero-photo::after{background:linear-gradient(to bottom,rgba(0,0,0,0) 75%,#000 100%);}
+}
 .train-hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 15%;}
 .train-hero-inner{position:relative;z-index:1;max-width:580px;padding:56px 40px 56px clamp(24px,6vw,96px);text-align:left;}
 @media(max-width:800px){.train-hero-inner{max-width:none;padding:30px 20px 40px;}}
@@ -675,7 +679,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 .partner-body p{font-size:13px;color:var(--muted);line-height:1.55;}
 
 /* sponsorship */
-.spons{background:#000;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.spons{background:#000;}
 .spons-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center;padding-top:76px;padding-bottom:76px;}
 @media(max-width:860px){.spons-grid{grid-template-columns:1fr;padding-top:56px;padding-bottom:56px;}}
 .spons h2{font-family:'Barlow',system-ui,sans-serif;font-size:30px;font-weight:600;line-height:1.15;margin:10px 0 4px;}
@@ -688,11 +692,15 @@ footer{background:#05080f;padding:60px 0 28px;}
 
 /* contact strip */
 .contact-strip{padding:60px 0;}
-.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 @media(max-width:760px){.contact-grid{grid-template-columns:1fr;}}
-.contact-item{background:#000;padding:26px 24px;}
-.contact-item .lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-2);margin-bottom:8px;}
-.contact-item .val{font-size:14.5px;line-height:1.5;}
+.contact-item{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;transition:border-color .25s ease,transform .25s ease;}
+.contact-item:hover{border-color:var(--blue);transform:translateY(-4px);}
+.contact-icon{width:46px;height:46px;border-radius:50%;background:rgba(58,95,176,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.contact-icon svg{width:21px;height:21px;stroke:var(--blue-2);fill:none;stroke-width:1.6;}
+.contact-item .lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-2);}
+.contact-item .val{font-size:14.5px;line-height:1.5;font-weight:500;}
+.contact-item .val span{display:block;font-size:12px;color:var(--muted-2);font-weight:400;margin-top:4px;}
 .contact-item a.val{color:var(--white);}
 .contact-item a.val:hover{color:var(--blue-2);}
 
@@ -899,9 +907,9 @@ footer{background:#05080f;padding:60px 0 28px;}
   <div class="wrap">
     <div class="sec-head reveal" style="margin-bottom:24px;"><h2 class="serif" style="font-size:24px;">Onde e quando</h2></div>
     <div class="contact-grid reveal">
-      <div class="contact-item"><div class="lbl">Local</div><div class="val">Complexo South<br>Av. do Estado D. Vieira, 4640 — Centro, Balneário Camboriú/SC — 88330-077</div></div>
-      <div class="contact-item"><div class="lbl">Duração</div><div class="val">1 dia completo<br><span style="font-size:12px;color:var(--muted-2);">das 9h às 17h</span></div></div>
-      <div class="contact-item"><div class="lbl">Vagas</div><div class="val">Até 5 pessoas<br><span style="font-size:12px;color:var(--muted-2);">atenção individual garantida</span></div></div>
+      <div class="contact-item"><div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.1-7-11a7 7 0 1 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div><div class="lbl">Local</div><div class="val">Complexo South<span>Av. do Estado D. Vieira, 4640 — Centro, Balneário Camboriú/SC — 88330-077</span></div></div>
+      <div class="contact-item"><div class="contact-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><div class="lbl">Duração</div><div class="val">1 dia completo<span>das 9h às 17h</span></div></div>
+      <div class="contact-item"><div class="contact-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><path d="M17 8.5a3 3 0 1 1 0-6"/><path d="M22 20c0-2.8-2.2-5.1-5.3-5.8"/></svg></div><div class="lbl">Vagas</div><div class="val">Até 5 pessoas<span>atenção individual garantida</span></div></div>
     </div>
   </div>
 </section>
