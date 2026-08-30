@@ -435,6 +435,17 @@ footer{background:#05080f;padding:60px 0 28px;}
 .cal-wrap{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;}
 @media(max-width:800px){.cal-wrap{grid-template-columns:1fr;}}
 .cal-card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:24px;max-width:420px;}
+@media(min-width:801px){
+  .cal-wrap{grid-template-columns:1fr 340px;}
+  .cal-card{max-width:640px;padding:36px;}
+  .cal-head{font-size:18px;margin-bottom:24px;}
+  .cal-arrow{width:34px;height:34px;}
+  .cal-arrow svg{width:14px;height:14px;}
+  .cal-grid{gap:8px;}
+  .cal-weekdays span{font-size:12px;}
+  .cal-day{font-size:17px;border-radius:4px;}
+  .cal-legend{font-size:13px;margin-top:22px;}
+}
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
 .cal-arrow{width:28px;height:28px;border:1px solid var(--line-2);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:.4;}
 .cal-arrow svg{width:12px;height:12px;stroke:var(--white);fill:none;stroke-width:2;}
@@ -451,6 +462,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 .dot-on{background:var(--blue);}
 .dot-off{background:var(--line-2);margin-left:10px;}
 .cal-side{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:24px;}
+@media(min-width:801px){.cal-side{padding:32px;}.cal-selected{font-size:15px;}.cal-selected b{font-size:19px;}}
 .cal-selected{font-size:14px;color:var(--muted);line-height:1.6;}
 .cal-selected b{color:var(--white);display:block;font-size:16px;margin-bottom:4px;}
 
@@ -846,7 +858,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 <section class="sec" style="padding-top:0;">
   <div class="wrap reveal">
     <div class="sec-head" style="margin-bottom:28px;">
-      <div><div class="eyebrow">Qual o melhor dia pra você?</div><h2 class="serif">Escolha a data da sua turma</h2></div>
+      <div><div class="eyebrow">Qual o melhor dia para você?</div><h2 class="serif">Escolha a data da sua turma</h2></div>
     </div>
     <div class="cal-wrap">
       <div class="cal-card">
