@@ -331,6 +331,22 @@ footer{background:#05080f;padding:60px 0 28px;}
 .foot-bottom{border-top:1px solid var(--line);padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted-2);}
 
 @media(prefers-reduced-motion:reduce){.hero-sheen,.prod-media::after{animation:none;transition:none;}.reveal{opacity:1;transform:none;}}
+/* ---------- TREINAMENTO BANNER (home) ---------- */
+.train-banner{display:block;position:relative;border-radius:3px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/7;min-height:280px;}
+.train-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;transition:transform .6s ease;}
+.train-banner:hover .train-banner-img{transform:scale(1.04);}
+.train-banner-fade{position:absolute;inset:0;background:linear-gradient(100deg,rgba(4,6,12,.94) 20%,rgba(4,6,12,.55) 52%,rgba(4,6,12,.15) 78%);}
+.train-banner-body{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:12px;max-width:520px;padding:36px 40px;}
+.train-banner-body h2{font-size:clamp(24px,3vw,36px);line-height:1.12;text-transform:uppercase;font-weight:700;color:var(--white);}
+.train-banner-body p{color:var(--muted);font-size:14.5px;line-height:1.65;max-width:420px;}
+.train-banner-btn{width:max-content;margin-top:6px;}
+@media(max-width:760px){
+  .train-banner{aspect-ratio:auto;min-height:auto;display:flex;flex-direction:column;}
+  .train-banner-img{position:relative;height:220px;object-position:center 25%;}
+  .train-banner-fade{background:linear-gradient(to top,rgba(4,6,12,.5) 0%,transparent 40%);}
+  .train-banner-body{position:relative;padding:26px 20px 30px;max-width:none;background:#04060c;}
+}
+
 /* ---------- COURSE / LOCKED CONTENT CARD ---------- */
 .course-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
 @media(max-width:900px){.course-grid{grid-template-columns:repeat(2,1fr);}}
@@ -461,12 +477,12 @@ footer{background:#05080f;padding:60px 0 28px;}
   <div class="wrap nav-row">
     <a href="index.html" class="logo-link"><img class="logo-img" src="assets/img/logo.png" alt="South Car Exclusive · CarPro"></a>
     <nav class="links">
-      <a href="categoria.html?cat=treinamentos">Treinamentos</a>
+      <a href="treinamento.html">Treinamentos</a>
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">CarPro</a>
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">South Leather</a>
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Kits</a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Academia South</a>
       <a href="blog.html">Blog</a>
-      <a href="tutoriais.html">Academia South</a>
       <a href="#">Dúvidas</a>
       <a href="sobre.html">Sobre</a>
     </nav>
@@ -510,6 +526,22 @@ footer{background:#05080f;padding:60px 0 28px;}
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- TREINAMENTO PRESENCIAL — DESTAQUE -->
+<section class="sec" style="padding-top:0;">
+  <div class="wrap">
+    <a href="treinamento.html" class="train-banner reveal">
+      <img class="train-banner-img" src="assets/img/cat-treinamentos.jpg" alt="Treinamento Presencial South Car — com Marcão">
+      <div class="train-banner-fade"></div>
+      <div class="train-banner-body">
+        <div class="eyebrow">Treinamento Presencial · Outubro/2026</div>
+        <h2 class="cond">Aprenda a proteger e vitrificar como um profissional</h2>
+        <p>Um dia inteiro na bancada com o Marcão — a mesma curadoria técnica aplicada nos carros da South Car, direto pra sua mão.</p>
+        <span class="btn btn-solid train-banner-btn">Conhecer o treinamento</span>
+      </div>
+    </a>
   </div>
 </section>
 
@@ -956,7 +988,8 @@ renderCart();
 
 
 const CATS = [
-  {n:'Treinamentos', href:'categoria.html?cat=treinamentos', img:'assets/img/cat-treinamentos.jpg', locked:false},
+  {n:'Treinamentos', href:'treinamento.html', img:'assets/img/cat-treinamentos.jpg', locked:false},
+  {n:'Cursos', href:'tutoriais.html', img:null, locked:true},
   {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg', locked:true},{n:'Polimento', href:'#', img:'assets/img/cat-polimento.jpg', locked:true},{n:'Descontaminação', href:'#', img:'assets/img/cat-descontaminacao.jpg', locked:true},{n:'Manutenção', href:'#', img:'assets/img/cat-manutencao.jpg', locked:true},{n:'Rodas & Pneus', href:'#', img:'assets/img/cat-rodas-pneus.jpg', locked:true},{n:'Acessórios', href:'#', img:'assets/img/cat-acessorios.jpg', locked:true},
   {n:'South Leather', href:'#', img:null, locked:true},
   {n:'Kits', href:'#', img:null, locked:true}

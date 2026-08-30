@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Página não encontrada | South Shop</title>
+<title>Treinamento Presencial — Academia South Car | South Shop</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap');
 
@@ -296,7 +296,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 
 @media(prefers-reduced-motion:reduce){.hero-sheen,.prod-media::after{animation:none;transition:none;}.reveal{opacity:1;transform:none;}}
 /* ================= PRODUCT PAGE ================= */
-.breadcrumb{padding:20px 0 0;font-family:'Barlow Condensed',sans-serif;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-2);}
+.breadcrumb{padding-top:20px;font-family:'Barlow Condensed',sans-serif;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-2);}
 .breadcrumb a{color:var(--muted);}
 .breadcrumb a:hover{color:var(--blue-2);}
 .breadcrumb span{margin:0 6px;opacity:.5;}
@@ -397,6 +397,56 @@ footer{background:#05080f;padding:60px 0 28px;}
 .rev-card b{display:block;color:var(--star);letter-spacing:2px;margin-bottom:12px;}
 .rev-card p{font-size:14px;color:var(--white);line-height:1.6;margin-bottom:14px;}
 .rev-card span{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted-2);}
+/* ---------- TREINAMENTO — LANDING PAGE ---------- */
+.train-hero{position:relative;min-height:640px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--line);}
+@media(max-width:760px){.train-hero{min-height:560px;}}
+.train-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;}
+.train-hero-fade{position:absolute;inset:0;background:linear-gradient(100deg,rgba(3,5,10,.95) 15%,rgba(3,5,10,.72) 45%,rgba(3,5,10,.3) 75%),linear-gradient(to top,rgba(3,5,10,.9) 0%,transparent 40%);}
+.train-hero-inner{position:relative;z-index:1;max-width:640px;padding:80px 24px;}
+.train-hero-inner h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(30px,4.6vw,52px);line-height:1.05;margin:14px 0 18px;color:var(--white);}
+.train-hero-inner p{color:var(--muted);font-size:15.5px;line-height:1.7;max-width:520px;margin-bottom:26px;}
+.train-hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px;}
+.train-hero-meta{display:flex;gap:22px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.03em;color:var(--muted-2);}
+
+.skills-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+@media(max-width:900px){.skills-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.skills-row{grid-template-columns:1fr;}}
+.skill-item{background:#000;padding:28px 22px;}
+.skill-item .num{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--blue-2);letter-spacing:.1em;margin-bottom:10px;}
+.skill-item h4{font-family:'Barlow',system-ui,sans-serif;font-size:19px;font-weight:600;margin-bottom:8px;}
+.skill-item p{font-size:13px;color:var(--muted);line-height:1.55;}
+
+.incluso-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+@media(max-width:900px){.incluso-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.incluso-grid{grid-template-columns:1fr;}}
+.incluso-item{background:#000;padding:28px 22px;display:flex;flex-direction:column;gap:14px;}
+.incluso-item svg{width:26px;height:26px;stroke:var(--blue-2);fill:none;stroke-width:1.5;}
+.incluso-item b{display:block;font-size:15px;font-weight:600;margin-bottom:4px;}
+.incluso-item span{font-size:13px;color:var(--muted);line-height:1.5;}
+
+.agenda-list{border-top:1px solid var(--line);max-width:680px;}
+.agenda-row{display:flex;gap:28px;padding:18px 0;border-bottom:1px solid var(--line);}
+.agenda-time{flex:0 0 64px;font-family:'Barlow Condensed',sans-serif;font-size:15px;color:var(--blue-2);font-weight:600;}
+.agenda-body b{display:block;font-size:15px;font-weight:500;margin-bottom:3px;}
+.agenda-body span{font-size:13px;color:var(--muted);}
+
+.price-card{max-width:520px;margin:0 auto;border:1px solid var(--line-2);border-radius:4px;background:linear-gradient(160deg,#0d1626,#141f34);overflow:hidden;}
+.price-card-inner{padding:44px 40px;text-align:center;}
+.price-card-inner p{color:var(--muted);font-size:14px;margin:10px 0 22px;}
+.price-tag{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:700;color:var(--white);margin-bottom:22px;}
+.price-tag span{display:block;font-size:12px;color:var(--muted-2);letter-spacing:.1em;text-transform:uppercase;font-weight:400;margin-top:4px;}
+.price-btn{width:100%;padding:16px;font-size:15px;}
+.price-note{font-size:11.5px;color:var(--muted-2);margin-top:16px;}
+
+.faq-list{border-top:1px solid var(--line);}
+.faq-item{border-bottom:1px solid var(--line);}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:20px 4px;cursor:pointer;font-size:15px;font-weight:500;}
+.faq-q svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.6;transition:transform .25s;flex-shrink:0;}
+.faq-item.open .faq-q svg{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.faq-item.open .faq-a{max-height:200px;}
+.faq-a p{color:var(--muted);font-size:14px;line-height:1.65;padding:0 4px 20px;max-width:600px;}
+
 /* ---------- COURSE / LOCKED CONTENT CARD ---------- */
 .course-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
 @media(max-width:900px){.course-grid{grid-template-columns:repeat(2,1fr);}}
@@ -450,24 +500,29 @@ footer{background:#05080f;padding:60px 0 28px;}
 .cat-count{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted-2);letter-spacing:.04em;white-space:nowrap;}
 
 .listing{padding:40px 0 70px;}
+.listing-grid{display:grid;grid-template-columns:230px 1fr;gap:44px;align-items:flex-start;}
+@media(max-width:860px){.listing-grid{grid-template-columns:1fr;}}
 
-/* category chips */
-.chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;}
-.chip{border:1px solid var(--line-2);padding:9px 18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.03em;border-radius:20px;cursor:pointer;transition:.15s;color:var(--muted);background:transparent;}
-.chip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
-.chip:hover:not(.active){border-color:var(--blue-2);color:var(--white);}
+/* filters sidebar */
+.filters{position:sticky;top:84px;}
+@media(max-width:860px){.filters{position:static;margin-bottom:24px;}}
+.filter-group{border-bottom:1px solid var(--line);padding:20px 0;}
+.filter-group:first-child{padding-top:0;}
+.filter-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;color:var(--white);}
+.filter-opt{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);padding:6px 0;cursor:pointer;}
+.filter-opt:hover{color:var(--white);}
+.filter-opt input{accent-color:var(--blue);width:14px;height:14px;}
+.filter-opt .count{margin-left:auto;color:var(--muted-2);font-size:12px;}
+.price-inputs{display:flex;align-items:center;gap:8px;}
+.price-inputs input{width:70px;background:transparent;border:1px solid var(--line-2);color:var(--white);padding:8px 10px;font-family:'Barlow Condensed',sans-serif;font-size:13px;border-radius:1px;}
+.price-inputs input:focus{outline:none;border-color:var(--blue);}
+.filter-clear{font-size:12px;color:var(--blue-2);text-decoration:underline;text-underline-offset:2px;cursor:pointer;margin-top:4px;display:inline-block;}
 
-/* editorial grid (reuses .rcard) */
-.editorial-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
-@media(max-width:960px){.editorial-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:560px){.editorial-grid{grid-template-columns:1fr;}}
-.rcard{display:block;}
-.rcard-media{position:relative;}
-.rcard-media::before{content:'';position:absolute;top:-20%;left:-70%;width:48%;height:160%;background:linear-gradient(72deg,transparent 35%,rgba(255,255,255,.14) 50%,transparent 65%);transform:rotate(10deg);transition:left .9s ease;}
-.rcard:hover .rcard-media::before{left:135%;}
-.rcard-body{padding:16px 18px 20px;}
-.rcard-title{font-size:14.5px;margin-top:2px;}
-.rcard-meta{font-size:11.5px;color:var(--muted-2);margin-top:8px;}
+/* toolbar */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.toolbar-count{font-size:13px;color:var(--muted);}
+.sort-select{background:var(--panel);border:1px solid var(--line-2);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.03em;padding:10px 14px;border-radius:1px;cursor:pointer;}
+.sort-select:focus{outline:none;border-color:var(--blue);}
 
 /* pagination */
 .pagination{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:48px;}
@@ -475,6 +530,11 @@ footer{background:#05080f;padding:60px 0 28px;}
 .page-btn.active{background:var(--white);color:#000;border-color:var(--white);}
 .page-btn:hover:not(.active){border-color:var(--blue);color:var(--white);}
 .page-btn.arrow svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+
+/* active filter pills */
+.active-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.active-pill{display:flex;align-items:center;gap:8px;background:rgba(58,95,176,.15);border:1px solid var(--blue);color:var(--blue-2);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.03em;padding:6px 10px 6px 12px;border-radius:20px;}
+.active-pill span{cursor:pointer;font-size:14px;line-height:1;}
 
 /* ================= CART DRAWER ================= */
 .cart-icon-btn{position:relative;display:flex;align-items:center;cursor:pointer;}
@@ -534,70 +594,59 @@ footer{background:#05080f;padding:60px 0 28px;}
   opacity:0;transition:opacity .25s,transform .25s;z-index:96;pointer-events:none;
 }
 .cart-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-/* ================= ARTIGO / TUTORIAL INDIVIDUAL ================= */
-.art-hero{padding:40px 0 0;}
-.art-head{max-width:760px;margin:0 auto;text-align:center;}
-.art-head h1{font-family:'Barlow',system-ui,sans-serif;font-weight:600;font-size:clamp(28px,4.4vw,46px);line-height:1.15;margin:14px 0 18px;}
-.art-meta{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.03em;}
-.art-meta span{display:flex;align-items:center;gap:6px;}
-.art-hero-media{max-width:920px;margin:34px auto 0;aspect-ratio:16/8;border:1px solid var(--line);border-radius:3px;position:relative;overflow:hidden;background:linear-gradient(150deg,#101a2e,#1a2c48);}
-.art-hero-media::after{content:'';position:absolute;top:-20%;left:-70%;width:50%;height:160%;background:linear-gradient(72deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%);transform:rotate(10deg);animation:sweep 7s ease-in-out infinite;}
+/* ================= SOBRE / ABOUT PAGE ================= */
+.about-hero{position:relative;padding:80px 0 60px;overflow:hidden;}
+.about-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(70% 90% at 75% 20%,rgba(58,95,176,.16),transparent 60%);pointer-events:none;}
+.about-hero-inner{position:relative;max-width:720px;}
+.about-hero h1{font-family:'Barlow',system-ui,sans-serif;font-weight:600;font-size:clamp(34px,5vw,54px);line-height:1.08;margin:14px 0 20px;}
+.about-hero p{color:var(--muted);font-size:16px;line-height:1.7;max-width:600px;}
 
-.art-body{max-width:680px;margin:0 auto;padding:56px 24px 20px;}
-.art-body p{font-size:16px;line-height:1.85;color:#dfe3ea;margin-bottom:22px;}
-.art-body h2{font-family:'Barlow',system-ui,sans-serif;font-size:26px;font-weight:600;margin:40px 0 16px;}
-.art-body ol,.art-body ul{margin:0 0 22px 22px;}
-.art-body li{font-size:15.5px;line-height:1.8;color:#dfe3ea;margin-bottom:10px;}
-.art-pull{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--blue-2);line-height:1.5;border-left:2px solid var(--blue);padding-left:22px;margin:34px 0;}
+.about-story{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding-top:80px;padding-bottom:80px;}
+@media(max-width:860px){.about-story{grid-template-columns:1fr;padding-top:56px;padding-bottom:56px;}}
+.about-story h2{font-family:'Barlow',system-ui,sans-serif;font-size:28px;font-weight:600;margin-bottom:16px;line-height:1.2;}
+.about-story p{color:var(--muted);font-size:15px;line-height:1.75;margin-bottom:14px;}
+.about-media{aspect-ratio:4/5;border:1px solid var(--line);border-radius:3px;position:relative;overflow:hidden;background:linear-gradient(150deg,#101a2e,#1a2c48);}
+.about-media::after{content:'';position:absolute;top:-20%;left:-70%;width:50%;height:160%;background:linear-gradient(72deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%);transform:rotate(10deg);animation:sweep 7s ease-in-out infinite;}
 
-.product-callout{
-  max-width:680px;margin:20px auto 0;
-  display:flex;gap:18px;align-items:center;
-  border:1px solid var(--line);border-radius:3px;background:var(--panel);
-  padding:18px 20px;
-}
-@media(max-width:560px){.product-callout{flex-direction:column;align-items:flex-start;}}
-.product-callout-media{width:64px;height:64px;flex-shrink:0;border-radius:2px;background:linear-gradient(150deg,#0f1a2e,#182a45);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
-.product-callout-media svg{width:22px;height:22px;stroke:var(--line-2);fill:none;stroke-width:1;}
-.product-callout-info{flex:1;}
-.product-callout-info .lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-2);margin-bottom:4px;}
-.product-callout-info h4{font-size:14.5px;font-weight:500;}
-.product-callout-info .price{font-family:'Barlow Condensed',sans-serif;color:var(--muted);font-size:12.5px;margin-top:3px;}
+.values-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+@media(max-width:760px){.values-row{grid-template-columns:1fr;}}
+.value-item{background:#000;padding:34px 28px;}
+.value-item .num{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--blue-2);letter-spacing:.1em;margin-bottom:10px;}
+.value-item h4{font-family:'Barlow',system-ui,sans-serif;font-size:22px;font-weight:600;margin-bottom:10px;}
+.value-item p{font-size:13.5px;color:var(--muted);line-height:1.6;}
 
-.art-share{max-width:680px;margin:44px auto 0;padding:24px 24px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
-.art-share span{font-size:12.5px;color:var(--muted-2);}
-/* ================= POLICY PAGES ================= */
-.policy-hero{padding:44px 0 8px;text-align:center;margin-bottom:50px;}
-.policy-hero h1{font-family:'Barlow',system-ui,sans-serif;font-weight:600;font-size:clamp(28px,4vw,40px);margin:12px 0 16px;}
-.policy-hero p{color:var(--muted);font-size:14.5px;max-width:520px;margin:0 auto 34px;line-height:1.6;}
+/* partners */
+.partner-row{display:flex;gap:20px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;}
+.partner-row::-webkit-scrollbar{display:none;}
+.partner-card{flex:0 0 300px;border:1px solid var(--line);border-radius:3px;background:var(--panel);overflow:hidden;transition:border-color .2s;}
+.partner-card:hover{border-color:var(--blue);}
+.partner-media{aspect-ratio:16/10;background:linear-gradient(150deg,#101a2e,#1a2c48);position:relative;overflow:hidden;}
+.partner-media::after{content:'';position:absolute;top:-20%;left:-70%;width:48%;height:160%;background:linear-gradient(72deg,transparent 35%,rgba(255,255,255,.14) 50%,transparent 65%);transform:rotate(10deg);}
+.partner-body{padding:18px 20px 22px;}
+.partner-tag{font-family:'Barlow Condensed',sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-2);margin-bottom:6px;}
+.partner-body h4{font-family:'Barlow',system-ui,sans-serif;font-size:19px;font-weight:600;margin-bottom:8px;}
+.partner-body p{font-size:13px;color:var(--muted);line-height:1.55;}
 
-.policy-layout{max-width:960px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:210px 1fr;gap:50px;align-items:flex-start;}
-@media(max-width:800px){.policy-layout{grid-template-columns:1fr;}}
-.policy-toc{position:sticky;top:84px;}
-@media(max-width:800px){.policy-toc{position:static;margin-bottom:10px;}}
-.policy-toc .lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);margin-bottom:14px;}
-.policy-toc a{display:block;font-size:13.5px;color:var(--muted);padding:7px 0;border-left:2px solid var(--line);padding-left:14px;transition:.15s;}
-.policy-toc a:hover{color:var(--white);border-left-color:var(--blue-2);}
-.policy-toc a.active{color:var(--blue-2);border-left-color:var(--blue);}
-.policy-content{max-width:640px;}
-.policy-content p{font-size:15px;line-height:1.8;color:#dfe3ea;margin-bottom:18px;}
-.policy-content h2{font-family:'Barlow',system-ui,sans-serif;font-size:23px;font-weight:600;margin:38px 0 14px;scroll-margin-top:90px;}
-.policy-content h2:first-child{margin-top:0;}
-.policy-content ul,.policy-content ol{margin:0 0 18px 20px;}
-.policy-content li{font-size:14.5px;line-height:1.75;color:#dfe3ea;margin-bottom:8px;}
-.policy-updated{font-size:12px;color:var(--muted-2);margin-top:40px;padding-top:20px;border-top:1px solid var(--line);}
-/* ================= 404 ================= */
-.err-hero{position:relative;padding:100px 0 90px;text-align:center;overflow:hidden;}
-.err-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(60% 90% at 50% 20%,rgba(58,95,176,.16),transparent 65%);pointer-events:none;}
-.err-code{position:relative;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(90px,16vw,180px);line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--line-2);letter-spacing:.02em;}
-.err-hero h1{position:relative;font-family:'Barlow',system-ui,sans-serif;font-weight:600;font-size:clamp(24px,3.4vw,34px);margin:6px 0 16px;}
-.err-hero p{position:relative;color:var(--muted);font-size:15px;max-width:440px;margin:0 auto 34px;line-height:1.65;}
-.err-actions{position:relative;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
-.err-search{position:relative;max-width:380px;margin:34px auto 0;display:flex;gap:0;border:1px solid var(--line-2);border-radius:1px;overflow:hidden;}
-.err-search input{flex:1;background:var(--panel);border:none;color:var(--white);padding:13px 16px;font-family:'Barlow',sans-serif;font-size:14px;}
-.err-search input:focus{outline:none;}
-.err-search button{background:var(--blue);border:none;color:#fff;padding:0 18px;cursor:pointer;}
-.err-search button svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;}
+/* sponsorship */
+.spons{background:#000;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.spons-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center;padding-top:76px;padding-bottom:76px;}
+@media(max-width:860px){.spons-grid{grid-template-columns:1fr;padding-top:56px;padding-bottom:56px;}}
+.spons h2{font-family:'Barlow',system-ui,sans-serif;font-size:30px;font-weight:600;line-height:1.15;margin:10px 0 16px;}
+.spons p{color:var(--muted);font-size:15px;line-height:1.75;margin-bottom:14px;max-width:480px;}
+.spons-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--blue-2);margin-top:18px;line-height:1.4;}
+.spons-stats{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+.spons-stats div b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:22px;color:var(--white);}
+.spons-stats div span{font-size:11.5px;color:var(--muted-2);letter-spacing:.03em;}
+
+/* contact strip */
+.contact-strip{padding:60px 0;}
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+@media(max-width:760px){.contact-grid{grid-template-columns:1fr;}}
+.contact-item{background:#000;padding:26px 24px;}
+.contact-item .lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-2);margin-bottom:8px;}
+.contact-item .val{font-size:14.5px;line-height:1.5;}
+.contact-item a.val{color:var(--white);}
+.contact-item a.val:hover{color:var(--blue-2);}
 
 /* ================= SEARCH OVERLAY ================= */
 .search-overlay{position:fixed;inset:0;background:rgba(2,4,8,.75);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:98;}
@@ -664,35 +713,134 @@ footer{background:#05080f;padding:60px 0 28px;}
   </div>
 </header>
 
-<!-- 404 -->
-<section class="err-hero reveal">
-  <div class="wrap">
-    <div class="err-code">404</div>
-    <h1 class="serif">Essa página saiu de linha</h1>
-    <p>O link pode estar quebrado ou a página foi movida. Mas o catálogo inteiro continua exatamente onde sempre esteve.</p>
-    <div class="err-actions">
-      <a href="index.html" class="btn btn-solid">Voltar pra Home</a>
-      <a href="categoria.html" class="btn btn-outline">Ver catálogo</a>
+<!-- BREADCRUMB -->
+<div class="wrap breadcrumb reveal">
+  <a href="index.html">Home</a><span>/</span><span class="current">Treinamento Presencial</span>
+</div>
+
+<!-- TRAIN HERO -->
+<section class="train-hero">
+  <img class="train-hero-img" src="assets/img/cat-treinamentos.jpg" alt="Marcão, curadoria técnica South Car, em treinamento presencial">
+  <div class="train-hero-fade"></div>
+  <div class="wrap train-hero-inner reveal">
+    <div class="eyebrow">Treinamento Presencial · Academia South Car</div>
+    <h1>Aprenda a proteger e<br>vitrificar como um profissional</h1>
+    <p>Um dia inteiro na bancada com o Marcão — a mesma curadoria técnica aplicada nos carros da South Car, direto pra sua mão. Sem enrolação, sem achismo.</p>
+    <div class="train-hero-btns">
+      <a href="#garantir" class="btn btn-solid">Garantir minha vaga</a>
+      <a href="#incluso" class="btn btn-outline">O que está incluso</a>
     </div>
-    <form class="err-search" id="errSearchForm">
-      <input type="text" placeholder="Buscar produto...">
-      <button type="submit"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
-    </form>
+    <div class="train-hero-meta">
+      <span>📍 Complexo South · Itajaí, SC</span>
+      <span>🗓️ Outubro de 2026</span>
+      <span>👥 Turma reduzida</span>
+    </div>
   </div>
 </section>
 
-<!-- SHOP BY CATEGORY -->
-<!-- SHOP BY CATEGORY -->
-<section class="sec" id="cat">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <h2 class="serif">Comprar por categoria</h2>
-      <div class="head-right">
-        <a href="categoria.html" class="pill" style="display:inline-block;">Ver tudo</a>
-        <div class="arrows"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
+<!-- O QUE VOCÊ VAI DOMINAR -->
+<section class="sec">
+  <div class="wrap reveal">
+    <div class="sec-head" style="margin-bottom:28px;">
+      <div><div class="eyebrow">Conteúdo prático</div><h2 class="serif">O que você vai dominar</h2></div>
+    </div>
+    <div class="skills-row">
+      <div class="skill-item"><div class="num">01</div><h4>Descontaminação</h4><p>Preparação de pintura antes de qualquer proteção.</p></div>
+      <div class="skill-item"><div class="num">02</div><h4>Polimento</h4><p>Correção de hologramas e defeitos leves na pintura.</p></div>
+      <div class="skill-item"><div class="num">03</div><h4>Vitrificação</h4><p>Aplicação de coating cerâmico CarPro passo a passo.</p></div>
+      <div class="skill-item"><div class="num">04</div><h4>Rodas &amp; vidros</h4><p>Proteção e repelente de água nos detalhes que fazem diferença.</p></div>
+      <div class="skill-item"><div class="num">05</div><h4>Interior</h4><p>Couro, plástico e acabamento com o mesmo padrão South Car.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTRUTOR -->
+<section class="spons">
+  <div class="wrap spons-grid">
+    <div class="reveal">
+      <div class="eyebrow">Quem vai te ensinar</div>
+      <h2>Marcão<br>Curadoria técnica South Car</h2>
+      <p>É a mão que aplica CarPro nos carros mais exigentes de Itajaí e Balneário Camboriú há anos — de PPF a vitrificação cerâmica. Aplicador Oficial CarPro e responsável pela curadoria técnica de tudo que entra no catálogo do South Shop.</p>
+      <p>Nesse treinamento, ele ensina do jeito que aprendeu na prática: na bancada, com as mãos no produto, sem atalho.</p>
+      <div class="spons-quote">"Não adianta produto bom com aplicação errada. Eu ensino o passo a passo que uso todo dia."</div>
+      <div class="spons-stats">
+        <div><b>Oficial</b><span>Aplicador CarPro</span></div>
+        <div><b>South Leather</b><span>Curadoria técnica</span></div>
+        <div><b>2020</b><span>Na bancada desde</span></div>
       </div>
     </div>
-    <div class="cat-strip reveal" id="catStrip"></div>
+    <div class="about-media reveal" style="aspect-ratio:5/4;background-image:url('assets/img/cat-treinamentos.jpg');background-size:cover;background-position:center 20%;"></div>
+  </div>
+</section>
+
+<!-- O QUE ESTÁ INCLUSO -->
+<section class="sec" id="incluso">
+  <div class="wrap reveal">
+    <div class="sec-head" style="margin-bottom:28px;">
+      <div><div class="eyebrow">O combo</div><h2 class="serif">O que está incluso</h2></div>
+    </div>
+    <div class="incluso-grid">
+      <div class="incluso-item"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><div><b>Ingresso presencial</b><span>1 dia completo de treinamento na bancada</span></div></div>
+      <div class="incluso-item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><div><b>Ebook digital</b><span>Guia de referência pra consultar depois, no seu ritmo</span></div></div>
+      <div class="incluso-item"><svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M8.5 14.5L7 22l5-3 5 3-1.5-7.5"/></svg><div><b>Certificado</b><span>De participação, emitido pela South Car Exclusive</span></div></div>
+      <div class="incluso-item"><svg viewBox="0 0 24 24"><path d="M20.5 12.5a8.5 8.5 0 1 1-8.5-8.5"/><path d="M12 8v4l3 3"/></svg><div><b>Mão na massa</b><span>Produtos CarPro de demonstração disponíveis na bancada</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENDA -->
+<section class="sec" style="padding-top:0;">
+  <div class="wrap reveal">
+    <div class="sec-head" style="margin-bottom:28px;">
+      <div><div class="eyebrow">Como funciona o dia</div><h2 class="serif">Agenda</h2></div>
+    </div>
+    <div class="agenda-list">
+      <div class="agenda-row"><div class="agenda-time">09h</div><div class="agenda-body"><b>Recepção e boas-vindas</b><span>Café, apresentação do grupo e do programa do dia</span></div></div>
+      <div class="agenda-row"><div class="agenda-time">09h30</div><div class="agenda-body"><b>Preparação e descontaminação</b><span>Teoria rápida + prática direto na bancada</span></div></div>
+      <div class="agenda-row"><div class="agenda-time">11h</div><div class="agenda-body"><b>Polimento e correção</b><span>Removendo hologramas e defeitos leves</span></div></div>
+      <div class="agenda-row"><div class="agenda-time">12h30</div><div class="agenda-body"><b>Almoço</b><span>Intervalo pra recarregar</span></div></div>
+      <div class="agenda-row"><div class="agenda-time">14h</div><div class="agenda-body"><b>Vitrificação cerâmica</b><span>Aplicação completa do coating CarPro, passo a passo</span></div></div>
+      <div class="agenda-row"><div class="agenda-time">16h</div><div class="agenda-body"><b>Rodas, vidros e interior</b><span>Os detalhes que separam o amador do profissional</span></div></div>
+      <div class="agenda-row"><div class="agenda-time">17h</div><div class="agenda-body"><b>Perguntas e encerramento</b><span>Certificado e networking com o grupo</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LOCAL -->
+<section class="contact-strip">
+  <div class="wrap">
+    <div class="sec-head reveal" style="margin-bottom:24px;"><h2 class="serif" style="font-size:24px;">Onde e quando</h2></div>
+    <div class="contact-grid reveal">
+      <div class="contact-item"><div class="lbl">Local</div><div class="val">Complexo South<br>Av. Osvaldo Reis, 2100 — Itajaí, SC — 88306-003</div></div>
+      <div class="contact-item"><div class="lbl">Data</div><div class="val">Outubro de 2026<br><span style="font-size:12px;color:var(--muted-2);">data exata em breve</span></div></div>
+      <div class="contact-item"><div class="lbl">Vagas</div><div class="val">Turma reduzida<br><span style="font-size:12px;color:var(--muted-2);">atenção individual garantida</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING / CTA -->
+<section class="sec" id="garantir">
+  <div class="wrap reveal">
+    <div class="price-card">
+      <div class="price-card-inner">
+        <div class="eyebrow">Ingresso + Ebook</div>
+        <h2 class="serif">Treinamento Presencial</h2>
+        <p>Vaga garantida + ebook digital + certificado de participação.</p>
+        <div class="price-tag">R$ 897<span>à vista</span></div>
+        <button class="btn btn-solid price-btn" id="trainBuyBtn">Garantir minha vaga</button>
+        <div class="price-note">Pagamento processado com segurança no checkout South Shop.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" style="padding-top:0;">
+  <div class="wrap reveal" style="max-width:760px;margin:0 auto;">
+    <div class="sec-head" style="margin-bottom:20px;justify-content:center;text-align:center;">
+      <div style="margin:0 auto;"><div class="eyebrow">Dúvidas frequentes</div><h2 class="serif">Antes de garantir sua vaga</h2></div>
+    </div>
+    <div class="faq-list" id="faqList"></div>
   </div>
 </section>
 
@@ -936,71 +1084,34 @@ document.getElementById('cartCheckoutBtn').addEventListener('click', ()=>{
 renderCart();
 
 
-const CATS = [
-  {n:'Treinamentos', href:'treinamento.html', img:'assets/img/cat-treinamentos.jpg', locked:false},
-  {n:'Cursos', href:'tutoriais.html', img:null, locked:true},
-  {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg', locked:true},{n:'Polimento', href:'#', img:'assets/img/cat-polimento.jpg', locked:true},{n:'Descontaminação', href:'#', img:'assets/img/cat-descontaminacao.jpg', locked:true},{n:'Manutenção', href:'#', img:'assets/img/cat-manutencao.jpg', locked:true},{n:'Rodas & Pneus', href:'#', img:'assets/img/cat-rodas-pneus.jpg', locked:true},{n:'Acessórios', href:'#', img:'assets/img/cat-acessorios.jpg', locked:true},
-  {n:'South Leather', href:'#', img:null, locked:true},
-  {n:'Kits', href:'#', img:null, locked:true}
+const FAQS = [
+  {q:'Preciso levar meu próprio carro?', a:'Não é obrigatório. A prática acontece em veículos disponíveis no Complexo South, mas se quiser trazer o seu pra aplicar no que aprender na hora, é bem-vindo.'},
+  {q:'Preciso ter experiência prévia?', a:'Não. O treinamento foi pensado tanto pra quem está começando quanto pra quem já mexe com estética automotiva e quer padronizar a técnica com quem aplica profissionalmente todo dia.'},
+  {q:'O que preciso levar no dia?', a:'Só disposição. Materiais, produtos de demonstração e equipamentos de proteção são fornecidos durante o treinamento.'},
+  {q:'Quando recebo o ebook?', a:'O ebook digital chega automaticamente por e-mail assim que a compra é confirmada — não precisa esperar o dia do evento pra começar a estudar.'},
+  {q:'Como funciona a confirmação da vaga?', a:'Sua compra já garante a vaga — a confirmação do pedido na sua conta South Shop serve como registro oficial de inscrição, sem necessidade de ingresso físico.'},
 ];
-const hex = '<svg class="hexmark" viewBox="0 0 24 26" fill="none" stroke="#7b9de0" stroke-width="1.2"><path d="M12 1 L23 7.5 L23 19.5 L12 26 L1 19.5 L1 7.5 Z"/></svg>';
-document.getElementById('catStrip').innerHTML = CATS.map(c=>`
-  <a href="${c.locked?'javascript:void(0)':c.href}" class="cat${c.locked?' cat-locked':''}"${c.locked?' aria-disabled="true" tabindex="-1"':''}><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${c.img?'':hex}<span>${c.n}</span>${c.locked?'<em class="soon-badge">Em breve</em>':''}</a>
+document.getElementById('faqList').innerHTML = FAQS.map((f,i)=>`
+  <div class="faq-item${i===0?' open':''}" data-faq="${i}">
+    <div class="faq-q">${f.q}<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="faq-a"><p>${f.a}</p></div>
+  </div>
 `).join('');
-(function(){
-  var strip = document.getElementById('catStrip');
-  var arrowsWrap = document.querySelector('#cat .arrows');
-  if (arrowsWrap) {
-    var arrowBtns = arrowsWrap.querySelectorAll('.arrow');
-    if (arrowBtns[0]) arrowBtns[0].addEventListener('click', function(){ strip.scrollBy({left:-232, behavior:'smooth'}); });
-    if (arrowBtns[1]) arrowBtns[1].addEventListener('click', function(){ strip.scrollBy({left:232, behavior:'smooth'}); });
-  }
-  strip.addEventListener('dragstart', function(e){ e.preventDefault(); });
-  var isDown=false, startX=0, startScroll=0, moved=false;
-  var lastX=0, lastT=0, velocity=0, rafId=null, pendingX=null;
-  function applyScroll(){
-    if (pendingX !== null) { strip.scrollLeft = pendingX; pendingX = null; }
-    rafId = null;
-  }
-  function momentumStep(){
-    velocity *= 0.94;
-    if (Math.abs(velocity) < 0.3) return;
-    strip.scrollLeft -= velocity;
-    requestAnimationFrame(momentumStep);
-  }
-  strip.addEventListener('mousedown', function(e){
-    isDown=true; moved=false; velocity=0;
-    strip.classList.add('dragging');
-    startX=e.pageX; startScroll=strip.scrollLeft;
-    lastX=e.pageX; lastT=performance.now();
-  });
-  window.addEventListener('mouseup', function(){
-    if (!isDown) return;
-    isDown=false; strip.classList.remove('dragging');
-    if (Math.abs(velocity) > 0.5) requestAnimationFrame(momentumStep);
-  });
-  window.addEventListener('mousemove', function(e){
-    if(!isDown) return;
-    e.preventDefault();
-    var dx = e.pageX - startX;
-    if (Math.abs(dx) > 4) moved = true;
-    pendingX = startScroll - dx;
-    if (rafId === null) rafId = requestAnimationFrame(applyScroll);
-    var now = performance.now();
-    var dt = now - lastT;
-    if (dt > 0) velocity = (e.pageX - lastX) / dt * 16;
-    lastX = e.pageX; lastT = now;
-  });
-  strip.querySelectorAll('a.cat').forEach(function(a){
-    a.addEventListener('click', function(e){ if (moved) e.preventDefault(); });
-  });
-})();
-
-// busca (stub) — redireciona pra listagem, que na Nuvemshop já resolve busca de verdade
-document.getElementById('errSearchForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  window.location.href = 'categoria.html';
+document.getElementById('faqList').addEventListener('click', (e)=>{
+  const item = e.target.closest('.faq-item');
+  if(!item) return;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(el=>el.classList.remove('open'));
+  if(!wasOpen) item.classList.add('open');
 });
+
+const trainBuyBtn = document.getElementById('trainBuyBtn');
+if (trainBuyBtn) {
+  trainBuyBtn.addEventListener('click', ()=>{
+    addToCart({ id: 'treinamento-presencial', name: 'Treinamento Presencial + Ebook — South Car Exclusive', price: 'R$ 897' });
+    openCart();
+  });
+}
 
 const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
