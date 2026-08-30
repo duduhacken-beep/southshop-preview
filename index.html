@@ -1060,8 +1060,14 @@ document.getElementById('catStrip').innerHTML = catCardsHtml + catCardsHtml;
     a.addEventListener('click', function(e){ if (moved) e.preventDefault(); });
   });
 
-  /* rolagem automatica continua, no mesmo espirito do marquee de depoimentos do treinamento: pausa no hover/arraste/toque e retoma sozinha, sem alterar layout, gap ou breakpoints existentes */
-  strip.addEventListener('mouseenter', function(){ autoPaused = true; });
+  /* rolagem automatica continua, no mesmo espirito do marquee de depoimentos do treinamento: pausa no hover de verdade/arraste/toque e retoma sozinha, sem alterar layout, gap ou breakpoints existentes */
+  var lastPageScrollTs = 0;
+  window.addEventListener('scroll', function(){ lastPageScrollTs = performance.now(); }, {passive:true});
+  strip.addEventListener('mouseenter', function(){
+    /* ignora o "hover fantasma" que o navegador dispara quando a faixa entra embaixo do cursor parado por causa do scroll da pagina (nao por movimento real do mouse) */
+    if (performance.now() - lastPageScrollTs < 250) return;
+    autoPaused = true;
+  });
   strip.addEventListener('mouseleave', function(){ if(!isDown) autoPaused = false; });
   strip.addEventListener('touchstart', function(){ autoPaused = true; }, {passive:true});
   strip.addEventListener('touchend', function(){ pauseAutoTemp(); }, {passive:true});
