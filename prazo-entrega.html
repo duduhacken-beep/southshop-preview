@@ -126,6 +126,9 @@ nav.links a:hover{color:var(--white);}
 .cat::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(5,8,15,.9) 8%,transparent 55%);}
 .cat span{position:absolute;left:0;right:0;bottom:12px;text-align:center;z-index:2;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.06em;text-transform:uppercase;font-weight:500;}
 .cat .hexmark{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:34px;height:34px;opacity:.5;z-index:2;}
+.cat-locked{opacity:.4;pointer-events:none;cursor:not-allowed;filter:grayscale(60%);}
+.cat .soon-badge{position:absolute;top:10px;right:10px;z-index:3;background:rgba(5,8,15,.75);color:#e7e9ee;font-family:'Barlow Condensed',sans-serif;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-style:normal;padding:4px 8px;border-radius:2px;border:1px solid rgba(255,255,255,.25);}
+nav.links a.nav-locked{opacity:.4;pointer-events:none;cursor:not-allowed;}
 
 /* ---------- SHOP QUADRANT ---------- */
 .quad{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;height:420px;}
@@ -622,13 +625,13 @@ footer{background:#05080f;padding:60px 0 28px;}
   <div class="wrap nav-row">
     <a href="index.html" class="logo-link"><img class="logo-img" src="assets/img/logo.png" alt="South Car Exclusive · CarPro"></a>
     <nav class="links">
-      <a href="#">Descontaminação</a>
-      <a href="categoria.html">Vitrificação</a>
-      <a href="#">Polimento</a>
-      <a href="#">Manutenção</a>
-      <a href="#">Kits</a>
+      <a href="categoria.html?cat=treinamentos">Treinamentos</a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">CarPro</a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">South Leather</a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Kits</a>
       <a href="blog.html">Blog</a>
       <a href="tutoriais.html">Como aplicar</a>
+      <a href="#">Dúvidas</a>
       <a href="sobre.html">Sobre</a>
     </nav>
     <div class="nav-right">
@@ -937,11 +940,14 @@ renderCart();
 
 
 const CATS = [
-  {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg'},{n:'Polimento', href:'#', img:'assets/img/cat-polimento.jpg'},{n:'Descontaminação', href:'#', img:'assets/img/cat-descontaminacao.jpg'},{n:'Manutenção', href:'#', img:'assets/img/cat-manutencao.jpg'},{n:'Rodas & Pneus', href:'#', img:'assets/img/cat-rodas-pneus.jpg'},{n:'Acessórios', href:'#', img:'assets/img/cat-acessorios.jpg'}
+  {n:'Treinamentos', href:'categoria.html?cat=treinamentos', img:'assets/img/cat-treinamentos.jpg', locked:false},
+  {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg', locked:true},{n:'Polimento', href:'#', img:'assets/img/cat-polimento.jpg', locked:true},{n:'Descontaminação', href:'#', img:'assets/img/cat-descontaminacao.jpg', locked:true},{n:'Manutenção', href:'#', img:'assets/img/cat-manutencao.jpg', locked:true},{n:'Rodas & Pneus', href:'#', img:'assets/img/cat-rodas-pneus.jpg', locked:true},{n:'Acessórios', href:'#', img:'assets/img/cat-acessorios.jpg', locked:true},
+  {n:'South Leather', href:'#', img:null, locked:true},
+  {n:'Kits', href:'#', img:null, locked:true}
 ];
 const hex = '<svg class="hexmark" viewBox="0 0 24 26" fill="none" stroke="#7b9de0" stroke-width="1.2"><path d="M12 1 L23 7.5 L23 19.5 L12 26 L1 19.5 L1 7.5 Z"/></svg>';
 document.getElementById('catStrip').innerHTML = CATS.map(c=>`
-  <a href="${c.href}" class="cat"><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${c.img?'':hex}<span>${c.n}</span></a>
+  <a href="${c.locked?'javascript:void(0)':c.href}" class="cat${c.locked?' cat-locked':''}"${c.locked?' aria-disabled="true" tabindex="-1"':''}><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${c.img?'':hex}<span>${c.n}</span>${c.locked?'<em class="soon-badge">Em breve</em>':''}</a>
 `).join('');
 
 // TOC scroll-spy
