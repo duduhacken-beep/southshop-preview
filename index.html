@@ -1001,32 +1001,40 @@ const CATS = [
   {n:'Kits', href:'#', img:'assets/img/cat-kits.jpg', locked:true}
 ];
 const hex = '<svg class="hexmark" viewBox="0 0 24 26" fill="none" stroke="#7b9de0" stroke-width="1.2"><path d="M12 1 L23 7.5 L23 19.5 L12 26 L1 19.5 L1 7.5 Z"/></svg>';
-document.getElementById('catStrip').innerHTML = CATS.map(c=>`
+var catCardsHtml = CATS.map(c=>`
   <a href="${c.locked?'javascript:void(0)':c.href}" class="cat${c.locked?' cat-locked':''}"${c.locked?' aria-disabled="true" tabindex="-1"':''}><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${c.img?'':hex}<span>${c.n}</span>${c.locked?'<em class="soon-badge">Em breve</em>':''}</a>
 `).join('');
+/* duplica os cards (mesma tecnica do marquee de depoimentos do treinamento) pra rolagem automatica dar loop sem "costura" visivel */
+document.getElementById('catStrip').innerHTML = catCardsHtml + catCardsHtml;
 (function(){
   var strip = document.getElementById('catStrip');
   var arrowsWrap = document.querySelector('#cat .arrows');
-  if (arrowsWrap) {
-    var arrowBtns = arrowsWrap.querySelectorAll('.arrow');
-    if (arrowBtns[0]) arrowBtns[0].addEventListener('click', function(){ strip.scrollBy({left:-232, behavior:'smooth'}); });
-    if (arrowBtns[1]) arrowBtns[1].addEventListener('click', function(){ strip.scrollBy({left:232, behavior:'smooth'}); });
-  }
-  strip.addEventListener('dragstart', function(e){ e.preventDefault(); });
   var isDown=false, startX=0, startScroll=0, moved=false;
   var lastX=0, lastT=0, velocity=0, rafId=null, pendingX=null;
+  var autoPaused=false, resumeTimer=null;
+  function pauseAutoTemp(){
+    autoPaused = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(function(){ if(!isDown) autoPaused = false; }, 2200);
+  }
+  if (arrowsWrap) {
+    var arrowBtns = arrowsWrap.querySelectorAll('.arrow');
+    if (arrowBtns[0]) arrowBtns[0].addEventListener('click', function(){ pauseAutoTemp(); strip.scrollBy({left:-232, behavior:'smooth'}); });
+    if (arrowBtns[1]) arrowBtns[1].addEventListener('click', function(){ pauseAutoTemp(); strip.scrollBy({left:232, behavior:'smooth'}); });
+  }
+  strip.addEventListener('dragstart', function(e){ e.preventDefault(); });
   function applyScroll(){
     if (pendingX !== null) { strip.scrollLeft = pendingX; pendingX = null; }
     rafId = null;
   }
   function momentumStep(){
     velocity *= 0.94;
-    if (Math.abs(velocity) < 0.3) return;
+    if (Math.abs(velocity) < 0.3) { autoPaused = false; return; }
     strip.scrollLeft -= velocity;
     requestAnimationFrame(momentumStep);
   }
   strip.addEventListener('mousedown', function(e){
-    isDown=true; moved=false; velocity=0;
+    isDown=true; moved=false; velocity=0; autoPaused=true;
     strip.classList.add('dragging');
     startX=e.pageX; startScroll=strip.scrollLeft;
     lastX=e.pageX; lastT=performance.now();
@@ -1034,7 +1042,7 @@ document.getElementById('catStrip').innerHTML = CATS.map(c=>`
   window.addEventListener('mouseup', function(){
     if (!isDown) return;
     isDown=false; strip.classList.remove('dragging');
-    if (Math.abs(velocity) > 0.5) requestAnimationFrame(momentumStep);
+    if (Math.abs(velocity) > 0.5) { requestAnimationFrame(momentumStep); } else { autoPaused = false; }
   });
   window.addEventListener('mousemove', function(e){
     if(!isDown) return;
@@ -1051,6 +1059,28 @@ document.getElementById('catStrip').innerHTML = CATS.map(c=>`
   strip.querySelectorAll('a.cat').forEach(function(a){
     a.addEventListener('click', function(e){ if (moved) e.preventDefault(); });
   });
+
+  /* rolagem automatica continua, no mesmo espirito do marquee de depoimentos do treinamento: pausa no hover/arraste/toque e retoma sozinha, sem alterar layout, gap ou breakpoints existentes */
+  strip.addEventListener('mouseenter', function(){ autoPaused = true; });
+  strip.addEventListener('mouseleave', function(){ if(!isDown) autoPaused = false; });
+  strip.addEventListener('touchstart', function(){ autoPaused = true; }, {passive:true});
+  strip.addEventListener('touchend', function(){ pauseAutoTemp(); }, {passive:true});
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion) {
+    var lastTs = null, speed = 32; /* px/s, ritmo proximo ao marquee de depoimentos */
+    function autoStep(ts){
+      if (lastTs === null) lastTs = ts;
+      var dt = ts - lastTs;
+      lastTs = ts;
+      if (!autoPaused) {
+        var half = strip.scrollWidth / 2;
+        strip.scrollLeft += speed * dt / 1000;
+        if (strip.scrollLeft >= half) strip.scrollLeft -= half;
+      }
+      requestAnimationFrame(autoStep);
+    }
+    requestAnimationFrame(autoStep);
+  }
 })();
 
 const PRODUCTS = [
