@@ -1058,32 +1058,14 @@ document.getElementById('catStrip').innerHTML = CATS.map(c=>`
     a.addEventListener('click', function(e){ if (moved) e.preventDefault(); });
   });
 
-  /* rolagem automatica: vai ate o fim e volta ate o inicio (sem duplicar itens -- e a mesma lista unica de categorias de sempre, so que ela anda sozinha). Pausa apenas quando o mouse realmente se MOVE em cima da faixa, nao em qualquer evento de "entrada" que o navegador possa disparar sozinho (scroll, troca de aba, etc) */
-  var hoverClearTimer = null;
-  strip.addEventListener('mousemove', function(){
-    autoPaused = true;
-    clearTimeout(hoverClearTimer);
-    hoverClearTimer = setTimeout(function(){ if (!isDown) autoPaused = false; }, 700);
-  });
-  strip.addEventListener('mouseleave', function(){
-    clearTimeout(hoverClearTimer);
-    if (!isDown) autoPaused = false;
-  });
+  /* carrossel automatico: anda sempre pra frente e reinicia do zero ao chegar no fim (sem duplicar itens -- e a mesma lista unica de categorias de sempre). Pausa somente durante interacao manual de verdade (arrastar, tocar, clicar nas setas) e retoma sozinho pouco depois */
   strip.addEventListener('touchstart', function(){ autoPaused = true; }, {passive:true});
   strip.addEventListener('touchend', function(){ pauseAutoTemp(); }, {passive:true});
-  var lastTs = null, speed = 32, dir = 1; /* px/s */
+  var lastTs = null, speed = 32; /* px/s */
   var tabHidden = document.hidden;
   document.addEventListener('visibilitychange', function(){
     tabHidden = document.hidden;
-    /* ao voltar pra aba, resincroniza tudo do zero pra nao herdar nenhum estado preso (timestamp velho, drag que nao terminou certinho, etc) */
-    if (!tabHidden) {
-      lastTs = null;
-      isDown = false;
-      strip.classList.remove('dragging');
-      clearTimeout(hoverClearTimer);
-      clearTimeout(resumeTimer);
-      autoPaused = false;
-    }
+    if (!tabHidden) lastTs = null; /* resincroniza o timestamp ao voltar pra aba, pra nao herdar um dt gigante */
   });
   function autoStep(ts){
     if (lastTs === null) lastTs = ts;
@@ -1092,9 +1074,8 @@ document.getElementById('catStrip').innerHTML = CATS.map(c=>`
     if (!autoPaused && !tabHidden) {
       var max = strip.scrollWidth - strip.clientWidth;
       if (max > 0) {
-        strip.scrollLeft += dir * speed * dt / 1000;
-        if (strip.scrollLeft >= max) { strip.scrollLeft = max; dir = -1; }
-        else if (strip.scrollLeft <= 0) { strip.scrollLeft = 0; dir = 1; }
+        strip.scrollLeft += speed * dt / 1000;
+        if (strip.scrollLeft >= max - 1) strip.scrollLeft = 0; /* reinicia o carrossel do comeco */
       }
     }
     requestAnimationFrame(autoStep);
