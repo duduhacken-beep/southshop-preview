@@ -432,6 +432,28 @@ footer{background:#05080f;padding:60px 0 28px;}
 .agenda-body b{display:block;font-size:15px;font-weight:500;margin-bottom:3px;}
 .agenda-body span{font-size:13px;color:var(--muted);}
 
+.cal-wrap{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;}
+@media(max-width:800px){.cal-wrap{grid-template-columns:1fr;}}
+.cal-card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:24px;max-width:420px;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+.cal-arrow{width:28px;height:28px;border:1px solid var(--line-2);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:.4;}
+.cal-arrow svg{width:12px;height:12px;stroke:var(--white);fill:none;stroke-width:2;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-weekdays{margin-bottom:6px;}
+.cal-weekdays span{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:10.5px;letter-spacing:.06em;color:var(--muted-2);}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;border-radius:3px;color:var(--muted-2);}
+.cal-day.empty{visibility:hidden;}
+.cal-day.avail{cursor:pointer;background:rgba(58,95,176,.14);color:var(--white);font-weight:600;transition:background .2s,transform .2s;}
+.cal-day.avail:hover{background:rgba(58,95,176,.3);transform:scale(1.08);}
+.cal-day.selected{background:var(--blue);color:#fff;}
+.cal-legend{display:flex;align-items:center;gap:6px;margin-top:16px;font-size:11.5px;color:var(--muted-2);}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.dot-on{background:var(--blue);}
+.dot-off{background:var(--line-2);margin-left:10px;}
+.cal-side{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:24px;}
+.cal-selected{font-size:14px;color:var(--muted);line-height:1.6;}
+.cal-selected b{color:var(--white);display:block;font-size:16px;margin-bottom:4px;}
+
 .price-card{max-width:520px;margin:0 auto;border:1px solid var(--line-2);border-radius:4px;background:linear-gradient(160deg,#0d1626,#141f34);overflow:hidden;}
 .price-card-inner{padding:44px 40px;text-align:center;}
 .price-card-inner p{color:var(--muted);font-size:14px;margin:10px 0 22px;}
@@ -820,21 +842,31 @@ footer{background:#05080f;padding:60px 0 28px;}
   </div>
 </section>
 
-<!-- AGENDA -->
+<!-- ESCOLHA A DATA -->
 <section class="sec" style="padding-top:0;">
   <div class="wrap reveal">
     <div class="sec-head" style="margin-bottom:28px;">
-      <div><div class="eyebrow">Como funciona o dia</div><h2 class="serif">Agenda</h2></div>
+      <div><div class="eyebrow">Qual o melhor dia pra você?</div><h2 class="serif">Escolha a data da sua turma</h2></div>
     </div>
-    <div class="agenda-list">
-      <div class="agenda-row"><div class="agenda-time">09h</div><div class="agenda-body"><b>Recepção e boas-vindas</b><span>Café, apresentação do grupo e do programa do dia</span></div></div>
-      <div class="agenda-row"><div class="agenda-time">09h30</div><div class="agenda-body"><b>Preparação e descontaminação</b><span>Teoria rápida + prática direto na bancada</span></div></div>
-      <div class="agenda-row"><div class="agenda-time">11h</div><div class="agenda-body"><b>Polimento e correção</b><span>Removendo hologramas e defeitos leves</span></div></div>
-      <div class="agenda-row"><div class="agenda-time">12h30</div><div class="agenda-body"><b>Almoço</b><span>Intervalo pra recarregar</span></div></div>
-      <div class="agenda-row"><div class="agenda-time">14h</div><div class="agenda-body"><b>Vitrificação cerâmica</b><span>Aplicação completa do coating CarPro, passo a passo</span></div></div>
-      <div class="agenda-row"><div class="agenda-time">16h</div><div class="agenda-body"><b>Rodas, vidros e interior</b><span>Os detalhes que separam o amador do profissional</span></div></div>
-      <div class="agenda-row"><div class="agenda-time">17h</div><div class="agenda-body"><b>Perguntas e encerramento</b><span>Certificado e networking com o grupo</span></div></div>
+    <div class="cal-wrap">
+      <div class="cal-card">
+        <div class="cal-head">
+          <span class="cal-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></span>
+          <b>Outubro 2026</b>
+          <span class="cal-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
+        </div>
+        <div class="cal-grid cal-weekdays">
+          <span>DOM</span><span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span>
+        </div>
+        <div class="cal-grid" id="calDays"></div>
+        <div class="cal-legend"><span class="dot dot-on"></span> Turma disponível &nbsp; <span class="dot dot-off"></span> Sem turma</div>
+      </div>
+      <div class="cal-side">
+        <div class="cal-selected" id="calSelected">Selecione uma data disponível no calendário ao lado.</div>
+        <button class="btn btn-solid" id="calConfirmBtn" style="width:100%;margin-top:16px;" disabled>Confirmar data e ver preço</button>
+      </div>
     </div>
+
   </div>
 </section>
 
@@ -855,7 +887,7 @@ footer{background:#05080f;padding:60px 0 28px;}
   <div class="wrap reveal">
     <div class="price-card">
       <div class="price-card-inner">
-        <div class="eyebrow">Ingresso + Ebook</div>
+        <div class="eyebrow" id="priceEyebrow">Ingresso + Ebook</div>
         <h2 class="serif">Treinamento Presencial</h2>
         <p>Vaga garantida + ebook digital + certificado de participação.</p>
         <div class="price-tag">R$ 897<span>à vista</span></div>
@@ -1137,10 +1169,52 @@ document.getElementById('faqList').addEventListener('click', (e)=>{
   if(!wasOpen) item.classList.add('open');
 });
 
+(function(){
+  var AVAILABLE = [10, 17, 24];
+  var firstWeekday = 4; // 1 de outubro de 2026 cai numa quinta-feira (0=Dom)
+  var daysInMonth = 31;
+  var grid = document.getElementById('calDays');
+  var html = '';
+  for (var i = 0; i < firstWeekday; i++) html += '<div class="cal-day empty"></div>';
+  for (var d = 1; d <= daysInMonth; d++) {
+    var isAvail = AVAILABLE.indexOf(d) !== -1;
+    html += '<div class="cal-day' + (isAvail ? ' avail' : '') + '" data-day="' + d + '">' + d + '</div>';
+  }
+  grid.innerHTML = html;
+
+  var selectedDay = null;
+  var selectedEl = document.getElementById('calSelected');
+  var confirmBtn = document.getElementById('calConfirmBtn');
+  var priceEyebrow = document.getElementById('priceEyebrow');
+
+  grid.addEventListener('click', function(e){
+    var day = e.target.closest('.cal-day.avail');
+    if (!day) return;
+    document.querySelectorAll('.cal-day.selected').forEach(function(el){ el.classList.remove('selected'); });
+    day.classList.add('selected');
+    selectedDay = day.dataset.day;
+    selectedEl.innerHTML = '<b>' + selectedDay + ' de outubro de 2026</b>Vaga reservada por 15 minutos enquanto você finaliza a compra.';
+    confirmBtn.disabled = false;
+  });
+
+  confirmBtn.addEventListener('click', function(){
+    if (!selectedDay) return;
+    priceEyebrow.textContent = 'Ingresso + Ebook · Turma de ' + selectedDay + '/10';
+    document.getElementById('garantir').scrollIntoView({behavior:'smooth', block:'center'});
+  });
+})();
+
 const trainBuyBtn = document.getElementById('trainBuyBtn');
 if (trainBuyBtn) {
   trainBuyBtn.addEventListener('click', ()=>{
-    addToCart({ id: 'treinamento-presencial', name: 'Treinamento Presencial + Ebook — South Car Exclusive', price: 'R$ 897' });
+    var chosen = document.querySelector('.cal-day.selected');
+    if (!chosen) {
+      document.getElementById('calDays').scrollIntoView({behavior:'smooth', block:'center'});
+      showToast('Escolha uma data disponível no calendário primeiro');
+      return;
+    }
+    var dateLabel = chosen.dataset.day + '/10/2026';
+    addToCart({ id: 'treinamento-presencial-' + chosen.dataset.day, name: 'Treinamento Presencial + Ebook — Turma ' + dateLabel, price: 'R$ 897' });
     openCart();
   });
 }
