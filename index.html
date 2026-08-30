@@ -466,7 +466,7 @@ footer{background:#05080f;padding:60px 0 28px;}
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">South Leather</a>
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Kits</a>
       <a href="blog.html">Blog</a>
-      <a href="tutoriais.html">Como aplicar</a>
+      <a href="tutoriais.html">Academia South</a>
       <a href="#">Dúvidas</a>
       <a href="sobre.html">Sobre</a>
     </nav>
@@ -701,17 +701,6 @@ footer{background:#05080f;padding:60px 0 28px;}
       <div class="head-right"><div class="pill" style="cursor:default;">Em breve</div></div>
     </div>
     <div class="course-grid reveal" id="courseGrid"></div>
-  </div>
-</section>
-
-<!-- TUTORIALS -->
-<section class="sec" style="padding-top:0;">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <h2 class="serif">Como aplicar</h2>
-      <div class="head-right"><a href="tutoriais.html" class="pill" style="display:inline-block;">Ver tudo</a></div>
-    </div>
-    <div class="card-row reveal" id="tutRow"></div>
   </div>
 </section>
 
@@ -1063,21 +1052,13 @@ document.querySelectorAll('#prodGrid [data-add-id]').forEach(btn=>{
   });
 });
 
-const TUTS = [
-  {slug:'cquartz-passo-a-passo', tag:'Vitrificação', title:'Como aplicar o CQuartz passo a passo'},
-  {slug:'iron-x-descontaminacao', tag:'Descontaminação', title:'Iron X: removendo contaminação ferrosa'},
-  {slug:'reload-manutencao', tag:'Manutenção', title:'Reload: mantendo o brilho entre lavagens'},
-  {slug:'perl-interior', tag:'Interior', title:'Perl: protegendo couro e plástico'},
-];
 const ARTS = [
   {slug:'vitrificacao-x-cera', tag:'Guia', title:'Vitrificação x cera: qual a diferença real?'},
   {slug:'erros-que-estragam-pintura', tag:'Cuidados', title:'5 erros que estragam a pintura do seu carro'},
   {slug:'rodas-pneus-como-cuidar', tag:'Rodas & Pneus', title:'Rodas e pneus: como manter o brilho sem ressecar a borracha'},
   {slug:'por-que-carpro', tag:'CarPro', title:'Por que a South Car escolheu a linha CarPro'},
 ];
-const rcardTut = a => a.map(x=>`<a href="tutorial.html?t=${x.slug}" class="rcard"><div class="rcard-media"></div><div class="rcard-body"><div class="rcard-tag">${x.tag}</div><div class="rcard-title">${x.title}</div></div></a>`).join('');
 const rcardArt = a => a.map(x=>`<a href="artigo.html?a=${x.slug}" class="rcard"><div class="rcard-media"></div><div class="rcard-body"><div class="rcard-tag">${x.tag}</div><div class="rcard-title">${x.title}</div></div></a>`).join('');
-document.getElementById('tutRow').innerHTML = rcardTut(TUTS);
 document.getElementById('artRow').innerHTML = rcardArt(ARTS);
 
 const lockSvg = `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tutoriais — Como aplicar | South Shop</title>
+<title>Academia South — Cursos Online | South Shop</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap');
 
@@ -424,7 +424,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 .course-price{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--blue-2);}
 .course-lessons{font-size:11px;color:var(--muted-2);}
 
-/* wide teaser variant — used inline in the "Como aplicar" tab */
+/* wide teaser variant — used inline in the "Academia South" tab */
 .course-wide{display:flex;gap:22px;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:linear-gradient(150deg,#0d1626,#0a1120);margin-top:20px;transition:border-color .25s;}
 .course-wide:hover{border-color:var(--blue);}
 .course-wide:hover .blur-bg{transform:scale(1.28);}
@@ -584,7 +584,7 @@ footer{background:#05080f;padding:60px 0 28px;}
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">South Leather</a>
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Kits</a>
       <a href="blog.html">Blog</a>
-      <a href="tutoriais.html">Como aplicar</a>
+      <a href="tutoriais.html">Academia South</a>
       <a href="#">Dúvidas</a>
       <a href="sobre.html">Sobre</a>
     </nav>
@@ -602,18 +602,18 @@ footer{background:#05080f;padding:60px 0 28px;}
 
 <!-- BREADCRUMB -->
 <div class="wrap breadcrumb reveal">
-  <a href="index.html">Home</a><span>/</span><span class="current">Tutoriais</span>
+  <a href="index.html">Home</a><span>/</span><span class="current">Academia South</span>
 </div>
 
 <!-- HERO -->
 <section class="cat-hero reveal">
   <div class="wrap cat-hero-inner">
     <div>
-      <div class="eyebrow">Como aplicar</div>
-      <h1 style="margin-top:8px;">Tutoriais South Car</h1>
-      <p>Passo a passo de aplicação direto da bancada — os mesmos detalhes técnicos que o Marcão usa no dia a dia.</p>
+      <div class="eyebrow">Academia South Car</div>
+      <h1 style="margin-top:8px;">Cursos online, direto da bancada</h1>
+      <p>Aulas gravadas com os mesmos detalhes técnicos que o Marcão usa no dia a dia — em breve, disponíveis aqui.</p>
     </div>
-    <div class="cat-count">8 tutoriais</div>
+    <div class="cat-count">8 cursos</div>
   </div>
 </section>
 
@@ -946,31 +946,40 @@ document.getElementById('catStrip').innerHTML = CATS.map(c=>`
   });
 })();
 
-const TUTORIALS = [
-  {slug:'cquartz-passo-a-passo', cat:'Vitrificação', title:'Como aplicar o CQuartz passo a passo', meta:'8 min de leitura'},
-  {slug:'iron-x-descontaminacao', cat:'Descontaminação', title:'Iron X: removendo contaminação ferrosa', meta:'5 min de leitura'},
-  {slug:'reload-manutencao', cat:'Manutenção', title:'Reload: mantendo o brilho entre lavagens', meta:'4 min de leitura'},
-  {slug:'perl-interior', cat:'Interior', title:'Perl: protegendo couro e plástico', meta:'6 min de leitura'},
-  {slug:'dlux-vidros', cat:'Vidros', title:'DLUX: repelente de água em vidros, aplicação correta', meta:'5 min de leitura'},
-  {slug:'reload-rodas', cat:'Rodas', title:'Reload Rodas: protegendo aros do dia a dia', meta:'4 min de leitura'},
-  {slug:'clay-bar-preparacao', cat:'Preparação', title:'Clay bar: como descontaminar antes de vitrificar', meta:'7 min de leitura'},
-  {slug:'correcao-polimento', cat:'Polimento', title:'Correção de pintura: removendo hologramas antes do coating', meta:'9 min de leitura'},
+const lockSvg = `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
+const COURSES_ALL = [
+  {cat:'Vitrificação', title:'Vitrificação Cerâmica na Prática', lessons:'8 aulas', dur:'1h20', price:'R$ 197'},
+  {cat:'Descontaminação', title:'Preparação e Descontaminação de Pintura', lessons:'5 aulas', dur:'45min', price:'R$ 97'},
+  {cat:'Polimento', title:'Correção de Pintura: Polimento Passo a Passo', lessons:'9 aulas', dur:'1h45', price:'R$ 227'},
+  {cat:'Interior', title:'Detalhamento de Interior Profissional', lessons:'6 aulas', dur:'55min', price:'R$ 127'},
+  {cat:'Manutenção', title:'Reload: Manutenção e Brilho Entre Lavagens', lessons:'5 aulas', dur:'50min', price:'R$ 117'},
+  {cat:'Vidros', title:'DLUX: Repelente de Água em Vidros', lessons:'4 aulas', dur:'35min', price:'R$ 87'},
+  {cat:'Rodas', title:'Reload Rodas: Protegendo Aros do Dia a Dia', lessons:'4 aulas', dur:'40min', price:'R$ 97'},
+  {cat:'Preparação', title:'Clay Bar: Descontaminação Antes de Vitrificar', lessons:'6 aulas', dur:'1h05', price:'R$ 147'},
 ];
 
-const CHIPS = ['Todos', ...new Set(TUTORIALS.map(t=>t.cat))];
+const CHIPS = ['Todos', ...new Set(COURSES_ALL.map(t=>t.cat))];
 document.getElementById('chipRow').innerHTML = CHIPS.map((c,i)=>`<div class="chip ${i===0?'active':''}" data-chip="${c}">${c}</div>`).join('');
 
 function renderTuts(filter){
-  const list = (!filter || filter==='Todos') ? TUTORIALS : TUTORIALS.filter(t=>t.cat===filter);
-  document.getElementById('tutGrid').innerHTML = list.map(t=>`
-    <a href="tutorial.html?t=${t.slug}" class="rcard">
-      <div class="rcard-media"></div>
-      <div class="rcard-body">
-        <div class="rcard-tag">${t.cat}</div>
-        <div class="rcard-title">${t.title}</div>
-        <div class="rcard-meta">${t.meta}</div>
+  const list = (!filter || filter==='Todos') ? COURSES_ALL : COURSES_ALL.filter(t=>t.cat===filter);
+  document.getElementById('tutGrid').innerHTML = list.map(c=>`
+    <div class="course-card">
+      <div class="course-cover">
+        <div class="blur-bg"></div>
+        <span class="badge">Em breve</span>
+        <div class="course-overlay">
+          <div class="course-lock">${lockSvg}</div>
+          <div class="course-buy">Em breve</div>
+        </div>
+        <div class="course-duration">${c.dur}</div>
       </div>
-    </a>
+      <div class="course-body">
+        <div class="course-tag">${c.cat}</div>
+        <div class="course-title">${c.title}</div>
+        <div class="course-foot"><span class="course-price">${c.price}</span><span class="course-lessons">${c.lessons}</span></div>
+      </div>
+    </div>
   `).join('');
 }
 renderTuts('Todos');
