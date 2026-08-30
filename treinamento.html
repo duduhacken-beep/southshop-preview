@@ -398,13 +398,19 @@ footer{background:#05080f;padding:60px 0 28px;}
 .rev-card p{font-size:14px;color:var(--white);line-height:1.6;margin-bottom:14px;}
 .rev-card span{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted-2);}
 /* ---------- TREINAMENTO — LANDING PAGE ---------- */
-.train-hero{position:relative;min-height:640px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--line);}
-@media(max-width:760px){.train-hero{min-height:560px;}}
-.train-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:82% 25%;}
-.train-hero-fade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,5,10,.97) 0%,rgba(3,5,10,.93) 38%,rgba(3,5,10,.6) 58%,rgba(3,5,10,.15) 82%),linear-gradient(to top,rgba(3,5,10,.9) 0%,transparent 45%);}
-.train-hero-inner{position:relative;z-index:1;max-width:640px;padding:80px 24px;}
-.train-hero-inner h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(30px,4.6vw,52px);line-height:1.05;margin:14px 0 18px;color:var(--white);}
-.train-hero-inner p{color:var(--muted);font-size:15.5px;line-height:1.7;max-width:520px;margin-bottom:26px;}
+.train-hero{position:relative;min-height:640px;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(120deg,#0a0f1a 0%,#101d33 46%,#060a12 100%);}
+@media(max-width:800px){.train-hero{min-height:auto;}}
+.train-hero-flex{display:flex;align-items:stretch;min-height:640px;}
+@media(max-width:800px){.train-hero-flex{flex-direction:column;min-height:auto;}}
+.train-hero-photo{flex:0 0 44%;position:relative;overflow:hidden;}
+@media(max-width:800px){.train-hero-photo{flex:none;height:300px;order:-1;}}
+.train-hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 12%;}
+.train-hero-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,#0a0f1a 0%,rgba(10,15,26,0) 14%);}
+@media(max-width:800px){.train-hero-photo::after{background:linear-gradient(to top,#0a0f1a 0%,rgba(10,15,26,0) 22%);}}
+.train-hero-inner{position:relative;z-index:1;flex:1;max-width:560px;padding:70px 40px 70px max(24px, calc((100vw - 1200px) / 2 + 24px));display:flex;flex-direction:column;justify-content:center;}
+@media(max-width:800px){.train-hero-inner{max-width:none;padding:30px 20px 40px;}}
+.train-hero-inner h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(30px,3.6vw,48px);line-height:1.05;margin:14px 0 18px;color:var(--white);}
+.train-hero-inner p{color:var(--muted);font-size:15.5px;line-height:1.7;max-width:480px;margin-bottom:26px;}
 .train-hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px;}
 .train-hero-meta{display:flex;gap:22px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.03em;color:var(--muted-2);}
 
@@ -761,20 +767,23 @@ footer{background:#05080f;padding:60px 0 28px;}
 
 <!-- TRAIN HERO -->
 <section class="train-hero">
-  <img class="train-hero-img" src="assets/img/cat-treinamentos.jpg" alt="Marcão, curadoria técnica South Car, em treinamento presencial">
-  <div class="train-hero-fade"></div>
-  <div class="wrap train-hero-inner reveal">
-    <div class="eyebrow">Treinamento Presencial · Academia South Car</div>
-    <h1>Aprenda a proteger e<br>vitrificar como um profissional</h1>
-    <p>Um dia inteiro na bancada com o Marcão — a mesma curadoria técnica aplicada nos carros da South Car, direto pra sua mão. Sem enrolação, sem achismo.</p>
-    <div class="train-hero-btns">
-      <a href="#garantir" class="btn btn-solid">Garantir minha vaga</a>
-      <a href="#incluso" class="btn btn-outline">O que está incluso</a>
+  <div class="train-hero-flex">
+    <div class="train-hero-inner reveal">
+      <div class="eyebrow">Treinamento Presencial · Academia South Car</div>
+      <h1>Aprenda a proteger e<br>vitrificar como um profissional</h1>
+      <p>Um dia inteiro na bancada com o Marcão — a mesma curadoria técnica aplicada nos carros da South Car, direto pra sua mão. Sem enrolação, sem achismo.</p>
+      <div class="train-hero-btns">
+        <a href="#garantir" class="btn btn-solid">Garantir minha vaga</a>
+        <a href="#incluso" class="btn btn-outline">O que está incluso</a>
+      </div>
+      <div class="train-hero-meta">
+        <span>📍 Complexo South · Balneário Camboriú, SC</span>
+        <span>🗓️ Outubro de 2026</span>
+        <span>👥 Até 5 pessoas por turma</span>
+      </div>
     </div>
-    <div class="train-hero-meta">
-      <span>📍 Complexo South · Itajaí, SC</span>
-      <span>🗓️ Outubro de 2026</span>
-      <span>👥 Turma reduzida</span>
+    <div class="train-hero-photo">
+      <img src="assets/img/cat-treinamentos.jpg" alt="Marcão, curadoria técnica South Car, em treinamento presencial">
     </div>
   </div>
 </section>
