@@ -194,6 +194,12 @@ nav.links a.nav-locked{opacity:.4;pointer-events:none;cursor:not-allowed;}
 .exp-panel .num{position:absolute;top:18px;right:20px;z-index:2;font-family:'Barlow Condensed',sans-serif;color:var(--blue-2);opacity:.6;font-size:13px;letter-spacing:.1em;}
 .exp-panel h4{font-family:'Barlow Condensed',sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.03em;font-weight:600;white-space:nowrap;}
 .exp-panel p{font-size:13px;color:var(--muted);line-height:1.5;max-height:0;opacity:0;overflow:hidden;transition:max-height .45s ease,opacity .3s ease,margin-top .45s ease;margin-top:0;}
+.exp-panel-media{cursor:pointer;}
+.exp-lightbox{display:none;position:fixed;inset:0;z-index:200;background:rgba(3,5,10,.94);align-items:center;justify-content:center;flex-direction:column;padding:24px;}
+.exp-lightbox.open{display:flex;}
+.exp-lightbox img{max-width:92vw;max-height:76vh;object-fit:contain;border-radius:4px;}
+.exp-lightbox-title{margin-top:16px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--white);}
+.exp-lightbox-close{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line-2);background:rgba(255,255,255,.06);color:var(--white);font-size:24px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .exp-panel:hover p{max-height:100px;opacity:1;margin-top:8px;}
 @media(max-width:800px){.exp-panel p{max-height:200px;opacity:1;margin-top:8px;}.exp-panel h4{white-space:normal;}}
 
@@ -863,27 +869,27 @@ footer{background:#05080f;padding:60px 0 28px;}
     <h2 class="exp-title reveal">O que você vai dominar</h2>
     <p class="exp-sub reveal">Do zero à aplicação profissional em um único dia — as cinco etapas que separam quem só lava o carro de quem realmente protege.</p>
     <div class="exp-row reveal">
-      <div class="exp-panel">
+      <div class="exp-panel" data-img="assets/img/skill-descontaminacao.jpg" data-title="Descontaminação">
         <div class="exp-panel-media" style="background-image:url('assets/img/skill-descontaminacao.jpg');background-size:cover;background-position:center 40%;"></div>
         <span class="num">01</span>
         <div class="exp-panel-inner"><h4>Descontaminação</h4><p>Preparação de pintura antes de qualquer proteção.</p></div>
       </div>
-      <div class="exp-panel">
+      <div class="exp-panel" data-img="assets/img/skill-polimento.jpg" data-title="Polimento">
         <div class="exp-panel-media" style="background-image:url('assets/img/skill-polimento.jpg');background-size:cover;background-position:center 35%;"></div>
         <span class="num">02</span>
         <div class="exp-panel-inner"><h4>Polimento</h4><p>Correção de hologramas e defeitos leves na pintura.</p></div>
       </div>
-      <div class="exp-panel">
+      <div class="exp-panel" data-img="assets/img/skill-vitrificacao.jpg" data-title="Vitrificação">
         <div class="exp-panel-media" style="background-image:url('assets/img/skill-vitrificacao.jpg');background-size:cover;background-position:center 45%;"></div>
         <span class="num">03</span>
         <div class="exp-panel-inner"><h4>Vitrificação</h4><p>Aplicação de coating cerâmico CarPro passo a passo.</p></div>
       </div>
-      <div class="exp-panel">
+      <div class="exp-panel" data-img="assets/img/skill-rodas.jpg" data-title="Rodas & vidros">
         <div class="exp-panel-media" style="background-image:url('assets/img/skill-rodas.jpg');background-size:cover;background-position:center 30%;"></div>
         <span class="num">04</span>
         <div class="exp-panel-inner"><h4>Rodas &amp; vidros</h4><p>Proteção e repelente de água nos detalhes que fazem diferença.</p></div>
       </div>
-      <div class="exp-panel">
+      <div class="exp-panel" data-img="assets/img/skill-interior.jpg" data-title="Interior">
         <div class="exp-panel-media" style="background-image:url('assets/img/skill-interior.jpg');background-size:cover;background-position:center 55%;"></div>
         <span class="num">05</span>
         <div class="exp-panel-inner"><h4>Interior</h4><p>Couro, plástico e acabamento com o mesmo padrão South Car.</p></div>
@@ -1053,6 +1059,13 @@ footer{background:#05080f;padding:60px 0 28px;}
   </div>
 </footer>
 
+
+<!-- LIGHTBOX (mobile: toca na foto pra ampliar) -->
+<div class="exp-lightbox" id="expLightbox">
+  <button class="exp-lightbox-close" id="expLightboxClose" aria-label="Fechar">&times;</button>
+  <img id="expLightboxImg" src="" alt="">
+  <div class="exp-lightbox-title" id="expLightboxTitle"></div>
+</div>
 
 <!-- CART DRAWER -->
 <div class="cart-overlay" id="cartOverlay"></div>
@@ -1400,6 +1413,34 @@ if (trainBuyBtn) {
     var dt = now - lastT;
     if (dt > 0) velocity = (e.pageX - lastX) / dt * 16;
     lastX = e.pageX; lastT = now;
+  });
+})();
+
+(function(){
+  var lightbox = document.getElementById('expLightbox');
+  var lbImg = document.getElementById('expLightboxImg');
+  var lbTitle = document.getElementById('expLightboxTitle');
+  var lbClose = document.getElementById('expLightboxClose');
+  if (!lightbox) return;
+  function isMobile(){ return window.matchMedia('(max-width:800px)').matches; }
+  function openLightbox(src, title){
+    lbImg.src = src;
+    lbImg.alt = title;
+    lbTitle.textContent = title;
+    lightbox.classList.add('open');
+  }
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+  }
+  document.querySelectorAll('.exp-panel').forEach(function(panel){
+    panel.addEventListener('click', function(e){
+      if (!isMobile()) return;
+      openLightbox(panel.dataset.img, panel.dataset.title || '');
+    });
+  });
+  lbClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', function(e){
+    if (e.target === lightbox) closeLightbox();
   });
 })();
 
