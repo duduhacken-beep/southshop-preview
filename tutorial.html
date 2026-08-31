@@ -678,7 +678,7 @@ footer{background:#05080f;padding:60px 0 28px;}
       <h4>CarPro CQuartz UK 3.0 — Vitrificador de Pintura</h4>
       <div class="price">R$ 429,90</div>
     </div>
-    <a href="product.html" class="btn btn-outline" style="white-space:nowrap;">Ver produto</a>
+    <a href="javascript:void(0)" class="btn btn-outline" style="white-space:nowrap;opacity:.5;pointer-events:none;cursor:not-allowed;" aria-disabled="true" tabindex="-1">Ver produto</a>
   </div>
 
   <h2>1. Preparação da superfície</h2>
@@ -716,7 +716,7 @@ footer{background:#05080f;padding:60px 0 28px;}
     <div class="sec-head reveal">
       <h2 class="serif">Comprar por categoria</h2>
       <div class="head-right">
-        <a href="categoria.html" class="pill" style="display:inline-block;">Ver tudo</a>
+        <a href="javascript:void(0)" class="pill" aria-disabled="true" tabindex="-1" style="display:inline-block;opacity:.5;pointer-events:none;cursor:not-allowed;">Ver tudo</a>
         <div class="arrows"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
       </div>
     </div>
@@ -743,7 +743,7 @@ footer{background:#05080f;padding:60px 0 28px;}
         <img class="logo-img footer-logo-img" src="assets/img/logo.png" alt="South Car Exclusive · CarPro">
         <p style="color:var(--muted);font-size:13px;line-height:1.65;max-width:280px;">Curadoria oficial CarPro pela South Car Exclusive. Estética automotiva premium, sem meio-termo.</p>
       </div>
-      <div><h4>Catálogo</h4><ul><li><a href="#">Descontaminação</a></li><li><a href="categoria.html">Vitrificação</a></li><li><a href="#">Polimento</a></li><li><a href="#">Manutenção</a></li><li><a href="#">Kits</a></li></ul></div>
+      <div><h4>Catálogo</h4><ul><li><a href="#">Descontaminação</a></li><li><a href="javascript:void(0)" aria-disabled="true" tabindex="-1" style="opacity:.5;pointer-events:none;cursor:not-allowed;">Vitrificação</a></li><li><a href="#">Polimento</a></li><li><a href="#">Manutenção</a></li><li><a href="#">Kits</a></li></ul></div>
       <div><h4>Ajuda</h4><ul><li><a href="trocas-devolucoes.html">Trocas e devoluções</a></li><li><a href="prazo-entrega.html">Prazo de entrega</a></li><li><a href="formas-pagamento.html">Formas de pagamento</a></li><li><a href="fale-conosco.html">Fale conosco</a></li></ul></div>
       <div><h4>South Car</h4><ul><li><a href="sobre.html">South Car Exclusive</a></li><li><a href="https://www.instagram.com/southcarservice/" target="_blank" rel="noopener">@southcarservice</a></li><li><a href="sobre.html">Porsche Cup Brasil</a></li></ul></div>
     </div>
@@ -824,10 +824,10 @@ if(searchIconBtn){
   document.getElementById('searchForm').addEventListener('submit', (e)=>{
     e.preventDefault();
     const q = document.getElementById('searchInput').value.trim();
-    window.location.href = 'categoria.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+    closeSearch(); showToast('Catálogo completo chega em breve — fique de olho! 👀');
   });
   document.querySelectorAll('.search-suggest-chip').forEach(c=>{
-    c.addEventListener('click', ()=>{ window.location.href = 'categoria.html?q=' + encodeURIComponent(c.dataset.q); });
+    c.addEventListener('click', ()=>{ closeSearch(); showToast('Catálogo completo chega em breve — fique de olho! 👀'); });
   });
 }
 
