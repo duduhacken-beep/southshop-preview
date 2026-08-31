@@ -191,6 +191,8 @@ nav.links a.nav-locked{opacity:.4;pointer-events:none;cursor:not-allowed;}
 .feature{position:relative;border-radius:3px;overflow:hidden;border:1px solid var(--line);padding:64px 48px;background:linear-gradient(115deg,#0c1424,#132339 60%,#080d16);}
 .feature::after{content:'';position:absolute;inset:0;background:radial-gradient(60% 100% at 85% 50%,rgba(58,95,176,.14),transparent 60%);}
 .feature-inner{position:relative;z-index:2;max-width:520px;}
+.feature-photo{background-size:cover;background-position:center 65%;}
+.feature-photo::after{background:linear-gradient(100deg,rgba(5,8,15,.96) 0%,rgba(5,8,15,.9) 38%,rgba(5,8,15,.55) 68%,rgba(5,8,15,.25) 100%);}
 .feature-logo-mark{position:absolute;right:-30px;bottom:-16px;width:300px;max-width:42%;opacity:.14;z-index:1;pointer-events:none;user-select:none;}
 @media(max-width:700px){.feature-logo-mark{width:190px;bottom:-8px;right:-16px;}}
 .feature h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(30px,4vw,52px);text-transform:uppercase;line-height:.98;color:var(--blue-2);}
@@ -619,7 +621,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 <!-- TREINAMENTO EM DESTAQUE (era "Mais vendidos") -->
 <section class="sec" id="best">
   <div class="wrap">
-    <div class="feature reveal" style="background:linear-gradient(115deg,#0c1424,#132339 60%,#080d16);">
+    <div class="feature feature-photo reveal" style="background-image:url('assets/img/complexo-south-fachada.jpg');">
       <div class="feature-inner">
         <div class="eyebrow">Primeiro lançamento · Vagas abertas</div>
         <h3>Treinamento Presencial South Car</h3>
