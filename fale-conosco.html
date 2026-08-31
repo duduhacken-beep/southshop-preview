@@ -769,21 +769,6 @@ footer{background:#05080f;padding:60px 0 28px;}
   </div>
 </div>
 
-<!-- SHOP BY CATEGORY -->
-<!-- SHOP BY CATEGORY -->
-<section class="sec" id="cat">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <h2 class="serif">Comprar por categoria</h2>
-      <div class="head-right">
-        <a href="javascript:void(0)" class="pill" style="display:inline-block;" onclick="openLeadModal('Catálogo completo','O catálogo completo está a caminho','Deixe seu e-mail e a gente avisa assim que todas as categorias abrirem pra venda.')">Ver tudo</a>
-        <div class="arrows"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
-      </div>
-    </div>
-    <div class="cat-strip reveal" id="catStrip"></div>
-  </div>
-</section>
-
 <!-- SUPPORT -->
 <section class="sec" style="padding-bottom:0;">
   <div class="wrap support reveal">
@@ -1026,66 +1011,6 @@ document.getElementById('cartCheckoutBtn').addEventListener('click', ()=>{
 renderCart();
 
 
-const CATS = [
-  {n:'Treinamentos', href:'treinamento.html', img:'assets/img/cat-treinamentos.jpg', locked:false},
-  {n:'Cursos', href:'tutoriais.html', img:'assets/img/cat-cursos.jpg', locked:true},
-  {n:'Vitrificação', href:'categoria.html', img:'assets/img/cat-vitrificacao.jpg', locked:true},{n:'Polimento', href:'#', img:'assets/img/cat-polimento.jpg', locked:true},{n:'Descontaminação', href:'#', img:'assets/img/cat-descontaminacao.jpg', locked:true},{n:'Manutenção', href:'#', img:'assets/img/cat-manutencao.jpg', locked:true},{n:'Rodas & Pneus', href:'#', img:'assets/img/cat-rodas-pneus.jpg', locked:true},{n:'Acessórios', href:'#', img:'assets/img/cat-acessorios.jpg', locked:true},
-  {n:'South Leather', href:'#', img:'assets/img/cat-south-leather.jpg', locked:true},
-  {n:'Kits', href:'#', img:'assets/img/cat-kits.jpg', locked:true}
-];
-const hex = '<svg class="hexmark" viewBox="0 0 24 26" fill="none" stroke="#7b9de0" stroke-width="1.2"><path d="M12 1 L23 7.5 L23 19.5 L12 26 L1 19.5 L1 7.5 Z"/></svg>';
-const lockIcon = '<div class="cat-lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>';
-document.getElementById('catStrip').innerHTML = CATS.map(c=>`
-  <a href="${c.locked?'javascript:void(0)':c.href}" class="cat${c.locked?' cat-locked':''}"${c.locked?' aria-disabled="true" tabindex="-1"':''}><div class="cat-img">${c.img?`<img src="${c.img}" alt="${c.n}">`:''}</div>${c.img?'':hex}${c.locked?lockIcon:''}<span>${c.n}</span>${c.locked?'<em class="soon-badge">Em breve</em>':''}</a>
-`).join('');
-(function(){
-  var strip = document.getElementById('catStrip');
-  var arrowsWrap = document.querySelector('#cat .arrows');
-  if (arrowsWrap) {
-    var arrowBtns = arrowsWrap.querySelectorAll('.arrow');
-    if (arrowBtns[0]) arrowBtns[0].addEventListener('click', function(){ strip.scrollBy({left:-232, behavior:'smooth'}); });
-    if (arrowBtns[1]) arrowBtns[1].addEventListener('click', function(){ strip.scrollBy({left:232, behavior:'smooth'}); });
-  }
-  strip.addEventListener('dragstart', function(e){ e.preventDefault(); });
-  var isDown=false, startX=0, startScroll=0, moved=false;
-  var lastX=0, lastT=0, velocity=0, rafId=null, pendingX=null;
-  function applyScroll(){
-    if (pendingX !== null) { strip.scrollLeft = pendingX; pendingX = null; }
-    rafId = null;
-  }
-  function momentumStep(){
-    velocity *= 0.94;
-    if (Math.abs(velocity) < 0.3) return;
-    strip.scrollLeft -= velocity;
-    requestAnimationFrame(momentumStep);
-  }
-  strip.addEventListener('mousedown', function(e){
-    isDown=true; moved=false; velocity=0;
-    strip.classList.add('dragging');
-    startX=e.pageX; startScroll=strip.scrollLeft;
-    lastX=e.pageX; lastT=performance.now();
-  });
-  window.addEventListener('mouseup', function(){
-    if (!isDown) return;
-    isDown=false; strip.classList.remove('dragging');
-    if (Math.abs(velocity) > 0.5) requestAnimationFrame(momentumStep);
-  });
-  window.addEventListener('mousemove', function(e){
-    if(!isDown) return;
-    e.preventDefault();
-    var dx = e.pageX - startX;
-    if (Math.abs(dx) > 4) moved = true;
-    pendingX = startScroll - dx;
-    if (rafId === null) rafId = requestAnimationFrame(applyScroll);
-    var now = performance.now();
-    var dt = now - lastT;
-    if (dt > 0) velocity = (e.pageX - lastX) / dt * 16;
-    lastX = e.pageX; lastT = now;
-  });
-  strip.querySelectorAll('a.cat').forEach(function(a){
-    a.addEventListener('click', function(e){ if (moved) e.preventDefault(); });
-  });
-})();
 
 // contact form (stub — sem backend real ainda)
 document.getElementById('contactForm').addEventListener('submit', function(e){
