@@ -1051,7 +1051,7 @@ document.querySelectorAll('.course-cover').forEach(c=>{
   c.addEventListener('click',()=>alert('Em breve — a Academia South Car ainda está a caminho.'));
 });
 
-// LEAD CAPTURE — teasers CarPro / South Leather (envia via FormSubmit para gestao.southshop@gmail.com,
+// LEAD CAPTURE — teasers CarPro / South Leather (envia via FormSubmit para contato@southshop.com.br,
 // sem backend próprio; troca por app nativo de captura quando migrar pra Nuvemshop / agente de leads).
 document.querySelectorAll('.lead-form').forEach(function(form){
   var line = form.dataset.line;
@@ -1067,7 +1067,7 @@ document.querySelectorAll('.lead-form').forEach(function(form){
     btn.disabled = true;
     var originalLabel = btn.textContent;
     btn.textContent = 'Enviando...';
-    fetch('https://formsubmit.co/ajax/gestao.southshop@gmail.com', {
+    fetch('https://formsubmit.co/ajax/contato@southshop.com.br', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
