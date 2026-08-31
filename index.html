@@ -487,6 +487,16 @@ footer{background:#05080f;padding:60px 0 28px;}
 .cart-shipping-opt .days{color:var(--muted-2);font-size:11.5px;}
 .cart-shipping-opt .price{color:var(--blue-2);font-family:'Barlow Condensed',sans-serif;font-size:14px;white-space:nowrap;}
 .cart-shipping-disclaimer{font-size:10.5px;color:var(--muted-2);margin-top:10px;line-height:1.5;}
+.lead-form{display:flex;gap:8px;margin-top:12px;max-width:380px;flex-wrap:wrap;}
+.lead-input{flex:1;min-width:170px;background:var(--panel);border:1px solid var(--line-2);color:var(--white);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:13.5px;border-radius:1px;}
+.lead-input::placeholder{color:var(--muted-2);}
+.lead-input:focus{outline:none;border-color:var(--blue-2);}
+.lead-submit.btn-solid{padding:11px 20px;font-size:12px;letter-spacing:.08em;white-space:nowrap;}
+.lead-submit.btn-solid:disabled{opacity:.5;cursor:not-allowed;}
+.lead-honey{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+.lead-msg{margin-top:9px;font-family:'Barlow Condensed',sans-serif;font-size:12.5px;letter-spacing:.03em;color:var(--blue-2);display:none;}
+.lead-msg.show{display:block;}
+.lead-msg.is-error{color:#e0837e;}
 </style>
 </head>
 <body>
@@ -596,7 +606,12 @@ footer{background:#05080f;padding:60px 0 28px;}
         <div class="eyebrow">Linha CarPro · Em breve</div>
         <h2 class="cond">Uma linha oficial está chegando</h2>
         <p>Anos de aplicação profissional em Balneário Camboriú viraram uma curadoria que a South Car está prestes a abrir pro público. Os detalhes a gente ainda guarda.</p>
-        <a href="https://wa.me/554732241691?text=Oi%21%20Quero%20ser%20avisado%20quando%20a%20linha%20oficial%20CarPro%20lan%C3%A7ar%20no%20South%20Shop." target="_blank" rel="noopener" class="pill" style="display:inline-flex;align-items:center;gap:7px;width:max-content;margin-top:6px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>Avise-me quando lançar</a>
+        <form class="lead-form" data-line="CarPro Oficial">
+          <input type="email" name="email" class="lead-input" placeholder="seu@email.com" required autocomplete="email">
+          <button type="submit" class="btn btn-solid lead-submit">Avisar</button>
+          <input type="text" name="_honey" class="lead-honey" tabindex="-1" autocomplete="off">
+        </form>
+        <p class="lead-msg"></p>
       </div>
     </div>
   </div>
@@ -613,7 +628,12 @@ footer{background:#05080f;padding:60px 0 28px;}
         <div class="eyebrow">South Leather · Em breve</div>
         <h2 class="cond">Uma linha própria está sendo criada</h2>
         <p>Anos restaurando couro e bancos em oficina viraram uma fórmula própria da South Car. Ainda não é hora de contar os detalhes.</p>
-        <a href="https://wa.me/554732241691?text=Oi%21%20Quero%20ser%20avisado%20quando%20a%20South%20Leather%20lan%C3%A7ar." target="_blank" rel="noopener" class="pill" style="display:inline-flex;align-items:center;gap:7px;width:max-content;margin-top:6px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>Avise-me quando lançar</a>
+        <form class="lead-form" data-line="South Leather">
+          <input type="email" name="email" class="lead-input" placeholder="seu@email.com" required autocomplete="email">
+          <button type="submit" class="btn btn-solid lead-submit">Avisar</button>
+          <input type="text" name="_honey" class="lead-honey" tabindex="-1" autocomplete="off">
+        </form>
+        <p class="lead-msg"></p>
       </div>
     </div>
   </div>
@@ -1029,6 +1049,44 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 document.querySelector('.burger').addEventListener('click',()=>alert('Menu mobile abre aqui no tema final.'));
 document.querySelectorAll('.course-cover').forEach(c=>{
   c.addEventListener('click',()=>alert('Em breve — a Academia South Car ainda está a caminho.'));
+});
+
+// LEAD CAPTURE — teasers CarPro / South Leather (envia via FormSubmit para gestao.southshop@gmail.com,
+// sem backend próprio; troca por app nativo de captura quando migrar pra Nuvemshop / agente de leads).
+document.querySelectorAll('.lead-form').forEach(function(form){
+  var line = form.dataset.line;
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var input = form.querySelector('.lead-input');
+    var btn = form.querySelector('.lead-submit');
+    var msg = form.nextElementSibling;
+    var honey = form.querySelector('.lead-honey');
+    if (honey && honey.value) return; // honeypot — provável bot, ignora silenciosamente
+    var email = input.value.trim();
+    if (!email) return;
+    btn.disabled = true;
+    var originalLabel = btn.textContent;
+    btn.textContent = 'Enviando...';
+    fetch('https://formsubmit.co/ajax/gestao.southshop@gmail.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        linha_de_interesse: line,
+        _subject: 'Novo interesse — ' + line + ' (South Shop)'
+      })
+    }).then(function(res){
+      if (!res.ok) throw new Error('request failed');
+      form.style.display = 'none';
+      msg.textContent = 'Prontinho — avisamos você em ' + email + ' assim que lançar.';
+      msg.classList.add('show');
+    }).catch(function(){
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+      msg.textContent = 'Não deu pra enviar agora. Tenta de novo em instantes.';
+      msg.classList.add('show', 'is-error');
+    });
+  });
 });
 </script>
 </body>
