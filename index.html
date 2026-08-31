@@ -348,9 +348,12 @@ footer{background:#05080f;padding:60px 0 28px;}
 .train-banner-body h2{font-size:clamp(20px,2.4vw,28px);line-height:1.12;text-transform:uppercase;font-weight:700;color:var(--white);}
 .train-banner-body p{color:var(--muted);font-size:13.5px;line-height:1.55;max-width:400px;}
 .train-banner-btn{width:max-content;margin-top:6px;}
+.train-banner-portrait.badge-mode{aspect-ratio:auto;width:220px;height:auto;}
+.train-banner-portrait.badge-mode img{border-radius:8px;object-fit:contain;box-shadow:0 10px 30px rgba(0,0,0,.35);}
 @media(max-width:760px){
   .train-banner{aspect-ratio:auto;min-height:auto;display:block;padding-top:24px;}
   .train-banner-portrait{position:relative;right:auto;top:auto;transform:none;height:150px;margin:0 auto 8px;display:block;}
+  .train-banner-portrait.badge-mode{width:170px;height:auto;}
   .train-banner:hover .train-banner-portrait{transform:none;}
   .train-banner-body{position:relative;padding:0 20px 30px;max-width:none;height:auto;}
 }
@@ -576,13 +579,34 @@ footer{background:#05080f;padding:60px 0 28px;}
 <!-- FEATURE BANNER — TEASER CARPRO (linha secundaria, em breve) -->
 <section class="sec" style="padding-top:0;">
   <div class="wrap">
-    <div class="feature reveal">
-      <img class="feature-logo-badge" src="assets/img/carpro-logo-badge.png" alt="CarPro">
-      <div class="feature-inner">
+    <div class="train-banner reveal" style="cursor:default;">
+      <div class="train-banner-portrait badge-mode">
+        <div class="train-banner-glow"></div>
+        <img src="assets/img/carpro-logo-badge.png" alt="CarPro">
+      </div>
+      <div class="train-banner-body">
         <div class="eyebrow">Linha CarPro · Em breve</div>
-        <h3 style="color:var(--white);">Uma linha oficial está chegando</h3>
+        <h2 class="cond">Uma linha oficial está chegando</h2>
         <p>Anos de aplicação profissional em Balneário Camboriú viraram uma curadoria que a South Car está prestes a abrir pro público. Os detalhes a gente ainda guarda.</p>
-        <div class="pill" style="display:inline-block;cursor:default;">Em breve</div>
+        <div class="pill" style="display:inline-block;width:max-content;margin-top:6px;cursor:default;">Em breve</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEASER SOUTH LEATHER (linha principal, em breve) -->
+<section class="sec" style="padding-top:0;">
+  <div class="wrap">
+    <div class="train-banner reveal" style="cursor:default;">
+      <div class="train-banner-portrait">
+        <div class="train-banner-glow"></div>
+        <img src="assets/img/south-leather-textura.jpg" alt="South Leather">
+      </div>
+      <div class="train-banner-body">
+        <div class="eyebrow">South Leather · Em breve</div>
+        <h2 class="cond">Uma linha própria está sendo criada</h2>
+        <p>Anos restaurando couro e bancos em oficina viraram uma fórmula própria da South Car. Ainda não é hora de contar os detalhes.</p>
+        <div class="pill" style="display:inline-block;width:max-content;margin-top:6px;cursor:default;">Em breve</div>
       </div>
     </div>
   </div>
@@ -629,20 +653,6 @@ footer{background:#05080f;padding:60px 0 28px;}
         <h3 style="color:var(--white);">Treinamento Presencial South Car</h3>
         <p style="color:rgba(244,246,249,.85);">Um dia inteiro de bancada com o Marcão, do zero à aplicação profissional — turmas de até 5 pessoas, atenção individual garantida. É o primeiro produto que a South Car está abrindo ao público.</p>
         <a href="treinamento.html" class="btn btn-solid">Garantir minha vaga</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURE 2 — TEASER SOUTH LEATHER (linha principal, em breve) -->
-<section class="sec" style="padding-top:0;">
-  <div class="wrap">
-    <div class="feature reveal" style="background:linear-gradient(115deg,#0c1424,#132339 60%,#080d16);text-align:center;padding:64px 32px;">
-      <div class="feature-inner" style="max-width:640px;margin:0 auto;">
-        <div class="eyebrow">South Leather · Em breve</div>
-        <h3 style="color:var(--white);">Uma linha própria está sendo criada</h3>
-        <p style="margin:14px auto 22px;">Anos restaurando couro e bancos em oficina viraram uma fórmula própria da South Car. Ainda não é hora de contar os detalhes.</p>
-        <div class="pill" style="display:inline-block;cursor:default;">Em breve</div>
       </div>
     </div>
   </div>
