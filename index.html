@@ -191,10 +191,10 @@ nav.links a.nav-locked{opacity:.4;pointer-events:none;cursor:not-allowed;}
 .feature{position:relative;border-radius:3px;overflow:hidden;border:1px solid var(--line);padding:64px 48px;background:linear-gradient(115deg,#0c1424,#132339 60%,#080d16);}
 .feature::after{content:'';position:absolute;inset:0;background:radial-gradient(60% 100% at 85% 50%,rgba(58,95,176,.14),transparent 60%);}
 .feature-inner{position:relative;z-index:2;max-width:520px;}
-.feature-photo{background-size:cover;background-position:center;}
+.feature-photo{background-size:cover;background-position:center;box-shadow:inset 0 0 90px 30px rgba(5,8,15,.7);}
 .feature-photo::after{background:linear-gradient(100deg,rgba(5,8,15,.96) 0%,rgba(5,8,15,.9) 38%,rgba(5,8,15,.55) 68%,rgba(5,8,15,.25) 100%);}
-.feature-logo-mark{position:absolute;right:40px;top:50%;transform:translateY(-50%);width:260px;max-width:36%;opacity:.22;z-index:1;pointer-events:none;user-select:none;}
-@media(max-width:700px){.feature-logo-mark{width:150px;right:20px;}}
+.feature-logo-badge{position:absolute;right:40px;top:50%;transform:translateY(-50%);width:230px;max-width:34%;z-index:1;pointer-events:none;user-select:none;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.35);}
+@media(max-width:700px){.feature-logo-badge{width:130px;right:20px;}}
 .feature h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(30px,4vw,52px);text-transform:uppercase;line-height:.98;color:var(--blue-2);}
 .feature p{color:var(--muted);margin:14px 0 22px;font-size:15px;max-width:400px;}
 
@@ -575,7 +575,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 <section class="sec" style="padding-top:0;">
   <div class="wrap">
     <div class="feature reveal">
-      <img class="feature-logo-mark" src="assets/img/carpro-logo-mark.png" alt="">
+      <img class="feature-logo-badge" src="assets/img/carpro-logo-badge.png" alt="CarPro">
       <div class="feature-inner">
         <div class="eyebrow">Linha CarPro · Em breve</div>
         <h3 style="color:var(--white);">Uma linha oficial está chegando</h3>
