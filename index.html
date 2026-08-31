@@ -157,8 +157,8 @@ nav.links a:hover{color:var(--white);}
 .cat-strip.dragging{cursor:grabbing;}
 .cat-strip .cat{flex:0 0 200px;}
 .cat-strip .cat-img img{-webkit-user-drag:none;user-drag:none;-moz-user-drag:none;pointer-events:none;}
-@media(max-width:900px){.cat-strip .cat{flex:0 0 160px;}}
-@media(max-width:560px){.cat-strip .cat{flex:0 0 132px;}}
+@media(max-width:900px){.cat-strip .cat{flex:0 0 190px;}}
+@media(max-width:560px){.cat-strip .cat{flex:0 0 172px;}}
 .cat{display:block;position:relative;aspect-ratio:3/4;border-radius:2px;overflow:hidden;cursor:pointer;border:1px solid var(--line);}
 .cat-img{position:absolute;inset:0;background:linear-gradient(155deg,#0f1a2e,#182a44);transition:transform .5s ease;}
 .cat-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;}
@@ -300,8 +300,8 @@ nav.links a.nav-locked{opacity:.4;pointer-events:none;cursor:not-allowed;}
 .council{display:grid;grid-template-columns:1fr 1.2fr;gap:48px;align-items:center;}
 @media(max-width:800px){.council{grid-template-columns:1fr;}}
 .council h2{font-family:'Barlow',system-ui,sans-serif;font-size:32px;font-weight:600;line-height:1.1;}
-.council-faces{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-@media(max-width:560px){.council-faces{grid-template-columns:repeat(2,1fr);}}
+.council-faces{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:420px;}
+@media(max-width:560px){.council-faces{grid-template-columns:repeat(3,1fr);gap:10px;max-width:none;}}
 .face{text-align:center;}
 .face-img{aspect-ratio:1/1;border-radius:50%;border:1px solid var(--line-2);background:linear-gradient(150deg,#101a2e,#1a2c48);margin-bottom:10px;}
 .face b{display:block;font-size:14px;}
@@ -350,6 +350,11 @@ footer{background:#05080f;padding:60px 0 28px;}
 .train-banner-btn{width:max-content;margin-top:6px;}
 .train-banner-portrait.badge-mode{aspect-ratio:auto;width:220px;height:auto;}
 .train-banner-portrait.badge-mode img{border-radius:8px;object-fit:contain;box-shadow:0 10px 30px rgba(0,0,0,.35);}
+.train-banner-portrait.square-mode img{border-radius:0;object-fit:cover;}
+@media(min-width:761px){
+  .train-banner-portrait.square-mode{right:0;top:0;height:100%;transform:none;}
+  .train-banner:hover .train-banner-portrait.square-mode{transform:none;}
+}
 @media(max-width:760px){
   .train-banner{aspect-ratio:auto;min-height:auto;display:block;padding-top:24px;}
   .train-banner-portrait{position:relative;right:auto;top:auto;transform:none;height:150px;margin:0 auto 8px;display:block;}
@@ -598,8 +603,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 <section class="sec" style="padding-top:0;">
   <div class="wrap">
     <div class="train-banner reveal" style="cursor:default;">
-      <div class="train-banner-portrait">
-        <div class="train-banner-glow"></div>
+      <div class="train-banner-portrait square-mode">
         <img src="assets/img/south-leather-textura.jpg" alt="South Leather">
       </div>
       <div class="train-banner-body">
@@ -685,21 +689,9 @@ footer{background:#05080f;padding:60px 0 28px;}
       <div class="council-faces">
         <div class="face"><div class="face-img"></div><b>Alan</b><span>Comercial</span></div>
         <div class="face"><div class="face-img"></div><b>Marcão</b><span>Instrutor</span></div>
-        <div class="face"><div class="face-img"></div><b>South Car</b><span>Aplicação</span></div>
-        <div class="face"><div class="face-img"></div><b>CarPro</b><span>Oficial</span></div>
+        <div class="face"><div class="face-img"></div><b>Eduardo</b><span>CEO</span></div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ACADEMIA (courses, future) -->
-<section class="sec" style="padding-top:0;">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <div><div class="eyebrow">Academia South Car</div><h2 class="serif">Aprenda com quem aplica todo dia</h2></div>
-      <div class="head-right"><div class="pill" style="cursor:default;">Em breve</div></div>
-    </div>
-    <div class="course-grid reveal" id="courseGrid"></div>
   </div>
 </section>
 
@@ -1023,32 +1015,6 @@ const ARTS = [
 ];
 const rcardArt = a => a.map(x=>`<a href="artigo.html?a=${x.slug}" class="rcard"><div class="rcard-media"></div><div class="rcard-body"><div class="rcard-tag">${x.tag}</div><div class="rcard-title">${x.title}</div></div></a>`).join('');
 document.getElementById('artRow').innerHTML = rcardArt(ARTS);
-
-const lockSvg = `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
-const COURSES = [
-  {tag:'Vitrificação', title:'Vitrificação Cerâmica na Prática', lessons:'8 aulas', dur:'1h20', price:'R$ 197'},
-  {tag:'Descontaminação', title:'Preparação e Descontaminação de Pintura', lessons:'5 aulas', dur:'45min', price:'R$ 97'},
-  {tag:'Polimento', title:'Correção de Pintura: Polimento Passo a Passo', lessons:'9 aulas', dur:'1h45', price:'R$ 227'},
-  {tag:'Interior', title:'Detalhamento de Interior Profissional', lessons:'6 aulas', dur:'55min', price:'R$ 127'},
-];
-document.getElementById('courseGrid').innerHTML = COURSES.map(c=>`
-  <div class="course-card">
-    <div class="course-cover">
-      <div class="blur-bg"></div>
-      <span class="badge">Em breve</span>
-      <div class="course-overlay">
-        <div class="course-lock">${lockSvg}</div>
-        <div class="course-buy">Em breve</div>
-      </div>
-      <div class="course-duration">${c.dur}</div>
-    </div>
-    <div class="course-body">
-      <div class="course-tag">${c.tag}</div>
-      <div class="course-title">${c.title}</div>
-      <div class="course-foot"><span class="course-price">${c.price}</span><span class="course-lessons">${c.lessons}</span></div>
-    </div>
-  </div>
-`).join('');
 
 // hero carousel — transição suave, avança sozinho, dots clicáveis
 const heroSlides = document.querySelectorAll('.hero-slide');
