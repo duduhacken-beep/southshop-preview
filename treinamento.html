@@ -136,7 +136,10 @@ nav.links a:hover{color:var(--white);}
 .cat-lock{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:rgba(5,8,15,.55);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;z-index:2;}
 .cat-lock svg{width:18px;height:18px;stroke:#e7e9ee;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
 .cat .soon-badge{position:absolute;top:10px;right:10px;z-index:3;background:rgba(5,8,15,.75);color:#e7e9ee;font-family:'Barlow Condensed',sans-serif;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-style:normal;padding:4px 8px;border-radius:2px;border:1px solid rgba(255,255,255,.25);}
-nav.links a.nav-locked{opacity:.4;pointer-events:none;cursor:not-allowed;}
+nav.links a.nav-locked{opacity:.5;pointer-events:none;cursor:not-allowed;display:inline-flex;align-items:center;gap:4px;}
+.nav-lock-ic{width:11px;height:11px;flex-shrink:0;opacity:.85;}
+.foot-legal{margin-top:12px;font-size:11px;line-height:1.6;color:var(--muted-2);opacity:.7;}
+.foot-legal a{color:inherit;}
 
 /* ---------- SHOP QUADRANT ---------- */
 .quad{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;height:420px;}
@@ -813,10 +816,10 @@ footer{background:#05080f;padding:60px 0 28px;}
     <a href="index.html" class="logo-link"><img class="logo-img" src="assets/img/logo.png" alt="South Car Exclusive · CarPro"></a>
     <nav class="links">
       <a href="treinamento.html">Treinamentos</a>
-      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">CarPro</a>
-      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">South Leather</a>
-      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Kits</a>
-      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Academia South</a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">CarPro<svg class="nav-lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">South Leather<svg class="nav-lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Kits<svg class="nav-lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></a>
+      <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Academia South<svg class="nav-lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></a>
       <a href="blog.html">Blog</a>
       <a href="#">Dúvidas</a>
       <a href="sobre.html">Sobre</a>
@@ -1053,6 +1056,7 @@ footer{background:#05080f;padding:60px 0 28px;}
       <span>© 2026 South Shop · South Car Exclusive</span>
       <span><a href="privacidade.html">Política de privacidade</a> · <a href="termos.html">Termos de uso</a></span>
     </div>
+    <div class="foot-legal">South Shop · CNPJ 68.767.162/0001-93 · Av. do Estado D. Vieira, 4640, Centro, Balneário Camboriú/SC — CEP 88330-077 · <a href="https://wa.me/554732241691" target="_blank" rel="noopener">(47) 3224-1691</a></div>
   </div>
 </footer>
 
