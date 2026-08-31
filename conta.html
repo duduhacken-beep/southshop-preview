@@ -697,6 +697,24 @@ footer{background:#05080f;padding:60px 0 28px;}
 .cart-shipping-opt .days{color:var(--muted-2);font-size:11.5px;}
 .cart-shipping-opt .price{color:var(--blue-2);font-family:'Barlow Condensed',sans-serif;font-size:14px;white-space:nowrap;}
 .cart-shipping-disclaimer{font-size:10.5px;color:var(--muted-2);margin-top:10px;line-height:1.5;}
+
+/* LEAD MODAL — captura de interesse (categorias/produtos travados + buscas) */
+.lead-form{display:flex;gap:8px;margin-top:14px;max-width:380px;flex-wrap:wrap;}
+.lead-input{flex:1;min-width:170px;background:var(--panel);border:1px solid var(--line-2);color:var(--white);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:13.5px;border-radius:1px;}
+.lead-submit.btn-solid{padding:11px 20px;font-size:12px;letter-spacing:.08em;white-space:nowrap;}
+.lead-submit.btn-solid:disabled{opacity:.5;cursor:not-allowed;}
+.lead-honey{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+.lead-msg{margin-top:9px;font-family:'Barlow Condensed',sans-serif;font-size:12.5px;letter-spacing:.03em;color:var(--blue-2);display:none;}
+.lead-msg.show{display:block;}
+.lead-msg.is-error{color:#e0837e;}
+.lead-modal-overlay{position:fixed;inset:0;background:rgba(2,4,8,.75);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:198;}
+.lead-modal-overlay.open{opacity:1;pointer-events:auto;}
+.lead-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%);width:min(420px,88vw);background:#04070d;border:1px solid var(--line);border-radius:2px;padding:34px 30px 28px;opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:199;}
+.lead-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%);}
+.lead-modal-close{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--white);font-size:24px;cursor:pointer;line-height:1;opacity:.55;padding:4px;}
+.lead-modal-close:hover{opacity:1;}
+.lead-modal h3{font-size:23px;font-weight:600;line-height:1.28;margin:6px 0 8px;}
+.lead-modal-sub{color:var(--muted);font-size:13.5px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -789,7 +807,7 @@ footer{background:#05080f;padding:60px 0 28px;}
     <div class="sec-head reveal">
       <h2 class="serif">Comprar por categoria</h2>
       <div class="head-right">
-        <a href="javascript:void(0)" class="pill" aria-disabled="true" tabindex="-1" style="display:inline-block;opacity:.5;pointer-events:none;cursor:not-allowed;">Ver tudo</a>
+        <a href="javascript:void(0)" class="pill" style="display:inline-block;" onclick="openLeadModal('Catálogo completo','O catálogo completo está a caminho','Deixe seu e-mail e a gente avisa assim que todas as categorias abrirem pra venda.')">Ver tudo</a>
         <div class="arrows"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
       </div>
     </div>
@@ -816,7 +834,7 @@ footer{background:#05080f;padding:60px 0 28px;}
         <img class="logo-img footer-logo-img" src="assets/img/logo.png" alt="South Car Exclusive · CarPro">
         <p style="color:var(--muted);font-size:13px;line-height:1.65;max-width:280px;">Curadoria oficial CarPro pela South Car Exclusive. Estética automotiva premium, sem meio-termo.</p>
       </div>
-      <div><h4>Catálogo</h4><ul><li><a href="#">Descontaminação</a></li><li><a href="javascript:void(0)" aria-disabled="true" tabindex="-1" style="opacity:.5;pointer-events:none;cursor:not-allowed;">Vitrificação</a></li><li><a href="#">Polimento</a></li><li><a href="#">Manutenção</a></li><li><a href="#">Kits</a></li></ul></div>
+      <div><h4>Catálogo</h4><ul><li><a href="#">Descontaminação</a></li><li><a href="javascript:void(0)" onclick="openLeadModal('Vitrificação Cerâmica','Vitrificação Cerâmica está chegando','Deixe seu e-mail e a gente avisa assim que a linha CarPro abrir pra venda.')">Vitrificação</a></li><li><a href="#">Polimento</a></li><li><a href="#">Manutenção</a></li><li><a href="#">Kits</a></li></ul></div>
       <div><h4>Ajuda</h4><ul><li><a href="trocas-devolucoes.html">Trocas e devoluções</a></li><li><a href="prazo-entrega.html">Prazo de entrega</a></li><li><a href="formas-pagamento.html">Formas de pagamento</a></li><li><a href="fale-conosco.html">Fale conosco</a></li></ul></div>
       <div><h4>South Car</h4><ul><li><a href="sobre.html">South Car Exclusive</a></li><li><a href="https://www.instagram.com/southcarservice/" target="_blank" rel="noopener">@southcarservice</a></li><li><a href="sobre.html">Porsche Cup Brasil</a></li></ul></div>
     </div>
@@ -897,10 +915,11 @@ if(searchIconBtn){
   document.getElementById('searchForm').addEventListener('submit', (e)=>{
     e.preventDefault();
     const q = document.getElementById('searchInput').value.trim();
-    closeSearch(); showToast('Catálogo completo chega em breve — fique de olho! 👀');
+    closeSearch();
+    openLeadModal(q ? q : 'Catálogo completo', q ? ('Ainda não temos "' + q + '" — mas você será avisado(a)') : 'O catálogo completo está a caminho', 'Deixe seu e-mail e a gente avisa assim que abrir.');
   });
   document.querySelectorAll('.search-suggest-chip').forEach(c=>{
-    c.addEventListener('click', ()=>{ closeSearch(); showToast('Catálogo completo chega em breve — fique de olho! 👀'); });
+    c.addEventListener('click', ()=>{ var q=c.dataset.q; closeSearch(); openLeadModal(q, 'Ainda não temos "' + q + '" — mas você será avisado(a)', 'Deixe seu e-mail e a gente avisa assim que abrir.'); });
   });
 }
 
@@ -1128,6 +1147,86 @@ document.querySelectorAll('.track-copy').forEach(el=>{
 const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 document.querySelector('.burger').addEventListener('click',()=>alert('Menu mobile abre aqui no tema final.'));
+</script>
+<!-- LEAD MODAL — captura de interesse para categorias/produtos ainda travados -->
+<div class="lead-modal-overlay" id="leadModalOverlay"></div>
+<div class="lead-modal" id="leadModal" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+  <button type="button" class="lead-modal-close" id="leadModalClose" aria-label="Fechar">&times;</button>
+  <div class="eyebrow" id="leadModalEyebrow">Em breve</div>
+  <h3 class="serif" id="leadModalTitle">Ainda não chegou — mas você pode ser o primeiro a saber</h3>
+  <p class="lead-modal-sub" id="leadModalSub">Deixe seu e-mail e a gente avisa assim que abrir.</p>
+  <form class="lead-form" data-line="" id="leadModalForm">
+    <input type="email" name="email" class="lead-input" placeholder="seu@email.com" required autocomplete="email">
+    <button type="submit" class="btn btn-solid lead-submit">Avisar</button>
+    <input type="text" name="_honey" class="lead-honey" tabindex="-1" autocomplete="off">
+  </form>
+  <p class="lead-msg"></p>
+</div>
+<script>
+// LEAD MODAL — abre/fecha e contextualiza (categoria, produto ou termo buscado)
+(function(){
+  var overlay = document.getElementById('leadModalOverlay');
+  var modal = document.getElementById('leadModal');
+  var form = document.getElementById('leadModalForm');
+  if(overlay && modal && form){
+    window.openLeadModal = function(line, title, sub){
+      form.dataset.line = line || 'Catálogo geral';
+      document.getElementById('leadModalEyebrow').textContent = line || 'Em breve';
+      document.getElementById('leadModalTitle').textContent = title || 'Ainda não chegou — mas você pode ser o primeiro a saber';
+      document.getElementById('leadModalSub').textContent = sub || 'Deixe seu e-mail e a gente avisa assim que abrir.';
+      form.style.display = '';
+      form.reset();
+      var btn = form.querySelector('.lead-submit'); btn.disabled = false; btn.textContent = 'Avisar';
+      var msg = form.nextElementSibling; msg.textContent=''; msg.classList.remove('show','is-error');
+      overlay.classList.add('open'); modal.classList.add('open');
+      setTimeout(function(){ var i = form.querySelector('.lead-input'); if(i) i.focus(); }, 200);
+    };
+    function closeLeadModal(){ overlay.classList.remove('open'); modal.classList.remove('open'); }
+    window.closeLeadModal = closeLeadModal;
+    overlay.addEventListener('click', closeLeadModal);
+    var closeBtn = document.getElementById('leadModalClose');
+    if(closeBtn) closeBtn.addEventListener('click', closeLeadModal);
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLeadModal(); });
+  }
+})();
+
+// LEAD CAPTURE — envio de todo .lead-form (teasers estaticos + modal dinamico) via FormSubmit,
+// sem backend proprio; troca por app nativo de captura quando migrar pra Nuvemshop / agente de leads.
+document.querySelectorAll('.lead-form').forEach(function(form){
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var line = form.dataset.line || 'Catálogo geral';
+    var input = form.querySelector('.lead-input');
+    var btn = form.querySelector('.lead-submit');
+    var msg = form.nextElementSibling;
+    var honey = form.querySelector('.lead-honey');
+    if (honey && honey.value) return;
+    var email = input.value.trim();
+    if (!email) return;
+    btn.disabled = true;
+    var originalLabel = btn.textContent;
+    btn.textContent = 'Enviando...';
+    fetch('https://formsubmit.co/ajax/contato@southshop.com.br', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        linha_de_interesse: line,
+        _subject: 'Novo interesse — ' + line + ' (South Shop)'
+      })
+    }).then(function(res){
+      if (!res.ok) throw new Error('request failed');
+      form.style.display = 'none';
+      msg.textContent = 'Prontinho — avisamos você em ' + email + ' assim que lançar.';
+      msg.classList.add('show');
+    }).catch(function(){
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+      msg.textContent = 'Não deu pra enviar agora. Tenta de novo em instantes.';
+      msg.classList.add('show', 'is-error');
+    });
+  });
+});
 </script>
 </body>
 </html>
