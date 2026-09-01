@@ -668,7 +668,17 @@ footer{background:#05080f;padding:60px 0 28px;}
 .lead-modal-close{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--white);font-size:24px;cursor:pointer;line-height:1;opacity:.55;padding:4px;}
 .lead-modal-close:hover{opacity:1;}
 .lead-modal h3{font-size:23px;font-weight:600;line-height:1.28;margin:6px 0 8px;}
-.lead-modal-sub{color:var(--muted);font-size:13.5px;line-height:1.5;}
+.lead-modal-sub{color:var(--muted);font-size:13.5px;line-height:1.5;}/* FAQ GERAL — reaproveita o padrão de acordeão do treinamento.html */
+.faq-groups{display:flex;flex-direction:column;gap:44px;}
+.faq-group h3{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue-2);margin-bottom:4px;}
+.faq-list{border-top:1px solid var(--line);}
+.faq-item{border-bottom:1px solid var(--line);}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:20px 4px;cursor:pointer;font-size:15px;font-weight:500;gap:16px;}
+.faq-q svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.6;transition:transform .25s;flex-shrink:0;}
+.faq-item.open .faq-q svg{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.faq-item.open .faq-a{max-height:400px;}
+.faq-a p{color:var(--muted);font-size:14px;line-height:1.65;padding:0 4px 20px;max-width:640px;}
 </style>
 </head>
 <body>
@@ -777,6 +787,33 @@ footer{background:#05080f;padding:60px 0 28px;}
       <p>Fale direto com o time South Car — resposta em horário comercial.</p>
     </div>
     <a class="wa" href="https://wa.me/554732241691" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>Chamar no WhatsApp</a>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal" style="margin-bottom:36px;">
+      <h2 class="serif">Perguntas frequentes</h2>
+    </div>
+    <div class="faq-groups">
+      <div class="faq-group reveal">
+        <h3>Produtos</h3>
+        <div class="faq-list" id="faqList-produtos"></div>
+      </div>
+      <div class="faq-group reveal">
+        <h3>Trocas e devoluções</h3>
+        <div class="faq-list" id="faqList-trocas"></div>
+      </div>
+      <div class="faq-group reveal">
+        <h3>Entrega</h3>
+        <div class="faq-list" id="faqList-entrega"></div>
+      </div>
+      <div class="faq-group reveal">
+        <h3>Treinamentos</h3>
+        <div class="faq-list" id="faqList-treinamentos"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1100,6 +1137,53 @@ document.querySelectorAll('.lead-form').forEach(function(form){
       msg.textContent = 'Não deu pra enviar agora. Tenta de novo em instantes.';
       msg.classList.add('show', 'is-error');
     });
+  });
+});
+</script>
+
+<script>
+// FAQ GERAL — 4 grupos independentes (Produtos, Trocas, Entrega, Treinamentos)
+const FAQ_GROUPS = {
+  produtos: [
+    {q:'Quando o catálogo completo (CarPro e South Leather) vai estar disponível?', a:'A partir de novembro de 2026 a gente abre a loja completa, com toda a linha CarPro (vitrificação, polimento, descontaminação, manutenção, rodas e pneus) e a South Leather, nossa linha própria de cuidado com couro. Deixa seu e-mail em qualquer categoria do catálogo que a gente avisa assim que abrir.'},
+    {q:'A South Shop é loja oficial CarPro?', a:'Sim — a South Car Exclusive é aplicadora oficial CarPro no Brasil, trabalhando com produtos como D.Quartz Pro, C.Quartz Professional e C.Quartz Finest Reserve (esse último de uso exclusivamente profissional). A South Shop é o braço de e-commerce dessa curadoria.'},
+    {q:'O que é a linha South Leather?', a:'É a nossa linha própria de cuidado e restauração de couro automotivo, testada e aprovada pelo nosso instrutor Marcão antes de chegar até você. Também estreia em novembro.'},
+    {q:'Os produtos CarPro são originais?', a:'Sim, 100% originais e importados diretamente, sem intermediários — a curadoria e a aplicação seguem o padrão oficial CarPro.'}
+  ],
+  trocas: [
+    {q:'Posso desistir da minha inscrição no Treinamento Presencial?', a:'Sim. Como em toda compra online, você tem 7 dias corridos a partir da confirmação do pedido pra cancelar com reembolso integral, sem precisar justificar — é o direito de arrependimento garantido pelo Código de Defesa do Consumidor (Art. 49). É só chamar a gente pelo WhatsApp ou e-mail.'},
+    {q:'E depois desses 7 dias, ainda dá pra cancelar ou remarcar?', a:'Fala com a gente pelo WhatsApp — avaliamos caso a caso, principalmente se ainda faltar tempo até a data da turma.'},
+    {q:'Como vai funcionar a troca ou devolução de produtos físicos (CarPro/South Leather)?', a:'Assim que o catálogo abrir em novembro, produtos com defeito de fabricação ou avaria no transporte podem ser trocados ou devolvidos dentro do prazo previsto em lei. Os detalhes completos vão estar na página de Trocas e Devoluções antes do lançamento.'}
+  ],
+  entrega: [
+    {q:'O Treinamento Presencial é enviado por correio?', a:'Não — é um evento presencial no Complexo South, em Balneário Camboriú/SC. Não tem envio físico; sua vaga é confirmada direto na sua conta South Shop.'},
+    {q:'Quando eu recebo o ebook do treinamento?', a:'Assim que a compra é confirmada, o ebook digital chega automaticamente no seu e-mail — antes mesmo do dia do evento.'},
+    {q:'Como vai funcionar o frete dos produtos físicos quando o catálogo abrir?', a:'O frete é calculado direto no carrinho, por CEP, via Correios e transportadora parceira. Assim que o catálogo abrir em novembro, essa página traz os prazos e valores atualizados.'},
+    {q:'Vocês entregam pra todo o Brasil?', a:'Sim, assim que o catálogo físico abrir em novembro — a entrega cobre todo o território nacional.'}
+  ],
+  treinamentos: [
+    {q:'Preciso levar meu próprio carro?', a:'Não é obrigatório. A prática acontece em veículos disponíveis no Complexo South, mas se quiser trazer o seu pra aplicar no que aprender na hora, é bem-vindo.'},
+    {q:'Preciso ter experiência prévia?', a:'Não. O treinamento foi pensado tanto pra quem está começando quanto pra quem já mexe com estética automotiva e quer padronizar a técnica com quem aplica profissionalmente todo dia.'},
+    {q:'O que preciso levar no dia?', a:'Só disposição. Materiais, produtos de demonstração e equipamentos de proteção são fornecidos durante o treinamento.'},
+    {q:'Onde é o treinamento?', a:'No Complexo South — Rua Acre, 139, Balneário Camboriú/SC. O endereço completo e horário de chegada são enviados por e-mail depois da confirmação da compra.'},
+    {q:'Como funciona a confirmação da vaga?', a:'Sua compra já garante a vaga — a confirmação do pedido na sua conta South Shop serve como registro oficial de inscrição, sem necessidade de ingresso físico. Você recebe um e-mail com todos os detalhes.'}
+  ]
+};
+Object.keys(FAQ_GROUPS).forEach(function(key){
+  var container = document.getElementById('faqList-' + key);
+  if(!container) return;
+  container.innerHTML = FAQ_GROUPS[key].map(function(f,i){
+    return '<div class="faq-item" data-faq="' + i + '">' +
+      '<div class="faq-q">' + f.q + '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>' +
+      '<div class="faq-a"><p>' + f.a + '</p></div>' +
+    '</div>';
+  }).join('');
+  container.addEventListener('click', function(e){
+    var item = e.target.closest('.faq-item');
+    if(!item) return;
+    var wasOpen = item.classList.contains('open');
+    container.querySelectorAll('.faq-item').forEach(function(el){ el.classList.remove('open'); });
+    if(!wasOpen) item.classList.add('open');
   });
 });
 </script>
