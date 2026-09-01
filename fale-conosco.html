@@ -694,7 +694,7 @@ footer{background:#05080f;padding:60px 0 28px;}
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Kits<svg class="nav-lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></a>
       <a href="javascript:void(0)" class="nav-locked" aria-disabled="true" tabindex="-1">Academia South<svg class="nav-lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></a>
       <a href="blog.html">Blog</a>
-      <a href="#">Dúvidas</a>
+      <a href="fale-conosco.html#faq">Dúvidas</a>
       <a href="sobre.html">Sobre</a>
     </nav>
     <div class="nav-right">
@@ -791,7 +791,7 @@ footer{background:#05080f;padding:60px 0 28px;}
 </section>
 
 <!-- FAQ -->
-<section class="sec">
+<section class="sec" id="faq">
   <div class="wrap">
     <div class="sec-head reveal" style="margin-bottom:36px;">
       <h2 class="serif">Perguntas frequentes</h2>
@@ -1145,21 +1145,21 @@ document.querySelectorAll('.lead-form').forEach(function(form){
 // FAQ GERAL — 4 grupos independentes (Produtos, Trocas, Entrega, Treinamentos)
 const FAQ_GROUPS = {
   produtos: [
-    {q:'Quando o catálogo completo (CarPro e South Leather) vai estar disponível?', a:'A partir de novembro de 2026 a gente abre a loja completa, com toda a linha CarPro (vitrificação, polimento, descontaminação, manutenção, rodas e pneus) e a South Leather, nossa linha própria de cuidado com couro. Deixa seu e-mail em qualquer categoria do catálogo que a gente avisa assim que abrir.'},
+    {q:'Quando o catálogo completo (CarPro e South Leather) vai estar disponível?', a:'Estamos com o lançamento em preparação — em breve abrimos a loja completa, com toda a linha CarPro (vitrificação, polimento, descontaminação, manutenção, rodas e pneus) e a South Leather, nossa linha própria de cuidado com couro. Deixa seu e-mail em qualquer categoria do catálogo que a gente avisa assim que abrir.'},
     {q:'A South Shop é loja oficial CarPro?', a:'Sim — a South Car Exclusive é aplicadora oficial CarPro no Brasil, trabalhando com produtos como D.Quartz Pro, C.Quartz Professional e C.Quartz Finest Reserve (esse último de uso exclusivamente profissional). A South Shop é o braço de e-commerce dessa curadoria.'},
-    {q:'O que é a linha South Leather?', a:'É a nossa linha própria de cuidado e restauração de couro automotivo, testada e aprovada pelo nosso instrutor Marcão antes de chegar até você. Também estreia em novembro.'},
+    {q:'O que é a linha South Leather?', a:'É a nossa linha própria de cuidado e restauração de couro automotivo, testada e aprovada pelo nosso instrutor Marcão antes de chegar até você. Está a caminho.'},
     {q:'Os produtos CarPro são originais?', a:'Sim, 100% originais e importados diretamente, sem intermediários — a curadoria e a aplicação seguem o padrão oficial CarPro.'}
   ],
   trocas: [
     {q:'Posso desistir da minha inscrição no Treinamento Presencial?', a:'Sim. Como em toda compra online, você tem 7 dias corridos a partir da confirmação do pedido pra cancelar com reembolso integral, sem precisar justificar — é o direito de arrependimento garantido pelo Código de Defesa do Consumidor (Art. 49). É só chamar a gente pelo WhatsApp ou e-mail.'},
     {q:'E depois desses 7 dias, ainda dá pra cancelar ou remarcar?', a:'Fala com a gente pelo WhatsApp — avaliamos caso a caso, principalmente se ainda faltar tempo até a data da turma.'},
-    {q:'Como vai funcionar a troca ou devolução de produtos físicos (CarPro/South Leather)?', a:'Assim que o catálogo abrir em novembro, produtos com defeito de fabricação ou avaria no transporte podem ser trocados ou devolvidos dentro do prazo previsto em lei. Os detalhes completos vão estar na página de Trocas e Devoluções antes do lançamento.'}
+    {q:'Como vai funcionar a troca ou devolução de produtos físicos (CarPro/South Leather)?', a:'Assim que o catálogo abrir, produtos com defeito de fabricação ou avaria no transporte podem ser trocados ou devolvidos dentro do prazo previsto em lei. Os detalhes completos vão estar na página de Trocas e Devoluções antes do lançamento.'}
   ],
   entrega: [
     {q:'O Treinamento Presencial é enviado por correio?', a:'Não — é um evento presencial no Complexo South, em Balneário Camboriú/SC. Não tem envio físico; sua vaga é confirmada direto na sua conta South Shop.'},
     {q:'Quando eu recebo o ebook do treinamento?', a:'Assim que a compra é confirmada, o ebook digital chega automaticamente no seu e-mail — antes mesmo do dia do evento.'},
-    {q:'Como vai funcionar o frete dos produtos físicos quando o catálogo abrir?', a:'O frete é calculado direto no carrinho, por CEP, via Correios e transportadora parceira. Assim que o catálogo abrir em novembro, essa página traz os prazos e valores atualizados.'},
-    {q:'Vocês entregam pra todo o Brasil?', a:'Sim, assim que o catálogo físico abrir em novembro — a entrega cobre todo o território nacional.'}
+    {q:'Como vai funcionar o frete dos produtos físicos quando o catálogo abrir?', a:'O frete é calculado direto no carrinho, por CEP, via Correios e transportadora parceira. Assim que o catálogo abrir, essa página traz os prazos e valores atualizados.'},
+    {q:'Vocês entregam pra todo o Brasil?', a:'Sim, assim que o catálogo físico abrir — a entrega cobre todo o território nacional.'}
   ],
   treinamentos: [
     {q:'Preciso levar meu próprio carro?', a:'Não é obrigatório. A prática acontece em veículos disponíveis no Complexo South, mas se quiser trazer o seu pra aplicar no que aprender na hora, é bem-vindo.'},
