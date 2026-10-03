@@ -309,7 +309,6 @@ button, select { font: inherit; color: inherit; }
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -400,13 +399,31 @@ const viewport = document.getElementById('viewport');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+// Estúdio de foto automotiva: softbox grande em cima + faixas de luz que desenham os reflexos longos na lataria.
+function studioEnvironment() {
+  const env = new THREE.Scene();
+  env.background = new THREE.Color(0x030405);
+  const box = new THREE.BoxGeometry(1, 1, 1);
+  const light = (w, h, d, x, y, z, power, color = 0xffffff) => {
+    const m = new THREE.Mesh(box, new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(power) }));
+    m.scale.set(w, h, d); m.position.set(x, y, z); env.add(m);
+  };
+  light(9, 0.1, 4, 0, 7, 0, 4);                 // softbox no teto
+  light(14, 0.5, 0.1, 0, 2.6, -7, 7);           // faixa atrás
+  light(14, 0.35, 0.1, 0, 1.6, 7, 6);           // faixa na frente
+  light(0.1, 5, 0.6, -8, 3, -2, 5);             // faixas verticais nas laterais
+  light(0.1, 5, 0.6, 8, 3, 2, 5);
+  light(0.1, 3, 6, -8, 1.5, 4, 0.6, 0x3a5fb0);  // rebatedor azul da marca, bem fraco
+  light(30, 0.1, 30, 0, -1, 0, 0.04);           // chão escuro
+  return pmrem.fromScene(env, 0.02).texture;
+}
+scene.environment = studioEnvironment();
 
 const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 60);
 const HOME = { pos: [5.0, 1.9, 5.3], target: [0, 0.6, 0] };
@@ -422,14 +439,14 @@ controls.autoRotate = !reduced;
 controls.autoRotateSpeed = 0.6;
 canvas.addEventListener('pointerdown', () => { controls.autoRotate = false; });
 
-const key = new THREE.DirectionalLight(0xffffff, 2.2);
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
 key.position.set(4, 7, 3);
 key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
 Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4 });
 key.shadow.radius = 6;
 scene.add(key);
-const rim = new THREE.DirectionalLight(0x5b7fd6, 1.4);
+const rim = new THREE.DirectionalLight(0x5b7fd6, 0.9);
 rim.position.set(-5, 3, -4);
 scene.add(rim);
 
@@ -444,16 +461,51 @@ const ring = new THREE.Mesh(new THREE.TorusGeometry(3.72, 0.012, 8, 160),
 ring.rotation.x = Math.PI / 2;
 ring.position.y = 0.002;
 scene.add(ring);
+const contactShadow = (() => {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 128;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(128, 64, 8, 128, 64, 128);
+  g.addColorStop(0, 'rgba(0,0,0,0.85)'); g.addColorStop(0.55, 'rgba(0,0,0,0.45)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.setTransform(1, 0, 0, 0.5, 0, 32); x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(5.6, 2.8), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.004;
+  return m;
+})();
+scene.add(contactShadow);
 
 // Materiais
-const paint = new THREE.MeshPhysicalMaterial({ color: PAINTS[0].hex, metalness: 0.45, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 0.75 });
-const trim = new THREE.MeshStandardMaterial({ color: 0x0b0c0f, roughness: 0.55, metalness: 0.2 });
-const tireMat = new THREE.MeshStandardMaterial({ color: 0x0d0d0f, roughness: 0.85 });
-const rimMat = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, metalness: 0.9, roughness: 0.22 });
-const discMat = new THREE.MeshStandardMaterial({ color: 0x5c6066, metalness: 0.85, roughness: 0.35 });
-const caliperMat = new THREE.MeshPhysicalMaterial({ color: CALIPERS[0].hex, roughness: 0.3, clearcoat: 1 });
-const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xe8f0ff, emissiveIntensity: 0 });
-const tailMat = new THREE.MeshStandardMaterial({ color: 0x400006, emissive: 0xff1a2a, emissiveIntensity: 0 });
+// Texturas originais do modelo (brasão/letreiros, interior, faróis, pneu, disco, pinça, placa). UV de glTF: flipY desligado.
+const texLoader = new THREE.TextureLoader();
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+function tex(file, color = false) {
+  const t = texLoader.load(`assets/models/macan-tex/${file}`);
+  t.flipY = false; t.anisotropy = maxAniso;
+  if (color) t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+// Flocos metálicos: ruído fino como normal map da pintura (o verniz por cima continua liso).
+const flakes = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d'), img = x.createImageData(256, 256);
+  for (let i = 0; i < img.data.length; i += 4) {
+    img.data[i] = 128 + (Math.random() - 0.5) * 90; img.data[i + 1] = 128 + (Math.random() - 0.5) * 90;
+    img.data[i + 2] = 255; img.data[i + 3] = 255;
+  }
+  x.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 6);
+  return t;
+})();
+const paint = new THREE.MeshPhysicalMaterial({ color: PAINTS[0].hex, metalness: 0.6, roughness: 0.38, normalMap: flakes, normalScale: new THREE.Vector2(0.12, 0.12),
+  clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1 });
+const trim = new THREE.MeshStandardMaterial({ color: 0x0c0d10, roughness: 0.42, metalness: 0.1 });
+const tireMat = new THREE.MeshStandardMaterial({ color: 0x18181a, roughness: 0.92, normalMap: tex('tire_n.png'), envMapIntensity: 0.4 });
+const rimMat = new THREE.MeshStandardMaterial({ color: 0xd2d6dc, metalness: 0.75, roughness: 0.32, normalMap: tex('rim_n.png'), envMapIntensity: 1.8 });
+const discMat = new THREE.MeshStandardMaterial({ map: tex('disc.png', true), normalMap: tex('disc_n.png'), metalness: 0.9, roughness: 0.4 });
+const caliperMat = new THREE.MeshPhysicalMaterial({ color: CALIPERS[0].hex, roughness: 0.3, clearcoat: 1, normalMap: tex('caliper_n.png') });
+const lightsTex = tex('lights.png', true), lightsN = tex('lights_n.png');
+const headMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, metalness: 0.6, roughness: 0.15, emissive: 0xe8f0ff, emissiveMap: lightsTex, emissiveIntensity: 0 });
+const tailMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, color: 0xff3040, metalness: 0.3, roughness: 0.2, emissive: 0xff1a2a, emissiveMap: lightsTex, emissiveIntensity: 0 });
 const carbon = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d');
@@ -472,15 +524,16 @@ const carbon = (() => {
 // Convertido de FBX para GLB sem as texturas do jogo; os materiais abaixo são aplicados pelo nome de cada malha.
 const car = new THREE.Group();
 scene.add(car);
-const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x0a0d14, metalness: 0, roughness: 0.04, clearcoat: 1, transparent: true, opacity: 0.62 });
+const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x0b0e14, metalness: 0, roughness: 0, clearcoat: 1, transparent: true, opacity: 0.5, envMapIntensity: 1.6 });
 const chrome = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 1, roughness: 0.12 });
-const interiorMat = new THREE.MeshStandardMaterial({ color: 0x17181b, roughness: 0.8 });
-const plateMat = new THREE.MeshStandardMaterial({ color: 0xe8ebef, roughness: 0.5 });
+const badgeMat = new THREE.MeshStandardMaterial({ map: tex('badges.png', true), normalMap: tex('badges_n.png'), metalness: 0.7, roughness: 0.25, alphaTest: 0.4 });
+const interiorMat = new THREE.MeshStandardMaterial({ map: tex('interior.png', true), roughness: 0.75 });
+const plateMat = new THREE.MeshStandardMaterial({ map: tex('plate.png', true), roughness: 0.4, metalness: 0.2 });
 const MATS = {
   M_Paint_Metal_High: paint, M_Caliper_High: caliperMat, M_BrakeDisc_High: discMat, M_Rim_High: rimMat, M_Tire_High: tireMat,
   M_GlassLights_High: glassMat, M_GlassColor_High: glassMat, M_GlassSurround_High: trim, M_Opaque_PlasticSmooth_High: trim,
   M_Chassis_High: trim, M_Grille_A_High: trim, M_Opaque_ExhaustGlow_High: trim, M_Internal_Interior_High: interiorMat,
-  M_Badges_High: chrome, M_LightRefracted_High: chrome, M_LicensePlate_High: plateMat,
+  M_Badges_High: badgeMat, M_LightRefracted_High: chrome, M_LicensePlate_High: plateMat,
 };
 const WHEEL_PARTS = ['M_Rim_High', 'M_Tire_High', 'M_BrakeDisc_High', 'M_Caliper_High'];
 // Eixos medidos no modelo (frente = +z do arquivo): entre-eixos ~2,8 m, bitola ~1,66 m.
