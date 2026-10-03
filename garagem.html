@@ -326,7 +326,6 @@ button, select { font: inherit; color: inherit; }
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const brl = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -553,8 +552,26 @@ function carbonWeave() {
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso;
   return t;
 }
-const carbonMat = map => new THREE.MeshPhysicalMaterial({ map, metalness: 0.25, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.3 });
-const carbon = carbonMat(carbonWeave()); // capa do retrovisor (UV por projeção na própria malha)
+// Carbono com projeção triplanar: a trama é aplicada pelos 3 eixos e misturada pela normal, sem emendas nem esticões em peças curvas.
+const carbonMat = map => {
+  const m = new THREE.MeshPhysicalMaterial({ map, metalness: 0.25, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.3 });
+  m.onBeforeCompile = sh => {
+    sh.uniforms.weaveScale = { value: 15 }; // 1 repetição = 16 células → ~4 mm por célula (carbono 3K)
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', `#include <common>
+varying vec3 vWPos; varying vec3 vWNrm;`)
+      .replace('#include <worldpos_vertex>', `#include <worldpos_vertex>
+vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz; vWNrm = normalize(mat3(modelMatrix) * objectNormal);`);
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>
+varying vec3 vWPos; varying vec3 vWNrm; uniform float weaveScale;`)
+      .replace('#include <map_fragment>', `vec3 bw = pow(abs(normalize(vWNrm)), vec3(4.0)); bw /= (bw.x + bw.y + bw.z);
+        vec4 sampledDiffuseColor = texture2D(map, vWPos.zy * weaveScale) * bw.x + texture2D(map, vWPos.xz * weaveScale) * bw.y + texture2D(map, vWPos.xy * weaveScale) * bw.z;
+        diffuseColor *= sampledDiffuseColor;`);
+  };
+  return m;
+};
+const carbon = carbonMat(carbonWeave()); // capas de retrovisor e side blades
 
 // Modelo: Porsche Macan GTS 2015 (Sketchfab, VuckyZ123, CC BY-NC-SA). Uso só para apresentação, não para o site comercial.
 // Convertido de FBX para GLB sem as texturas do jogo; os materiais abaixo são aplicados pelo nome de cada malha.
@@ -580,22 +597,20 @@ const WHEEL_PARTS = ['M_Rim_High', 'M_Tire_High', 'M_BrakeDisc_High', 'M_Caliper
 // Centro das rodas tirado das juntas do arquivo original do jogo (frente = +z): entre-eixos 2,81 m, bitola 1,65 m.
 const WHEELS = [[0.824, 1.405], [-0.824, 1.405], [0.824, -1.405], [-0.824, -1.405]];
 const WHEEL_Y = 0.195;
-const bladeDecals = [];
-const bladeMat = (() => {
-  const weave = carbonWeave(); weave.repeat.set(14, 1.6); // ~1 cm por célula na peça de 1,72 m x 0,20 m
-  const c = document.createElement('canvas'); c.width = 1024; c.height = 128;
-  const x = c.getContext('2d');
-  x.fillStyle = '#000'; x.fillRect(0, 0, 1024, 128);
-  x.fillStyle = '#fff'; x.beginPath(); // faixa com pontas inclinadas e cantos arredondados
-  x.moveTo(40, 112); x.lineTo(990, 112); x.quadraticCurveTo(1016, 112, 1008, 88); x.lineTo(960, 22);
-  x.quadraticCurveTo(950, 12, 930, 12); x.lineTo(70, 12); x.quadraticCurveTo(46, 12, 38, 34); x.lineTo(18, 90); x.quadraticCurveTo(12, 112, 40, 112); x.fill();
-  const mask = new THREE.CanvasTexture(c);
-  const m = carbonMat(weave);
-  Object.assign(m, { alphaMap: mask, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 });
-  return m;
-})();
+const bladeSlots = [trim, trim]; // 0 frisos pretos, 1 side blades (preto original ou carbono)
 const paintSlots = [paint, paint, paint]; // 0 carroceria, 1 retrovisores, 2 laterais (side blades)
 
+// UV por projeção no eixo dominante da normal de cada vértice: a trama do carbono fica em escala real e não estica.
+function projectUV(o) {
+  const uv = [], p = o.geometry.attributes.position, nrm = o.geometry.attributes.normal, v = new THREE.Vector3(), n = new THREE.Vector3();
+  const nm = new THREE.Matrix3().getNormalMatrix(o.matrixWorld);
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld); n.fromBufferAttribute(nrm, i).applyMatrix3(nm);
+    const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
+    if (ax >= ay && ax >= az) uv.push(v.z * 6, v.y * 6); else if (ay >= az) uv.push(v.x * 6, v.z * 6); else uv.push(v.x * 6, v.y * 6);
+  }
+  o.geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+}
 // Separa os triângulos de uma malha em grupos de material, pela posição do centro de cada triângulo.
 function splitByRegion(mesh, classify, materials) {
   const g = mesh.geometry, pos = g.attributes.position;
@@ -623,7 +638,7 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
   car.add(model);
   car.updateMatrixWorld(true);
   const wheelParts = [];
-  let badges = null, paintMesh = null, trimMesh = null;
+  let badges = null;
   model.traverse(o => {
     if (!o.isMesh) return;
     const name = o.name.replace(/lod0$/, ''); // nome da malha = nome da peça no modelo
@@ -631,16 +646,7 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
     if (WHEEL_PARTS.includes(name)) wheelParts.push(o);
     if (name === 'M_Badges_High') badges = o;
     if (name === 'M_Paint_Metal_High') {
-      // UV por projeção no eixo dominante da normal de cada vértice: a trama do carbono fica em escala real e não estica.
-      const uv = [], p = o.geometry.attributes.position, nrm = o.geometry.attributes.normal, v = new THREE.Vector3(), n = new THREE.Vector3();
-      const nm = new THREE.Matrix3().getNormalMatrix(o.matrixWorld);
-      for (let i = 0; i < p.count; i++) {
-        v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld); n.fromBufferAttribute(nrm, i).applyMatrix3(nm);
-        const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
-        if (ax >= ay && ax >= az) uv.push(v.z * 6, v.y * 6); else if (ay >= az) uv.push(v.x * 6, v.z * 6); else uv.push(v.x * 6, v.y * 6);
-      }
-      o.geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-      paintMesh = o;
+      projectUV(o);
       splitByRegion(o, m => {
         const side = Math.abs(m.x);
         if (side > 0.89 && m.y > 0.86 && m.z > 0.28 && m.z < 0.62) return 1;
@@ -653,22 +659,14 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
       splitByRegion(o, m => (m.z > 0 ? 0 : 1), [chrome, tailChrome]); // refletor traseiro é vermelho
     } else if (name === 'M_LightCluster_High') {
       splitByRegion(o, m => (m.z > 0 ? 0 : 1), [headMat, tailMat]);
+    } else if (name === 'M_Opaque_PlasticSmooth_High') {
+      // A faixa preta em relevo nas portas é a side blade original do GTS: é ela que vira carbono.
+      projectUV(o);
+      splitByRegion(o, m => (Math.abs(m.x) > 0.85 && m.y > 0.12 && m.y < 0.38 && m.z > -0.86 && m.z < 0.8 ? 1 : 0), bladeSlots);
     } else {
       o.material = MATS[name] || trim;
-      if (name === 'M_Opaque_PlasticSmooth_High') trimMesh = o;
     }
   });
-  // Side blades: peça de carbono projetada por cima da lataria (contorno limpo, acompanha a curva das portas).
-  for (const side of [1, -1]) {
-    const pos = new THREE.Vector3(side * 0.97, 0.275, 0.02), rot = new THREE.Euler(0, side * Math.PI / 2, 0), size = new THREE.Vector3(1.72, 0.2, 0.5);
-    for (const target of [paintMesh, trimMesh]) {
-      if (!target) continue;
-      const blade = new THREE.Mesh(new DecalGeometry(target, pos, rot, size), bladeMat);
-      blade.visible = false;
-      car.add(blade);
-      bladeDecals.push(blade);
-    }
-  }
   // Os brasões das calotas vêm junto com os emblemas da carroceria, no centro da roda: separa e leva pra roda.
   if (badges) {
     const g = badges.geometry, pos = g.attributes.position, idx = Array.from(g.index.array);
@@ -753,7 +751,7 @@ function applyVisuals() {
   tweenColor(paint, swatchItem(GROUPS.find(g => g.id === 'pintura'), PAINTS.find(p => p.id === state.radio.pintura)).hex);
   tweenColor(caliperMat, CALIPERS.find(p => p.id === state.radio.pincas).hex);
   paintSlots[1] = state.checks.has('capa-retro') ? carbon : paint;
-  for (const b of bladeDecals) b.visible = state.checks.has('blades');
+  bladeSlots[1] = state.checks.has('blades') ? carbon : trim;
 }
 
 /* ---------- Painel ---------- */
