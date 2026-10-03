@@ -553,9 +553,9 @@ const MATS = {
   M_Badges_High: badgeMat, M_LightRefracted_High: chrome, M_LicensePlate_High: plateMat,
 };
 const WHEEL_PARTS = ['M_Rim_High', 'M_Tire_High', 'M_BrakeDisc_High', 'M_Caliper_High'];
-// Eixos medidos no modelo (frente = +z do arquivo): entre-eixos ~2,8 m, bitola ~1,66 m.
-const WHEELS = [[0.83, 1.4], [-0.83, 1.4], [0.83, -1.4], [-0.83, -1.4]];
-const WHEEL_Y = 0.37;
+// Centro das rodas tirado das juntas do arquivo original do jogo (frente = +z): entre-eixos 2,81 m, bitola 1,65 m.
+const WHEELS = [[0.824, 1.405], [-0.824, 1.405], [0.824, -1.405], [-0.824, -1.405]];
+const WHEEL_Y = 0.195;
 const paintSlots = [paint, paint, paint]; // 0 carroceria, 1 retrovisores, 2 laterais (side blades)
 
 // Separa os triângulos de uma malha em grupos de material, pela posição do centro de cada triângulo.
