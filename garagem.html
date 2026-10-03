@@ -44,8 +44,7 @@ button, select { font: inherit; color: inherit; }
 .lockup a { display: block; }
 .lockup img { display: block; width: auto; }
 .lockup .south { height: 46px; }
-.lockup .marchand { height: 38px; }
-.wordmark { margin: 0; padding-left: 22px; border-left: 1px solid var(--line); font: 800 22px/1 var(--display); font-stretch: 125%; letter-spacing: .06em; text-transform: uppercase; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* título só para leitores de tela */
 .car-switch { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--band); border-radius: 12px; padding: 7px 12px 7px 14px; cursor: pointer; text-align: left; min-height: 44px; transition: border-color .2s; }
 .car-switch:hover { border-color: rgba(244,246,249,.3); }
 .car-switch small { display: block; color: var(--muted); font-size: 12px; line-height: 1.2; }
@@ -277,8 +276,6 @@ button, select { font: inherit; color: inherit; }
   .mode { width: 100%; }
   .mode button { flex: 1; }
   .lockup .south { height: 34px; }
-  .lockup .marchand { height: 28px; }
-  .wordmark { font-size: 16px; padding-left: 14px; }
   .brand { gap: 14px; }
   .add-form { grid-template-columns: 1fr 1fr; }
 }
@@ -294,9 +291,8 @@ button, select { font: inherit; color: inherit; }
     <div class="brand">
       <div class="lockup">
         <a href="index.html" aria-label="Voltar para a South Shop"><img class="south" src="assets/img/logo-south-shop.png" alt="South Shop"></a>
-        <img class="marchand" src="assets/img/logo-marchand.png" alt="Marchand">
       </div>
-      <h1 class="wordmark">Garagem South</h1>
+      <h1 class="sr-only">Garagem South</h1>
     </div>
     <button type="button" class="car-switch" id="car-switch" aria-haspopup="dialog">
       <img class="chip-crest" id="car-crest" src="assets/img/brands/porsche.png" alt="">
