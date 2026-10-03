@@ -396,6 +396,10 @@ button, select { font: inherit; color: inherit; }
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const brl = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -614,12 +618,10 @@ const floor = new THREE.Mesh(new THREE.CylinderGeometry(3.7, 3.8, 0.12, 96),
   new THREE.MeshStandardMaterial({ color: 0x05070c, roughness: 0.7, metalness: 0.1, envMapIntensity: 0.15 }));
 floor.position.y = -0.06;
 floor.receiveShadow = true;
-scene.add(floor);
 const ring = new THREE.Mesh(new THREE.TorusGeometry(3.72, 0.012, 8, 160),
   new THREE.MeshBasicMaterial({ color: 0x3a5fb0 }));
 ring.rotation.x = Math.PI / 2;
 ring.position.y = 0.002;
-scene.add(ring);
 const contactShadow = (() => {
   const c = document.createElement('canvas'); c.width = 256; c.height = 128;
   const x = c.getContext('2d');
@@ -630,7 +632,9 @@ const contactShadow = (() => {
   m.rotation.x = -Math.PI / 2; m.position.y = 0.004;
   return m;
 })();
-scene.add(contactShadow);
+const podium = new THREE.Group();
+podium.add(floor, ring, contactShadow);
+scene.add(podium);
 
 // Materiais
 // Texturas originais do modelo (brasão/letreiros, interior, faróis, pneu, disco, pinça, placa). UV de glTF: flipY desligado.
@@ -833,9 +837,29 @@ function applyViewShift() {
   const { clientWidth: w, clientHeight: h } = viewport;
   if (viewShift.x) camera.setViewOffset(w, h, viewShift.x, 0, w, h); else camera.clearViewOffset();
 }
+// Desfoque de lente (bokeh): o carro em foco fica nítido e as outras plataformas desfocam com a distância.
+// O pass devolve a imagem opaca, então o degradê do fundo (antes CSS) é desenhado na própria cena.
+scene.background = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const x = c.getContext('2d'), g = x.createRadialGradient(256, 297, 0, 256, 297, 300);
+  g.addColorStop(0, '#13254a'); g.addColorStop(0.55, '#070b16'); g.addColorStop(1, '#000');
+  x.fillStyle = g; x.fillRect(0, 0, 512, 512);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
+composer.addPass(new RenderPass(scene, camera));
+const bokeh = new BokehPass(scene, camera, { focus: 7, aperture: 0.0012, maxblur: 0.006 });
+// Faixa de 3 m em volta do foco sem desfoque nenhum: o carro inteiro fica nítido, da frente à traseira.
+bokeh.materialBokeh.fragmentShader = bokeh.materialBokeh.fragmentShader.replace('float factor = ( focus + viewZ );',
+  'float factor = focus + viewZ; factor = sign( factor ) * max( abs( factor ) - 3.0, 0.0 );');
+composer.addPass(bokeh);
+composer.addPass(new OutputPass());
+renderer.shadowMap.autoUpdate = false; // o bokeh renderiza a cena de novo (profundidade): sombra calculada 1x por quadro
 function resize() {
   const { clientWidth: w, clientHeight: h } = viewport;
   renderer.setSize(w, h, false);
+  composer.setSize(w, h);
   camera.aspect = w / h;
   camera.fov = w < 600 ? 42 : 32;
   applyViewShift();
@@ -1402,10 +1426,9 @@ function pick(e) {
   const r = canvas.getBoundingClientRect();
   ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const hit = ray.intersectObjects([car, ...showroom.ghosts.values()], true)[0];
-  if (!hit) return null;
-  for (let o = hit.object; o; o = o.parent) if (o.userData.ghostOf) return o.userData.ghostOf;
-  return 'car';
+  for (const hit of ray.intersectObject(showroom.ready ? room : car, true))
+    for (let o = hit.object; o; o = o.parent) { if (o === car) return 'car'; if (o.userData.ghostOf) return o.userData.ghostOf; }
+  return null;
 }
 let down = null;
 canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
@@ -1423,87 +1446,90 @@ document.getElementById('clear-all').addEventListener('click', () => {
 });
 function update() { applyVisuals(); renderGroups(); renderSummary(); updateChooserCounts(); }
 
-/* ---------- Showroom: os outros carros da garagem flutuando no fundo ---------- */
-// Ficam num anel grande em volta do pódio, sumindo na névoa. Trocar de carro gira o anel: o escolhido vem do
-// fundo até o pódio e o atual volta pro lugar dele. Cópias reaproveitam geometria e materiais do carro principal
-// (só a pintura é própria), então custam só draw calls.
-scene.fog = new THREE.Fog(0x0a1224, 12, 28); // começa depois do pódio: o carro principal não embaça
-const SHOW_R = 18, SHOW_STEP = 0.42, FLOAT_Y = 0.6; // raio do anel (m), distância entre carros (rad ≈ 24°), altura
-const showroom = { ready: false, ghosts: new Map(), rot: Math.PI, busy: null };
-const slotAngle = (id, rot = showroom.rot) => garage.findIndex(c => c.id === id) * SHOW_STEP + rot;
+/* ---------- Showroom: cada carro da garagem na sua plataforma ---------- */
+// As plataformas ficam num círculo; o carro escolhido fica na frente da câmera e os outros aparecem lá no fundo,
+// desfocados. Trocar de carro leva a câmera em voo pela borda do círculo até a plataforma dele.
+// (Na prática quem gira é a sala inteira em volta da câmera: tudo que já está ancorado no pódio — bolinhas,
+// vistas dos serviços, faróis — continua valendo sem mudança.)
+scene.fog = new THREE.Fog(0x0a1224, 14, 40);
+const room = new THREE.Group();
+scene.add(room);
+const showroom = { ready: false, pods: new Map(), busy: null };
+const HOME_AZ = Math.atan2(HOME.pos[0] - HOME.target[0], HOME.pos[2] - HOME.target[2]);
 const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+const podR = () => Math.max(10, garage.length * 1.6); // raio do círculo: plataformas não encostam umas nas outras
+// Com 2 carros o outro fica de lado (não escondido bem atrás do escolhido).
+const podAngle = id => garage.findIndex(c => c.id === id) * 2 * Math.PI / Math.max(garage.length, 3);
+// Gira/move a sala para a plataforma no ângulo theta ficar na origem, na mesma posição de sempre.
+function setRoom(theta) {
+  const phi = theta - HOME_AZ, r = podR();
+  room.rotation.y = -phi;
+  room.position.set(-r * Math.sin(theta), 0, -r * Math.cos(theta)).applyAxisAngle(THREE.Object3D.DEFAULT_UP, -phi);
+}
 function makeGhost(c) {
   const p = paint.clone(); p.color.set(c.cor.hex);
   const swap = m => (m === paint ? p : m === carbon ? trim : m);
-  const g = car.clone(); g.visible = true;
+  const g = car.clone();
   g.traverse(o => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map(swap) : swap(o.material); });
-  const h = new THREE.Group();
-  h.add(g);
-  h.userData = { ghostOf: c.id, paint: p, phase: Math.random() * 6 };
-  scene.add(h);
-  return h;
+  g.userData = { ghostOf: c.id, paint: p };
+  return g;
 }
-function dropGhost(h) { scene.remove(h); h.userData.paint.dispose(); }
-// Garante um carro no anel para cada carro da garagem, menos o que está no pódio.
+// Monta uma plataforma por carro: o escolhido recebe o carro de verdade, os outros uma cópia na cor deles.
 function syncShowroom() {
   if (!showroom.ready) return;
-  for (const [id, h] of showroom.ghosts) if (id === state.carId || !garage.some(c => c.id === id)) { dropGhost(h); showroom.ghosts.delete(id); }
-  for (const c of garage) {
-    if (c.id === state.carId) continue;
-    if (!showroom.ghosts.has(c.id)) showroom.ghosts.set(c.id, makeGhost(c));
-    showroom.ghosts.get(c.id).userData.paint.color.set(c.cor.hex);
+  for (const pod of showroom.pods.values()) {
+    for (const o of pod.children) if (o.userData.ghostOf) o.userData.paint.dispose();
+    room.remove(pod);
   }
+  showroom.pods.clear();
+  const r = podR();
+  for (const c of garage) {
+    const a = podAngle(c.id), pod = new THREE.Group();
+    pod.position.set(r * Math.sin(a), 0, r * Math.cos(a));
+    pod.rotation.y = a - HOME_AZ;
+    pod.add(podium.clone(), c.id === state.carId ? car : makeGhost(c));
+    room.add(pod);
+    showroom.pods.set(c.id, pod);
+  }
+  setRoom(podAngle(state.carId));
 }
-// Posição de descanso no anel: de perfil para o pódio, subindo e descendo devagar.
-function restPose(h, a, t) {
-  h.position.set(Math.sin(a) * SHOW_R, FLOAT_Y + Math.sin(t * 0.0007 + h.userData.phase) * 0.12, Math.cos(a) * SHOW_R);
-  h.rotation.y = a + 0.4;
-}
-function tickShowroom(t) {
-  for (const [id, h] of showroom.ghosts) if (!h.userData.flying) restPose(h, slotAngle(id), t);
-}
+// Voo da câmera: afasta e sobe no meio do caminho, contorna o círculo e pousa na plataforma escolhida.
 function showroomSwap(prev, next) {
-  if (!showroom.ready || reduced) return;
+  if (!showroom.ready) return;
   if (showroom.busy) showroom.busy.progress(1); // troca rápida: termina a anterior na hora
-  const inc = showroom.ghosts.get(next.id) || makeGhost(next); // carro novo ainda não tem cópia: nasce no fundo
-  const out = makeGhost(prev); // cópia do carro atual, no lugar exato dele
-  showroom.ghosts.delete(next.id);
-  inc.userData.flying = out.userData.flying = true;
-  car.visible = false;
-  // Gira o anel para o escolhido partir de trás do pódio (do ponto de vista da câmera agora).
-  const behind = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z) + Math.PI;
-  const rot0 = showroom.rot, rot1 = rot0 + wrap(behind - slotAngle(next.id));
-  const from = inc.position.clone(), fromYaw = inc.rotation.y, t0 = performance.now();
-  const k = { v: 0 }, inOut = gsap.parseEase('power2.inOut'), clamp = v => Math.min(1, Math.max(0, v));
-  showroom.busy = gsap.to(k, { v: 1, duration: 2, ease: 'none',
+  syncShowroom(); // já na arrumação final (carro de verdade na plataforma nova)
+  // O carro de destino já está na cor dele lá longe (sem transição de cor durante o voo).
+  gsap.killTweensOf(paint.color); paint.color.set(next.cor.hex); paint.userData.colorTarget = paint.color.getHex();
+  if (reduced) return;
+  if (flight) flight.kill();
+  const t0 = podAngle(prev.id), t1 = t0 + wrap(podAngle(next.id) - t0);
+  const off = camera.position.clone().sub(controls.target), maxD = controls.maxDistance;
+  controls.enabled = false; controls.autoRotate = false; controls.maxDistance = 40;
+  const k = { v: 0 };
+  setRoom(t0);
+  showroom.busy = gsap.to(k, { v: 1, duration: 2.4, ease: 'power2.inOut',
     onUpdate: () => {
-      const e = k.v;
-      showroom.rot = rot0 + (rot1 - rot0) * inOut(e);
-      // Saindo primeiro: o atual deixa o pódio e assume o lugar dele no anel.
-      const ao = slotAngle(prev.id), fo = inOut(clamp(e / 0.55));
-      out.position.set(Math.sin(ao) * SHOW_R * fo, FLOAT_Y * fo, Math.cos(ao) * SHOW_R * fo);
-      out.rotation.y = wrap(ao + 0.4) * fo;
-      // Entrando logo depois: o escolhido acompanha o giro do anel e então desce até o pódio.
-      const ai = slotAngle(next.id), fi = inOut(clamp((e - 0.2) / 0.8)), ride = clamp(e / 0.2);
-      const sx = from.x + (Math.sin(ai) * SHOW_R - from.x) * ride, sz = from.z + (Math.cos(ai) * SHOW_R - from.z) * ride;
-      inc.position.set(sx * (1 - fi), from.y * (1 - fi), sz * (1 - fi));
-      inc.rotation.y = fromYaw + wrap(0 - fromYaw) * fi;
-      tickShowroom(performance.now());
+      setRoom(t0 + (t1 - t0) * k.v);
+      const lift = Math.sin(Math.PI * k.v);
+      camera.position.copy(controls.target).addScaledVector(off, 1 + 0.8 * lift);
+      camera.position.y += 2.2 * lift;
     },
     onComplete: () => {
-      dropGhost(inc);
-      out.userData.flying = false;
-      showroom.ghosts.get(prev.id) && dropGhost(showroom.ghosts.get(prev.id));
-      showroom.ghosts.set(prev.id, out);
-      car.visible = true;
+      camera.position.copy(controls.target).add(off);
+      controls.maxDistance = maxD; controls.enabled = true;
       showroom.busy = null;
-      syncShowroom();
     } });
 }
 
 /* ---------- Abertura + loop ---------- */
 renderGroups(); selectCar(state.carId); moveThumb();
-renderer.setAnimationLoop(t => { controls.update(); if (!showroom.busy) tickShowroom(t); renderer.render(scene, camera); if (!spotsEl.hidden) placeSpots(); });
+renderer.setAnimationLoop(() => {
+  controls.update();
+  bokeh.uniforms.focus.value = camera.position.distanceTo(controls.target);
+  renderer.shadowMap.needsUpdate = true;
+  composer.render();
+  if (!spotsEl.hidden) placeSpots();
+});
 await loadCar.catch(err => {
   console.error(err);
   document.getElementById('loading').textContent = 'Não foi possível carregar o modelo 3D. Recarregue a página.';
@@ -1513,6 +1539,7 @@ document.getElementById('loading').remove();
 spotsEl.hidden = false;
 applyVisuals();
 showroom.ready = true;
+scene.remove(podium);
 syncShowroom();
 // Faróis: acende faróis/lanternas e projeta dois fachos no pódio.
 const beams = [1, -1].map(side => {
