@@ -516,7 +516,7 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
   });
   // As peças da roda vêm uma vez só, centradas na origem: monta as 4 rodas.
   const proto = new THREE.Group();
-  for (const part of wheelParts) proto.add(part);
+  for (const part of wheelParts) proto.attach(part); // attach mantém o deslocamento interno de cada peça
   for (const [x, z] of WHEELS) {
     const w = proto.clone();
     w.position.set(x, WHEEL_Y, z);
@@ -524,6 +524,8 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
     car.add(w);
   }
   car.rotation.y = Math.PI / 2; // frente do carro para +x da cena
+  car.updateMatrixWorld(true);
+  car.position.y = -new THREE.Box3().setFromObject(car).min.y; // pneus apoiados no pódio
 });
 
 function resize() {
