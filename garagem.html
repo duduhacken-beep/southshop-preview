@@ -155,6 +155,12 @@ button, select { font: inherit; color: inherit; }
 .group.is-active { background: rgba(255,255,255,.035); border-left-color: var(--c, var(--south)); }
 .group[data-layer="marchand"] { --c: var(--marchand); }
 .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; border: 0; background: none; padding: 0; text-align: left; cursor: pointer; }
+.badge { display: inline-block; margin-left: 10px; padding: 3px 7px; border: 1px solid var(--line); border-radius: 999px; font: 600 10px/1 var(--sans); font-stretch: normal; letter-spacing: .02em; text-transform: none; color: var(--muted); vertical-align: 2px; }
+.qty { grid-column: 2 / 4; display: inline-flex; align-items: center; gap: 2px; justify-self: start; margin-top: 6px; border: 1px solid var(--line); border-radius: 999px; }
+.qty button { width: 34px; height: 30px; border: 0; background: none; border-radius: 999px; cursor: pointer; font-size: 17px; color: var(--white); }
+.qty button:hover:not(:disabled) { background: rgba(255,255,255,.07); }
+.qty button:disabled { opacity: .3; cursor: default; }
+.qty output { min-width: 64px; text-align: center; font: 600 14px var(--cond); font-variant-numeric: tabular-nums; }
 .group-head h3 { margin: 0; font: 800 15px/1.2 var(--display); font-stretch: 125%; letter-spacing: .07em; text-transform: uppercase; } /* mesma família do título GARAGEM SOUTH */
 .group-head span { color: var(--muted); font: 500 14px var(--cond); white-space: nowrap; }
 .group-note { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
@@ -369,10 +375,21 @@ const GROUPS = [
       { id: 'amort', name: 'Par de amortecedores dianteiros originais', price: 7200, inst: 1200, onde: 'ambos' },
       { id: 'buchas', name: 'Buchas e bieletas', price: 1600, inst: 600, onde: 'ambos' },
     ] },
-  { id: 'pintura', layer: 'south', title: () => 'Pintura', kind: 'swatch', items: PAINTS, onde: 'servico',
+  { id: 'pintura', layer: 'south', title: () => 'Pintura', badge: 'PPG à base d’água', kind: 'swatch', items: PAINTS, onde: 'servico',
     note: 'Repintura completa feita pela South Paint.',
     spot: { label: 'Pintura', p: [-0.3, 0.72, 1.06], n: [0, 0.1, 1] },
     view: { pos: [0.4, 1.5, 5.9], target: [0, 0.75, 0] } },
+  // Reparo cobrado por tamanho do dano (padrão de smart repair), com quantidade de pontos. Valores de exemplo: definir com a South Paint.
+  { id: 'reparo', layer: 'south', title: () => 'Pintura de reparo', kind: 'check',
+    note: 'Riscos, lascas e pequenos amassados, cobrados pelo tamanho de cada dano.',
+    spot: { label: 'Reparo', p: [-2.25, 0.5, 0.72], n: [-0.7, 0, 0.7] },
+    view: { pos: [-4.4, 1.1, 3.4], target: [-1.9, 0.5, 0.5] },
+    options: [
+      { id: 'reparo-p', name: 'Pequeno, até 5 cm', price: 350, onde: 'servico', qty: 'ponto', detail: 'Lascas de pedra e pontos de batida.' },
+      { id: 'reparo-m', name: 'Médio, até 15 cm', price: 650, onde: 'servico', qty: 'ponto', detail: 'Riscos e arranhões.' },
+      { id: 'reparo-g', name: 'Grande, até 30 cm', price: 1100, onde: 'servico', qty: 'ponto', detail: 'Arranhões longos e pequenos amassados.' },
+      { id: 'reparo-peca', name: 'Peça inteira', price: 2200, onde: 'servico', qty: 'peça', detail: 'Dano maior que 30 cm: pinta a peça toda (porta, capô, para-choque…).' },
+    ] },
   { id: 'protecao', layer: 'south', title: () => 'Proteção', kind: 'check',
     spot: { label: 'Proteção', p: [2.28, 0.6, 0.5], n: [1, 0.1, 0.3] },
     view: { pos: [5.4, 1.5, 1.9], target: [1.8, 0.75, 0] },
@@ -398,7 +415,7 @@ const GROUPS = [
 ];
 
 const state = {
-  layer: 'marchand', mode: 'complexo', active: null,
+  layer: 'marchand', mode: 'complexo', active: null, qty: {},
   radio: { pintura: 'original', pincas: 'original' },
   checks: new Set(),
   notes: {},
@@ -704,8 +721,9 @@ function applyVisuals() {
 /* ---------- Painel ---------- */
 const groupsEl = document.getElementById('groups');
 const offInCasa = o => state.mode === 'casa' && o.onde === 'servico';
-function priceLabel(o) {
+function priceLabel(o, n = 1) {
   if (!o.price) return 'Incluso';
+  if (n > 1) return brl(o.price * n);
   if (o.onde === 'ambos') return state.mode === 'complexo' ? `${brl(o.price + o.inst)}` : brl(o.price);
   return brl(o.price);
 }
@@ -717,6 +735,11 @@ function optDetail(o, g) {
   if (offInCasa(o)) bits.push('Serviço feito no Complexo South.');
   return bits.join(' ');
 }
+const qtyOf = o => (o.qty ? state.qty[o.id] || 1 : 1);
+function qtyControl(o) {
+  const n = qtyOf(o), unit = n === 1 ? o.qty : `${o.qty}s`;
+  return `<span class="qty" data-id="${o.id}"><button type="button" data-step="-1" aria-label="Menos" ${n <= 1 ? 'disabled' : ''}>−</button><output aria-live="polite">${n} ${unit}</output><button type="button" data-step="1" aria-label="Mais" ${n >= 9 ? 'disabled' : ''}>+</button></span>`;
+}
 function renderGroups() {
   groupsEl.innerHTML = '';
   for (const g of GROUPS.filter(g => g.layer === state.layer)) {
@@ -725,7 +748,7 @@ function renderGroups() {
     sec.dataset.layer = g.layer; sec.id = 'g-' + g.id;
     const groupOff = state.mode === 'casa' && g.onde === 'servico';
     const count = g.kind === 'check' ? g.options.filter(o => state.checks.has(o.id)).length : 0;
-    sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : g.layer === 'marchand' ? '' : 'Ver no carro'}</span></button>`;
+    sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}${g.badge ? `<span class="badge">${g.badge}</span>` : ''}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : g.layer === 'marchand' ? '' : 'Ver no carro'}</span></button>`;
     sec.querySelector('.group-head').addEventListener('click', () => focusGroup(g.id, false));
     const note = state.notes[g.id] || (groupOff ? 'Serviço feito no Complexo South. Fica fora do orçamento de envio.' : typeof g.note === 'function' ? g.note() : g.note);
     if (note) sec.insertAdjacentHTML('beforeend', `<p class="group-note${state.notes[g.id] || groupOff ? ' warn' : ''}">${note}</p>`);
@@ -768,9 +791,20 @@ function renderGroups() {
         const detail = optDetail(o, g);
         wrap.insertAdjacentHTML('beforeend', `<label class="opt${off ? ' is-off' : ''}" for="${id}">
           <input type="${g.kind === 'radio' ? 'radio' : 'checkbox'}" name="${g.id}" id="${id}" value="${o.id}" ${checked ? 'checked' : ''} ${off ? 'disabled' : ''}>
-          <span class="box"></span><span class="name">${o.name}</span><span class="price">${priceLabel(o)}</span>
-          ${detail ? `<span class="detail">${detail}</span>` : ''}</label>`);
+          <span class="box"></span><span class="name">${o.name}</span><span class="price">${priceLabel(o, qtyOf(o))}</span>
+          ${detail ? `<span class="detail">${detail}</span>` : ''}
+          ${o.qty && checked && !off ? qtyControl(o) : ''}</label>`);
       }
+      // Botões de quantidade ficam dentro do item: o clique neles não marca/desmarca o item.
+      wrap.addEventListener('click', e => {
+        const b = e.target.closest('.qty button');
+        if (!b) return;
+        e.preventDefault();
+        const id = b.closest('.qty').dataset.id;
+        state.qty[id] = Math.min(9, Math.max(1, qtyOf({ id, qty: true }) + Number(b.dataset.step)));
+        state.active = g.id;
+        update();
+      });
       wrap.addEventListener('change', e => {
         const o = g.options.find(x => x.id === e.target.value);
         delete state.notes[g.id];
@@ -816,8 +850,10 @@ function lineItems() {
     for (const o of picks) {
       const name = g.kind === 'radio' || g.id === 'revisao' ? `${g.title()}, ${o.name}` : o.name;
       if (offInCasa(o)) { skipped.push(name); continue; }
-      const p = o.price + (state.mode === 'complexo' && o.inst ? o.inst : 0);
-      lines.push({ id: o.id || `${g.id}-${state.radio[g.id]}`, name, p, brand });
+      const n = qtyOf(o);
+      const p = (o.price + (state.mode === 'complexo' && o.inst ? o.inst : 0)) * n;
+      const label = g.id === 'reparo' ? `Reparo ${o.name.toLowerCase()}` : name;
+      lines.push({ id: o.id || `${g.id}-${state.radio[g.id]}`, name: n > 1 ? `${label} × ${n}` : label, p, brand });
     }
   }
   return { lines, skipped };
