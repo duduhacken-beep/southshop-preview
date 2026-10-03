@@ -401,6 +401,7 @@ const GROUPS = [
       { id: 'cquartz-kit', name: 'Kit CarPro CQuartz para aplicar em casa', price: 890, onde: 'produto' },
     ] },
   { id: 'carbono', layer: 'south', title: () => 'Carbono', kind: 'check',
+    note: () => (state.mode === 'casa' ? 'Peças em carbono, enviamos para todo o Brasil.' : 'Peças em carbono com instalação inclusa.'),
     spot: { label: 'Carbono', p: [0.45, 1.0, 1.1], n: [0.2, 0.3, 1] },
     view: { pos: [2.2, 1.6, 3.0], target: [0.45, 0.9, 0.8] },
     options: [
@@ -730,7 +731,6 @@ function priceLabel(o, n = 1) {
 function optDetail(o, g) {
   const bits = [];
   if (o.detail) bits.push(o.detail);
-  if (o.onde === 'ambos' && g.layer !== 'marchand') bits.push(state.mode === 'casa' ? 'Enviamos para todo o Brasil.' : `Peça ${brl(o.price)} + instalação ${brl(o.inst)}.`);
   if (o.onde === 'produto') bits.push('Enviamos para todo o Brasil.');
   if (offInCasa(o)) bits.push('Serviço feito no Complexo South.');
   return bits.join(' ');
