@@ -104,6 +104,8 @@ button, select { font: inherit; color: inherit; }
 .sw-custom i { background: conic-gradient(#e33, #ec3, #3c5, #3ae, #73e, #e33); }
 .sw-custom input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
 .sw-custom.is-on i { border-color: var(--white); box-shadow: 0 0 0 3px #000, 0 0 0 5px var(--white); }
+.list-crest { height: 22px; width: auto; margin-right: 10px; vertical-align: -5px; }
+.chip-crest { height: 30px; width: auto; flex: none; }
 .car-dot { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); vertical-align: 1px; }
 .no-3d { position: absolute; right: 16px; top: 16px; max-width: 280px; margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.55); backdrop-filter: blur(10px); color: var(--muted); font-size: 13px; }
 
@@ -279,6 +281,7 @@ button, select { font: inherit; color: inherit; }
       <h1 class="wordmark">Garagem South</h1>
     </div>
     <button type="button" class="car-switch" id="car-switch" aria-haspopup="dialog">
+      <img class="chip-crest" id="car-crest" src="assets/img/brands/porsche.png" alt="">
       <span><small>Seu carro</small><strong id="car-name">Porsche Macan GTS 2015</strong></span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
@@ -1203,7 +1206,7 @@ function renderGarage() {
       <button type="button" class="keep" data-act="keep">Manter</button><button type="button" class="really" data-act="really">Excluir</button></div></li>`;
     return `<li class="garage-row" data-id="${esc(c.id)}">
       <button type="button" class="garage-car" data-act="select" aria-current="${c.id === state.carId}">
-        <strong><i class="car-dot" style="background:${c.cor.hex}" aria-hidden="true"></i>${name}</strong><em class="${has3D(c) ? 'ok' : ''}">${has3D(c) ? 'Ver em 3D' : '3D em breve'}</em><span>${esc(c.ano)}</span></button>
+        <strong>${BRAND_LOGOS[c.marca] ? `<img class="list-crest" src="${BRAND_LOGOS[c.marca]}" alt="">` : ''}<i class="car-dot" style="background:${c.cor.hex}" aria-hidden="true"></i>${name}</strong>${has3D(c) ? '' : '<em>3D em breve</em>'}<span>${esc(c.ano)}</span></button>
       <div class="row-actions">
         <button type="button" class="icon-btn" data-act="edit" aria-label="Editar ${name}" title="Editar">${ICON_EDIT}</button>
         <button type="button" class="icon-btn del" data-act="del" aria-label="Excluir ${name}" title="${solo ? 'A garagem precisa de pelo menos um carro' : 'Excluir'}" ${solo ? 'disabled' : ''}>${ICON_DEL}</button>
@@ -1272,8 +1275,8 @@ function selectCar(id) {
   document.getElementById('stage-title').textContent = carLabel(c);
   // Escudo da marca ao lado do nome (logos em assets/img/brands; marca sem logo fica só com o nome)
   const crest = document.getElementById('stage-brand'), logo = BRAND_LOGOS[c.marca];
-  crest.hidden = !logo;
-  if (logo) { crest.src = logo; crest.alt = c.marca; }
+  for (const el of [crest, document.getElementById('car-crest')]) { el.hidden = !logo; if (logo) el.src = logo; }
+  if (logo) crest.alt = c.marca;
   viewport.setAttribute('aria-label', `${carLabel(c)} em 3D`);
   const note = document.getElementById('no-3d');
   note.hidden = has3D(c);
