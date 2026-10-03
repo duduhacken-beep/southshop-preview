@@ -258,12 +258,6 @@ button, select { font: inherit; color: inherit; }
         <button type="button" id="ctl-lights" aria-pressed="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-3.5 0-6 3-6 7s2.5 7 6 7c1.5 0 2-1 2-7s-.5-7-2-7z"/><path d="M17 8h5M17 12h5M17 16h5"/></svg>Faróis
         </button>
-        <button type="button" id="ctl-doors" aria-pressed="false">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V9l6-5h8v16z"/><path d="M5 12h14M15 15h2"/></svg>Portas
-        </button>
-        <button type="button" id="ctl-trunk" aria-pressed="false">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15l4-6h7l5 3h2v3z"/><path d="M14 9l3-5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>Porta-malas
-        </button>
       </div>
       <button type="button" class="view-reset" id="reset-view">Visão geral</button>
     </section>
@@ -551,7 +545,6 @@ const tailChrome = new THREE.MeshStandardMaterial({ color: 0x8c0c16, metalness: 
 const badgeMat = new THREE.MeshStandardMaterial({ map: tex('badges.png', true), normalMap: tex('badges_n.png'), metalness: 0.7, roughness: 0.25, alphaTest: 0.4 });
 badgeMat.map.channel = 1; badgeMat.normalMap.channel = 1;
 const interiorMat = new THREE.MeshStandardMaterial({ map: tex('interior.png', true), roughness: 0.75 });
-const doorInnerMat = new THREE.MeshStandardMaterial({ color: 0x141518, roughness: 0.7, side: THREE.BackSide }); // forro interno das portas
 const plateMat = new THREE.MeshStandardMaterial({ map: tex('plate.png', true), roughness: 0.4, metalness: 0.2 });
 const MATS = {
   M_Paint_Metal_High: paint, M_Caliper_High: caliperMat, M_BrakeDisc_High: discMat, M_Rim_High: rimMat, M_Tire_High: tireMat,
@@ -584,44 +577,6 @@ function splitByRegion(mesh, classify, materials) {
 }
 
 // O modelo vem embutido em base64 num .js porque o artifact não serve arquivos .glb.
-// Separa de uma malha os triângulos cujo centro passa no teste; devolve a peça nova (ou null).
-function extractRegion(mesh, test) {
-  const g = mesh.geometry, pos = g.attributes.position;
-  const idx = g.index ? Array.from(g.index.array) : [...Array(pos.count).keys()];
-  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), keep = [], take = [];
-  for (let i = 0; i < idx.length; i += 3) {
-    a.fromBufferAttribute(pos, idx[i]); b.fromBufferAttribute(pos, idx[i + 1]); c.fromBufferAttribute(pos, idx[i + 2]);
-    const m = a.add(b).add(c).divideScalar(3).applyMatrix4(mesh.matrixWorld);
-    (test(m) ? take : keep).push(idx[i], idx[i + 1], idx[i + 2]);
-  }
-  if (!take.length) return null;
-  const part = mesh.clone();
-  part.geometry = g.clone();
-  part.geometry.setIndex(take);
-  g.setIndex(keep);
-  mesh.parent.add(part);
-  return part;
-}
-
-// Portas e tampa traseira: o modelo do jogo tem a lataria numa peça só, então o recorte segue as frestas da geometria
-// (medidas no arquivo, frente = +z): porta dianteira z 0,82 → -0,235 (coluna B), traseira até -1,13 contornando o arco.
-function doorZone(m) {
-  if (m.y < 0.12 || m.y > 1.34) return null;
-  if (Math.abs(m.x) < (m.y > 0.92 ? 0.55 : 0.78)) return null; // acima da linha de cintura entra a moldura da janela
-  if (m.z >= -0.235 && m.z < 0.82) return 'F';
-  if (m.z >= -1.13 && m.z < -0.235 && !(m.y < 0.62 && m.z < -0.96)) return 'T';
-  return null;
-}
-const OPENINGS = [
-  { group: 'doors', hinge: [0.96, 0.6, 0.82], axis: 'y', angle: -1.05, test: m => m.x > 0 && doorZone(m) === 'F' },
-  { group: 'doors', hinge: [-0.96, 0.6, 0.82], axis: 'y', angle: 1.05, test: m => m.x < 0 && doorZone(m) === 'F' },
-  { group: 'doors', hinge: [0.96, 0.6, -0.235], axis: 'y', angle: -1.05, test: m => m.x > 0 && doorZone(m) === 'T' },
-  { group: 'doors', hinge: [-0.96, 0.6, -0.235], axis: 'y', angle: 1.05, test: m => m.x < 0 && doorZone(m) === 'T' },
-  { group: 'trunk', hinge: [0, 1.4, -1.72], axis: 'x', angle: 1.15, test: m => m.z < -1.72 && m.y > 0.58 && Math.abs(m.x) < 0.82 },
-];
-const FIXED_PARTS = ['M_Rim_High', 'M_Tire_High', 'M_BrakeDisc_High', 'M_Caliper_High', 'M_Chassis_High'];
-const openings = { doors: [], trunk: [] };
-
 const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 }) => {
   const bytes = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
   return new GLTFLoader().parseAsync(bytes.buffer, './');
@@ -631,31 +586,12 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
   car.updateMatrixWorld(true);
   const wheelParts = [];
   let badges = null;
-  const meshes = [];
-  model.traverse(o => { if (o.isMesh) meshes.push(o); });
-  // 1) recorta portas e tampa em pivôs na dobradiça, antes de aplicar materiais (assim os recortes de pintura valem nelas também)
-  for (const op of OPENINGS) {
-    const pivot = new THREE.Group();
-    pivot.position.set(...op.hinge);
-    pivot.userData = { axis: op.axis, angle: op.angle };
-    model.add(pivot);
-    for (const mesh of meshes.slice()) {
-      if (FIXED_PARTS.includes(mesh.name.replace(/lod0$/, ''))) continue;
-      const part = extractRegion(mesh, op.test);
-      if (!part) continue;
-      pivot.attach(part);
-      meshes.push(part);
-      if (part.name.startsWith('M_Paint')) pivot.userData.paint = part;
-    }
-    openings[op.group].push(pivot);
-  }
-  model.updateMatrixWorld(true);
-  // 2) materiais por peça
-  for (const o of meshes) {
+  model.traverse(o => {
+    if (!o.isMesh) return;
     const name = o.name.replace(/lod0$/, ''); // nome da malha = nome da peça no modelo
     o.castShadow = true;
     if (WHEEL_PARTS.includes(name)) wheelParts.push(o);
-    if (name === 'M_Badges_High' && !badges) badges = o;
+    if (name === 'M_Badges_High') badges = o;
     if (name === 'M_Paint_Metal_High') {
       // UV nova por projeção lateral, para a trama do carbono ficar em escala real (~1,5 cm por célula).
       const uv = [], p = o.geometry.attributes.position, v = new THREE.Vector3();
@@ -669,7 +605,7 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
       }, paintSlots);
     } else if (name === 'M_GlassLights_High') {
       // Mesma malha tem janelas e capas dos faróis/lanternas: capa fica transparente, janela fica fumê.
-      splitByRegion(o, m => (m.z > 1.6 && m.y < 1.0 ? 1 : m.z < -1.9 && m.y < 0.92 ? 2 : 0), [glassMat, lensMat, tailLensMat]); // vidro traseiro começa em y≈0,95
+      splitByRegion(o, m => (m.z > 1.6 && m.y < 1.0 ? 1 : m.z < -2.0 && m.y < 1.02 ? 2 : 0), [glassMat, lensMat, tailLensMat]);
     } else if (name === 'M_LightRefracted_High') {
       splitByRegion(o, m => (m.z > 0 ? 0 : 1), [chrome, tailChrome]); // refletor traseiro é vermelho
     } else if (name === 'M_LightCluster_High') {
@@ -677,15 +613,7 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
     } else {
       o.material = MATS[name] || trim;
     }
-  }
-  // Lado de dentro das portas/tampa: a lataria do jogo é uma casca, então ganha um forro escuro.
-  for (const pivot of [...openings.doors, ...openings.trunk]) {
-    const shell = pivot.userData.paint;
-    if (!shell) continue;
-    const inner = shell.clone();
-    inner.material = doorInnerMat;
-    pivot.add(inner);
-  }
+  });
   // Os brasões das calotas vêm junto com os emblemas da carroceria, no centro da roda: separa e leva pra roda.
   if (badges) {
     const g = badges.geometry, pos = g.attributes.position, idx = Array.from(g.index.array);
@@ -1154,18 +1082,6 @@ function setLights(on, delay = 0) {
   for (const b of beams) gsap.to(b, { intensity: on ? 55 : 0, ...t });
 }
 lightsBtn.addEventListener('click', () => setLights(lightsBtn.getAttribute('aria-pressed') !== 'true'));
-
-// Portas e porta-malas: giram na dobradiça.
-function toggleOpening(btn, pivots) {
-  const open = btn.getAttribute('aria-pressed') !== 'true';
-  btn.setAttribute('aria-pressed', open);
-  controls.autoRotate = false;
-  pivots.forEach((p, i) => gsap.to(p.rotation, { [p.userData.axis]: open ? p.userData.angle : 0,
-    duration: reduced ? 0 : 1.1, delay: reduced ? 0 : i * 0.08, ease: 'power2.inOut', overwrite: true }));
-}
-const doorsBtn = document.getElementById('ctl-doors'), trunkBtn = document.getElementById('ctl-trunk');
-doorsBtn.addEventListener('click', () => toggleOpening(doorsBtn, openings.doors));
-trunkBtn.addEventListener('click', () => toggleOpening(trunkBtn, openings.trunk));
 
 if (reduced) setLights(true);
 else {
