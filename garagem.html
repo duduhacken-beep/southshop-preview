@@ -121,8 +121,6 @@ button, select { font: inherit; color: inherit; }
 .car-controls button:hover:not([aria-pressed="true"]) { color: var(--white); }
 .view-reset { position: absolute; right: 16px; bottom: 16px; border: 1px solid var(--line); background: rgba(0,0,0,.45); backdrop-filter: blur(10px); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; min-height: 40px; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
-.model-credit { position: absolute; left: 22px; top: 60px; color: var(--muted); font-size: 11px; opacity: .7; text-decoration: none; }
-.model-credit:hover { opacity: 1; text-decoration: underline; }
 .drag-hint { position: absolute; left: 22px; bottom: 20px; color: var(--muted); font-size: 13px; pointer-events: none; }
 
 /* Pontos clicáveis */
@@ -209,9 +207,7 @@ button, select { font: inherit; color: inherit; }
 @media (max-width: 560px) {
   .spot .tag { display: none; }
   .spot.is-active .tag { display: block; }
-  .model-credit { position: absolute; left: 22px; top: 60px; color: var(--muted); font-size: 11px; opacity: .7; text-decoration: none; }
-.model-credit:hover { opacity: 1; text-decoration: underline; }
-.drag-hint { display: none; }
+  .drag-hint { display: none; }
   .car-controls { left: 16px; transform: none; }
   .mode { width: 100%; }
   .mode button { flex: 1; }
@@ -258,7 +254,6 @@ button, select { font: inherit; color: inherit; }
       <p class="loading" id="loading">Carregando a Macan…</p>
       <p class="no-3d" id="no-3d" hidden></p>
       <span class="drag-hint">Arraste para girar, use o scroll para aproximar</span>
-      <a class="model-credit" href="https://sketchfab.com/3d-models/porsche-macan-gts-2020-c17ff4da1bf446da96878fb50f9ff897" target="_blank" rel="noopener">Modelo 3D: “Porsche Macan GTS 2020” por Nieve5677, CC BY 4.0</a>
       <div class="car-controls" role="toolbar" aria-label="Controles do carro">
         <button type="button" id="ctl-lights" aria-pressed="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-3.5 0-6 3-6 7s2.5 7 6 7c1.5 0 2-1 2-7s-.5-7-2-7z"/><path d="M17 8h5M17 12h5M17 16h5"/></svg>Faróis
@@ -326,7 +321,6 @@ button, select { font: inherit; color: inherit; }
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const brl = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -351,7 +345,7 @@ const GROUPS = [
   { id: 'revisao', layer: 'marchand', title: () => 'Revisão', kind: 'radio',
     note: 'Peças originais separadas pela Marchand Peças para o seu carro.',
     spot: { label: 'Revisão', p: [1.6, 0.98, 0], n: [0.35, 1, 0] },
-    view: { pos: [5.4, 2.5, 2.6], target: [1.2, 0.85, 0] },
+    view: { pos: [4.6, 2.9, 1.9], target: [1.3, 0.9, 0] },
     options: [
       { id: 'nao', name: 'Agora não', price: 0 },
       { id: 'essencial', name: 'Essencial', price: 2900, onde: 'servico',
@@ -390,8 +384,8 @@ const GROUPS = [
       { id: 'cquartz-kit', name: 'Kit CarPro CQuartz para aplicar em casa', price: 890, onde: 'produto' },
     ] },
   { id: 'carbono', layer: 'south', title: () => 'Carbono', kind: 'check',
-    spot: { label: 'Carbono', p: [0.66, 1.1, 1.06], n: [0.2, 0.3, 1] },
-    view: { pos: [2.4, 1.7, 3.0], target: [0.66, 1.0, 0.85] },
+    spot: { label: 'Carbono', p: [0.45, 1.0, 1.1], n: [0.2, 0.3, 1] },
+    view: { pos: [2.2, 1.6, 3.0], target: [0.45, 0.9, 0.8] },
     options: [
       { id: 'capa-retro', name: 'Capas de retrovisor em carbono', price: 3200, inst: 300, onde: 'ambos' },
       { id: 'blades', name: 'Side blades em carbono', price: 3800, inst: 500, onde: 'ambos' },
@@ -491,6 +485,15 @@ const contactShadow = (() => {
 scene.add(contactShadow);
 
 // Materiais
+// Texturas originais do modelo (brasão/letreiros, interior, faróis, pneu, disco, pinça, placa). UV de glTF: flipY desligado.
+const texLoader = new THREE.TextureLoader();
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+function tex(file, color = false) {
+  const t = texLoader.load(`assets/models/macan-tex/${file}`);
+  t.flipY = false; t.anisotropy = maxAniso;
+  if (color) t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
 // Flocos metálicos: ruído fino como normal map da pintura (o verniz por cima continua liso).
 const flakes = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 256;
@@ -507,12 +510,14 @@ const flakes = (() => {
 const paint = new THREE.MeshPhysicalMaterial({ color: PAINTS[0].hex, metalness: 0.6, roughness: 0.38, normalMap: flakes, normalScale: new THREE.Vector2(0.12, 0.12),
   clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1 });
 const trim = new THREE.MeshStandardMaterial({ color: 0x0c0d10, roughness: 0.42, metalness: 0.1 });
-const gloss = new THREE.MeshPhysicalMaterial({ color: 0x050506, roughness: 0.15, metalness: 0.2, clearcoat: 1 }); // preto brilhante dos frisos GTS
-const tireMat = new THREE.MeshStandardMaterial({ color: 0x18181a, roughness: 0.92, envMapIntensity: 0.4 });
-const rimMat = new THREE.MeshStandardMaterial({ color: 0xd2d6dc, metalness: 0.75, roughness: 0.32, envMapIntensity: 1.8 });
-const discMat = new THREE.MeshStandardMaterial({ color: 0x6a6e74, metalness: 0.9, roughness: 0.42 });
-const caliperMat = new THREE.MeshPhysicalMaterial({ color: CALIPERS[0].hex, roughness: 0.3, clearcoat: 1 });
-const headMat = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 0.85, roughness: 0.18, emissive: 0xeef4ff, emissiveIntensity: 0 });
+const tireMat = new THREE.MeshStandardMaterial({ color: 0x18181a, roughness: 0.92, normalMap: tex('tire_n.png'), envMapIntensity: 0.4 });
+const rimMat = new THREE.MeshStandardMaterial({ color: 0xd2d6dc, metalness: 0.75, roughness: 0.32, normalMap: tex('rim_n.png'), envMapIntensity: 1.8 });
+const discMat = new THREE.MeshStandardMaterial({ map: tex('disc.png', true), normalMap: tex('disc_n.png'), metalness: 0.9, roughness: 0.4 });
+const caliperMat = new THREE.MeshPhysicalMaterial({ color: CALIPERS[0].hex, roughness: 0.3, clearcoat: 1, normalMap: tex('caliper_n.png') });
+const lightsTex = tex('lights.png', true), lightsN = tex('lights_n.png');
+// Máscaras de emissão originais do modelo: canal verde = faróis/luz diurna, canal vermelho = lanternas.
+const headMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, metalness: 0.6, roughness: 0.15, emissive: 0xeef4ff, emissiveMap: tex('lights_e_head.png'), emissiveIntensity: 0 });
+const tailMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, color: 0xff3040, metalness: 0.3, roughness: 0.2, emissive: 0xff1a2a, emissiveMap: tex('lights_e_tail.png'), emissiveIntensity: 0 });
 const carbon = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d');
@@ -527,25 +532,31 @@ const carbon = (() => {
   return new THREE.MeshPhysicalMaterial({ map: t, metalness: 0.3, roughness: 0.35, clearcoat: 1, clearcoatRoughness: 0.03 });
 })();
 
-// Modelo: "Porsche Macan GTS 2020" por Nieve5677 (niev), Sketchfab, CC BY 4.0 — uso comercial permitido com crédito.
-// https://sketchfab.com/3d-models/porsche-macan-gts-2020-c17ff4da1bf446da96878fb50f9ff897
-// O arquivo vem sem materiais (fundido por cor em blocos Object_N); os materiais abaixo são aplicados por bloco e região.
+// Modelo: Porsche Macan GTS 2015 (Sketchfab, VuckyZ123, CC BY-NC-SA). Uso só para apresentação, não para o site comercial.
+// Convertido de FBX para GLB sem as texturas do jogo; os materiais abaixo são aplicados pelo nome de cada malha.
 const car = new THREE.Group();
 scene.add(car);
 const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x0b0e14, metalness: 0, roughness: 0, clearcoat: 1, transparent: true, opacity: 0.5, envMapIntensity: 1.6 });
+const tailLensMat = new THREE.MeshPhysicalMaterial({ color: 0x8a0a14, metalness: 0, roughness: 0.05, clearcoat: 1, transparent: true, opacity: 0.8, emissive: 0xff1020, emissiveIntensity: 0 });
 const lensMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0, clearcoat: 1, transparent: true, opacity: 0.12, envMapIntensity: 1.2 });
-const tailLensMat = new THREE.MeshPhysicalMaterial({ color: 0x8a0a14, metalness: 0, roughness: 0.05, clearcoat: 1, transparent: true, opacity: 0.85, emissive: 0xff1020, emissiveIntensity: 0 });
 const chrome = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 1, roughness: 0.12 });
-const crestMat = new THREE.MeshStandardMaterial({ color: 0xc8a24a, metalness: 1, roughness: 0.25 }); // brasão sem textura: dourado
-const exhaustMat = new THREE.MeshStandardMaterial({ color: 0x2a2c30, metalness: 1, roughness: 0.3 });
-const interiorMat = new THREE.MeshStandardMaterial({ color: 0x17181b, roughness: 0.75 });
-const plateMat = new THREE.MeshStandardMaterial({ color: 0xe8ebef, roughness: 0.4, metalness: 0.2 });
-const mirrorMeshes = []; // malhas com o grupo das capas dos retrovisores (pintura ou carbono)
-const bladeSlots = [trim, trim, paint]; // 0 frisos pretos, 1 side blades (preto ou carbono), 2 trecho do para-lama dianteiro
-
-const RIMS = ['Object_2', 'Object_3', 'Object_4', 'Object_5', 'Object_6'];
-const TIRES = [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 43, 45, 47].map(n => `Object_${n}`);
-const BODY = ['Object_11', 'Object_13'];
+const tailChrome = new THREE.MeshStandardMaterial({ color: 0x8c0c16, metalness: 1, roughness: 0.25, emissive: 0xff1020, emissiveIntensity: 0 });
+// Os emblemas usam o 2º mapa de UV do modelo (o 1º vem colapsado nessa peça).
+const badgeMat = new THREE.MeshStandardMaterial({ map: tex('badges.png', true), normalMap: tex('badges_n.png'), metalness: 0.7, roughness: 0.25, alphaTest: 0.4 });
+badgeMat.map.channel = 1; badgeMat.normalMap.channel = 1;
+const interiorMat = new THREE.MeshStandardMaterial({ map: tex('interior.png', true), roughness: 0.75 });
+const plateMat = new THREE.MeshStandardMaterial({ map: tex('plate.png', true), roughness: 0.4, metalness: 0.2 });
+const MATS = {
+  M_Paint_Metal_High: paint, M_Caliper_High: caliperMat, M_BrakeDisc_High: discMat, M_Rim_High: rimMat, M_Tire_High: tireMat,
+  M_GlassLights_High: glassMat, M_GlassColor_High: tailLensMat, M_GlassSurround_High: trim, M_Opaque_PlasticSmooth_High: trim,
+  M_Chassis_High: trim, M_Grille_A_High: trim, M_Opaque_ExhaustGlow_High: trim, M_Internal_Interior_High: interiorMat,
+  M_Badges_High: badgeMat, M_LightRefracted_High: chrome, M_LicensePlate_High: plateMat,
+};
+const WHEEL_PARTS = ['M_Rim_High', 'M_Tire_High', 'M_BrakeDisc_High', 'M_Caliper_High'];
+// Centro das rodas tirado das juntas do arquivo original do jogo (frente = +z): entre-eixos 2,81 m, bitola 1,65 m.
+const WHEELS = [[0.824, 1.405], [-0.824, 1.405], [0.824, -1.405], [-0.824, -1.405]];
+const WHEEL_Y = 0.195;
+const paintSlots = [paint, paint, paint]; // 0 carroceria, 1 retrovisores, 2 laterais (side blades)
 
 // Separa os triângulos de uma malha em grupos de material, pela posição do centro de cada triângulo.
 function splitByRegion(mesh, classify, materials) {
@@ -564,54 +575,71 @@ function splitByRegion(mesh, classify, materials) {
   buckets.forEach((bk, i) => { g.addGroup(start, bk.length, i); start += bk.length; });
   mesh.material = materials;
 }
-// UV por projeção (o modelo não tem UV): flocos da pintura e trama do carbono em escala real (~1,5 cm por célula).
-function projectUV(mesh) {
-  const p = mesh.geometry.attributes.position, v = new THREE.Vector3(), uv = [];
-  for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).applyMatrix4(mesh.matrixWorld); uv.push((v.x + v.z) * 8, v.y * 8); }
-  mesh.geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-}
 
-// Coordenadas abaixo em metros, no sistema do arquivo: frente = −x, chão em y = 0, largura em z.
-const isMirror = m => Math.abs(m.z) > 0.88 && m.y > 0.88 && m.x > -0.9 && m.x < -0.45;
-const loadCar = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('assets/models/macan-gts-2020.glb').then(gltf => {
+// O modelo vem embutido em base64 num .js porque o artifact não serve arquivos .glb.
+const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 }) => {
+  const bytes = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
+  return new GLTFLoader().parseAsync(bytes.buffer, './');
+}).then(gltf => {
   const model = gltf.scene;
-  model.scale.setScalar(0.001); // arquivo em milímetros
   car.add(model);
   car.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(model);
-  model.position.set(-(box.min.x + box.max.x) / 2, -box.min.y, -(box.min.z + box.max.z) / 2);
-  car.updateMatrixWorld(true);
+  const wheelParts = [];
+  let badges = null;
   model.traverse(o => {
     if (!o.isMesh) return;
-    const n = o.name;
+    const name = o.name.replace(/lod0$/, ''); // nome da malha = nome da peça no modelo
     o.castShadow = true;
-    if (RIMS.includes(n)) o.material = rimMat;
-    else if (TIRES.includes(n)) o.material = tireMat;
-    else if (n === 'Object_7') o.material = discMat;
-    else if (n === 'Object_8' || n === 'Object_9') o.material = caliperMat;
-    else if (n === 'Object_19') o.material = plateMat;
-    else if (n === 'Object_20') o.material = exhaustMat;
-    else if (BODY.includes(n)) { projectUV(o); o.material = paint; }
-    else if (n === 'Object_12') { // capô e para-lamas + lentes das lanternas na traseira
-      projectUV(o);
-      splitByRegion(o, m => (m.x > 2.0 ? 1 : 0), [paint, tailLensMat]);
-    } else if (n === 'Object_14') { // todos os vidros: capas dos faróis, lanternas e o brasão do capô vêm juntos
-      splitByRegion(o, m => (m.x < -2.0 && Math.abs(m.z) < 0.07 && m.y > 0.8 ? 3 : m.x < -1.8 && m.y < 0.95 ? 1 : m.x > 2.05 && m.y < 1.0 ? 2 : 0),
-        [glassMat, lensMat, tailLensMat, crestMat]);
-    } else if (n === 'Object_15') { // frisos preto brilhante + barra de luz traseira
-      splitByRegion(o, m => (m.x > 2.05 && m.y > 0.8 && m.y < 1.05 ? 1 : 0), [gloss, tailLensMat]);
-    } else if (n === 'Object_16') { // detalhes pretos GTS; as aletas laterais podem virar carbono
-      projectUV(o);
-      splitByRegion(o, m => (Math.abs(m.z) > 0.8 && m.y > 0.3 && m.x > -1.3 && m.x < -0.78 ? 2 : Math.abs(m.z) > 0.85 && m.y < 0.45 && m.x > -0.78 && m.x < 0.95 ? 1 : 0), bladeSlots);
-    } else if (n === 'Object_17') { // retrovisores, painel da tampa, interior dos faróis e grade
-      projectUV(o);
-      splitByRegion(o, m => (isMirror(m) ? 1 : m.x > 1.9 && m.y > 0.5 ? 0 : m.x < -1.8 && Math.abs(m.z) > 0.35 && m.y > 0.55 ? 3 : 2),
-        [paint, paint, gloss, headMat]);
-      mirrorMeshes.push(o);
-    } else if (/^Object_(2[1-5]|42|44|46)$/.test(n)) o.material = interiorMat;
-    else o.material = trim;
+    if (WHEEL_PARTS.includes(name)) wheelParts.push(o);
+    if (name === 'M_Badges_High') badges = o;
+    if (name === 'M_Paint_Metal_High') {
+      // UV nova por projeção lateral, para a trama do carbono ficar em escala real (~1,5 cm por célula).
+      const uv = [], p = o.geometry.attributes.position, v = new THREE.Vector3();
+      for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld); uv.push(v.z * 8, v.y * 8); }
+      o.geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+      splitByRegion(o, m => {
+        const side = Math.abs(m.x);
+        if (side > 0.89 && m.y > 0.86 && m.z > 0.28 && m.z < 0.62) return 1;
+        if (side > 0.9 && m.y > 0.12 && m.y < 0.4 && m.z > -0.85 && m.z < 0.9) return 2;
+        return 0;
+      }, paintSlots);
+    } else if (name === 'M_GlassLights_High') {
+      // Mesma malha tem janelas e capas dos faróis/lanternas: capa fica transparente, janela fica fumê.
+      splitByRegion(o, m => (m.z > 1.6 && m.y < 1.0 ? 1 : m.z < -1.9 && m.y < 0.92 ? 2 : 0), [glassMat, lensMat, tailLensMat]); // vidro traseiro começa em y≈0,95
+    } else if (name === 'M_LightRefracted_High') {
+      splitByRegion(o, m => (m.z > 0 ? 0 : 1), [chrome, tailChrome]); // refletor traseiro é vermelho
+    } else if (name === 'M_LightCluster_High') {
+      splitByRegion(o, m => (m.z > 0 ? 0 : 1), [headMat, tailMat]);
+    } else {
+      o.material = MATS[name] || trim;
+    }
   });
-  car.rotation.y = Math.PI; // frente do carro para +x da cena
+  // Os brasões das calotas vêm junto com os emblemas da carroceria, no centro da roda: separa e leva pra roda.
+  if (badges) {
+    const g = badges.geometry, pos = g.attributes.position, idx = Array.from(g.index.array);
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), body = [], cap = [];
+    for (let i = 0; i < idx.length; i += 3) {
+      a.fromBufferAttribute(pos, idx[i]); b.fromBufferAttribute(pos, idx[i + 1]); c.fromBufferAttribute(pos, idx[i + 2]);
+      const m = a.add(b).add(c).divideScalar(3).applyMatrix4(badges.matrixWorld);
+      (Math.abs(m.z) < 0.35 && Math.abs(m.y) < 0.35 && Math.abs(m.x) < 0.2 ? cap : body).push(idx[i], idx[i + 1], idx[i + 2]);
+    }
+    const capMesh = badges.clone();
+    capMesh.geometry = g.clone();
+    capMesh.geometry.setIndex(cap);
+    g.setIndex(body);
+    badges.parent.add(capMesh);
+    wheelParts.push(capMesh);
+  }
+  // As peças da roda vêm uma vez só, centradas na origem: monta as 4 rodas.
+  const proto = new THREE.Group();
+  for (const part of wheelParts) proto.attach(part); // attach mantém o deslocamento interno de cada peça
+  for (const [x, z] of WHEELS) {
+    const w = proto.clone();
+    w.position.set(x, WHEEL_Y, z);
+    if (x < 0) w.scale.x = -1;
+    car.add(w);
+  }
+  car.rotation.y = Math.PI / 2; // frente do carro para +x da cena
   car.updateMatrixWorld(true);
   car.position.y = -new THREE.Box3().setFromObject(car).min.y; // pneus apoiados no pódio
 });
@@ -669,8 +697,8 @@ function tweenColor(mat, hex) {
 function applyVisuals() {
   tweenColor(paint, swatchItem(GROUPS.find(g => g.id === 'pintura'), PAINTS.find(p => p.id === state.radio.pintura)).hex);
   tweenColor(caliperMat, CALIPERS.find(p => p.id === state.radio.pincas).hex);
-  for (const m of mirrorMeshes) m.material[1] = state.checks.has('capa-retro') ? carbon : paint;
-  bladeSlots[1] = state.checks.has('blades') ? carbon : trim;
+  paintSlots[1] = state.checks.has('capa-retro') ? carbon : paint;
+  paintSlots[2] = state.checks.has('blades') ? carbon : paint;
 }
 
 /* ---------- Painel ---------- */
@@ -1047,8 +1075,10 @@ const lightsBtn = document.getElementById('ctl-lights');
 function setLights(on, delay = 0) {
   lightsBtn.setAttribute('aria-pressed', on);
   const t = { duration: reduced ? 0 : 0.45, delay: reduced ? 0 : delay, overwrite: true };
-  gsap.to(headMat, { emissiveIntensity: on ? 1.6 : 0, ...t });
+  gsap.to(headMat, { emissiveIntensity: on ? 8 : 0, ...t });
+  gsap.to(tailMat, { emissiveIntensity: on ? 5 : 0, ...t });
   gsap.to(tailLensMat, { emissiveIntensity: on ? 1.4 : 0, ...t });
+  gsap.to(tailChrome, { emissiveIntensity: on ? 0.8 : 0, ...t });
   for (const b of beams) gsap.to(b, { intensity: on ? 55 : 0, ...t });
 }
 lightsBtn.addEventListener('click', () => setLights(lightsBtn.getAttribute('aria-pressed') !== 'true'));
