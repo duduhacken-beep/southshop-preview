@@ -405,9 +405,9 @@ const GROUPS = [
     spot: { label: 'Carbono', p: [0.45, 1.0, 1.1], n: [0.2, 0.3, 1] },
     view: { pos: [2.2, 1.6, 3.0], target: [0.45, 0.9, 0.8] },
     options: [
-      { id: 'capa-retro', name: 'Capas de retrovisor em carbono', price: 3200, inst: 300, onde: 'ambos' },
-      { id: 'blades', name: 'Side blades em carbono', price: 3800, inst: 500, onde: 'ambos' },
-      { id: 'console', name: 'Moldura do console interno em carbono', price: 2300, inst: 250, onde: 'ambos' },
+      { id: 'capa-retro', name: 'Capas de retrovisor em carbono', price: 3200, inst: 300, onde: 'ambos', view: { pos: [2.4, 1.7, 3.0], target: [0.8, 1.0, 0.8] } },
+      { id: 'blades', name: 'Side blades em carbono', price: 3800, inst: 500, onde: 'ambos', view: { pos: [0.6, 0.75, 4.0], target: [-0.2, 0.4, 0.8] } },
+      { id: 'console', name: 'Moldura do console interno em carbono', price: 2300, inst: 250, onde: 'ambos' }, // interior: não aparece bem no 3D deste modelo
     ] },
   { id: 'pincas', layer: 'south', title: () => 'Pinças de freio', kind: 'swatch', items: CALIPERS, onde: 'servico',
     note: 'Pintura das pinças pela South Paint.',
@@ -567,13 +567,14 @@ const plateMat = new THREE.MeshStandardMaterial({ map: tex('plate.png', true), r
 const MATS = {
   M_Paint_Metal_High: paint, M_Caliper_High: caliperMat, M_BrakeDisc_High: discMat, M_Rim_High: rimMat, M_Tire_High: tireMat,
   M_GlassLights_High: glassMat, M_GlassColor_High: tailLensMat, M_GlassSurround_High: trim, M_Opaque_PlasticSmooth_High: trim,
-  M_Chassis_High: trim, M_Grille_A_High: trim, M_Opaque_ExhaustGlow_High: trim, M_Internal_Interior_High: interiorMat,
+  M_Chassis_High: trim, M_Grille_A_High: trim, M_Opaque_ExhaustGlow_High: trim,
   M_Badges_High: badgeMat, M_LightRefracted_High: chrome, M_LicensePlate_High: plateMat,
 };
 const WHEEL_PARTS = ['M_Rim_High', 'M_Tire_High', 'M_BrakeDisc_High', 'M_Caliper_High'];
 // Centro das rodas tirado das juntas do arquivo original do jogo (frente = +z): entre-eixos 2,81 m, bitola 1,65 m.
 const WHEELS = [[0.824, 1.405], [-0.824, 1.405], [0.824, -1.405], [-0.824, -1.405]];
 const WHEEL_Y = 0.195;
+const consoleSlots = [interiorMat, interiorMat]; // 0 interior, 1 moldura do console (original ou carbono)
 const paintSlots = [paint, paint, paint]; // 0 carroceria, 1 retrovisores, 2 laterais (side blades)
 
 // Separa os triângulos de uma malha em grupos de material, pela posição do centro de cada triângulo.
@@ -626,6 +627,9 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
       splitByRegion(o, m => (m.z > 1.6 && m.y < 1.0 ? 1 : m.z < -1.9 && m.y < 0.92 ? 2 : 0), [glassMat, lensMat, tailLensMat]); // vidro traseiro começa em y≈0,95
     } else if (name === 'M_LightRefracted_High') {
       splitByRegion(o, m => (m.z > 0 ? 0 : 1), [chrome, tailChrome]); // refletor traseiro é vermelho
+    } else if (name === 'M_Internal_Interior_High') {
+      // Console central (entre os bancos, do câmbio até o painel) pode virar carbono.
+      splitByRegion(o, m => (Math.abs(m.x) < 0.14 && m.y > 0.4 && m.y < 0.85 && m.z > -0.35 && m.z < 0.8 ? 1 : 0), consoleSlots);
     } else if (name === 'M_LightCluster_High') {
       splitByRegion(o, m => (m.z > 0 ? 0 : 1), [headMat, tailMat]);
     } else {
@@ -717,6 +721,7 @@ function applyVisuals() {
   tweenColor(caliperMat, CALIPERS.find(p => p.id === state.radio.pincas).hex);
   paintSlots[1] = state.checks.has('capa-retro') ? carbon : paint;
   paintSlots[2] = state.checks.has('blades') ? carbon : paint;
+  consoleSlots[1] = state.checks.has('console') ? carbon : interiorMat;
 }
 
 /* ---------- Painel ---------- */
@@ -813,6 +818,7 @@ function renderGroups() {
           state.checks.add(o.id);
           for (const x of o.excl || []) if (state.checks.delete(x)) state.notes[g.id] = `${o.name} já cobre ${g.options.find(y => y.id === x).name.toLowerCase()}, então tiramos o item repetido.`;
           for (const x of o.troca || []) state.checks.delete(x);
+          if (o.view) fly(o.view); // mostra no carro a peça que acabou de ser escolhida
         } else state.checks.delete(o.id);
         state.active = g.id;
         update();
