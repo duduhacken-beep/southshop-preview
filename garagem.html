@@ -605,7 +605,7 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
       }, paintSlots);
     } else if (name === 'M_GlassLights_High') {
       // Mesma malha tem janelas e capas dos faróis/lanternas: capa fica transparente, janela fica fumê.
-      splitByRegion(o, m => (m.z > 1.6 && m.y < 1.0 ? 1 : m.z < -2.0 && m.y < 1.02 ? 2 : 0), [glassMat, lensMat, tailLensMat]);
+      splitByRegion(o, m => (m.z > 1.6 && m.y < 1.0 ? 1 : m.z < -1.9 && m.y < 0.92 ? 2 : 0), [glassMat, lensMat, tailLensMat]); // vidro traseiro começa em y≈0,95
     } else if (name === 'M_LightRefracted_High') {
       splitByRegion(o, m => (m.z > 0 ? 0 : 1), [chrome, tailChrome]); // refletor traseiro é vermelho
     } else if (name === 'M_LightCluster_High') {
