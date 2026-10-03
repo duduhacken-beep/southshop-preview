@@ -333,6 +333,7 @@ const PAINTS = [
   { id: 'verde', label: 'Verde Inglês', hex: '#1d3a2b', price: 38000 },
   { id: 'gelo', label: 'Branco Gelo', hex: '#dcdfe2', price: 34000 },
   { id: 'onix', label: 'Preto Ônix', hex: '#0b0c0f', price: 34000 },
+  { id: 'custom', label: 'Cor personalizada', hex: '#5a3e2b', price: 38000, custom: true },
 ];
 const CALIPERS = [
   { id: 'original', label: 'Original (preto)', hex: '#141518', price: 0 },
@@ -734,9 +735,27 @@ function renderGroups() {
       wrap.setAttribute('role', 'radiogroup'); wrap.setAttribute('aria-label', g.title());
       for (const raw of g.items) {
         const it = swatchItem(g, raw), id = `${g.id}-${it.id}`;
+        if (raw.custom) {
+          const on = state.radio[g.id] === it.id;
+          wrap.insertAdjacentHTML('beforeend', `<label class="sw sw-custom${on ? ' is-on' : ''}" title="Escolher outra cor"><input type="color" id="${id}" value="${it.hex}" aria-label="Escolher outra cor"><i${on ? ` style="background:${it.hex}"` : ''}></i></label>`);
+          continue;
+        }
         wrap.insertAdjacentHTML('beforeend', `<label class="sw" title="${esc(it.label)}"><input type="radio" name="${g.id}" id="${id}" value="${it.id}" ${state.radio[g.id] === it.id ? 'checked' : ''} aria-label="${esc(it.label)}"><i style="background:${it.hex}"></i></label>`);
       }
-      wrap.addEventListener('change', e => { state.radio[g.id] = e.target.value; state.active = g.id; update(); });
+      wrap.addEventListener('change', e => {
+        if (e.target.type === 'color') { state.customPaint = e.target.value; state.radio[g.id] = 'custom'; state.active = g.id; update(); return; }
+        state.radio[g.id] = e.target.value; state.active = g.id; update();
+      });
+      // Enquanto arrasta no seletor: pinta o carro ao vivo sem redesenhar o painel (redesenhar fecharia o seletor).
+      wrap.addEventListener('input', e => {
+        if (e.target.type !== 'color') return;
+        state.customPaint = e.target.value; state.radio[g.id] = 'custom';
+        for (const r of wrap.querySelectorAll('input[type="radio"]')) r.checked = false;
+        const sw = e.target.closest('.sw-custom'); sw.classList.add('is-on'); sw.querySelector('i').style.background = e.target.value;
+        paint.color.set(e.target.value);
+        const cap = sec.querySelector('.sw-caption');
+        cap.innerHTML = `<b>Cor personalizada (${e.target.value.toUpperCase()})</b><span>${brl(PAINTS.find(p => p.custom).price)}</span>`;
+      });
       sec.append(wrap);
       const cur = swatchItem(g, g.items.find(i => i.id === state.radio[g.id]));
       sec.insertAdjacentHTML('beforeend', `<div class="sw-caption"><b>${esc(cur.label)}</b><span>${cur.price ? brl(cur.price) : 'Sem custo'}</span></div>`);
@@ -791,7 +810,7 @@ function lineItems() {
     if (g.kind === 'check') picks = g.options.filter(o => state.checks.has(o.id));
     else if (g.kind === 'radio') picks = g.options.filter(o => o.id === state.radio[g.id] && o.price);
     else {
-      const it = g.items.find(i => i.id === state.radio[g.id]);
+      const it = swatchItem(g, g.items.find(i => i.id === state.radio[g.id]));
       if (it.price) picks = [{ name: `${g.title()}: ${it.label}`, price: it.price, onde: g.onde }];
     }
     for (const o of picks) {
@@ -903,6 +922,10 @@ garage = garage.map(c => (c.cor && isHex(c.cor.hex) ? c : { ...c, cor: FACTORY_C
 state.carId = garage[0].id;
 const currentCar = () => garage.find(c => c.id === state.carId) || garage[0];
 function swatchItem(g, it) {
+  if (g.id === 'pintura' && it.custom) {
+    const hex = state.customPaint || it.hex;
+    return { ...it, hex, label: `Cor personalizada (${hex.toUpperCase()})` };
+  }
   if (g.id !== 'pintura' || it.id !== 'original') return it;
   const cor = currentCar().cor;
   return { ...it, hex: cor.hex, label: `Cor original (${cor.nome})` };
