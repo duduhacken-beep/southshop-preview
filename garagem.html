@@ -190,12 +190,10 @@ button, select { font: inherit; color: inherit; }
 .total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .total span { color: var(--muted); font-size: 14px; }
 .total strong { font: 600 34px/1 var(--cond); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
-.example-note { margin: 4px 0 12px; color: var(--muted); font-size: 12px; }
-.actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-.cta { border: 0; border-radius: 12px; padding: 13px 16px; background: var(--white); color: #000; font-weight: 600; cursor: pointer; min-height: 46px; }
-.ghost { border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; background: none; cursor: pointer; min-height: 46px; }
-.feedback { margin: 10px 0 0; font-size: 13px; color: var(--muted); min-height: 1em; }
-#copy-fallback { width: 100%; margin-top: 8px; min-height: 120px; background: #05070c; color: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: 12px/1.5 var(--sans); }
+.total { margin-bottom: 14px; }
+.cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; border-radius: 12px; padding: 14px 16px; background: var(--white); color: #000; font-weight: 600; text-decoration: none; min-height: 50px; transition: transform .2s, box-shadow .2s; }
+.cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(244,246,249,.12); }
+.cta svg { width: 20px; height: 20px; flex: none; }
 
 @media (max-width: 980px) {
   .stage { grid-template-columns: 1fr; }
@@ -271,14 +269,11 @@ button, select { font: inherit; color: inherit; }
       <section class="summary" aria-live="polite">
         <ul class="summary-lines" id="lines"></ul>
         <p class="skipped" id="skipped" hidden></p>
-        <div class="total"><span>Total estimado</span><strong id="total">R$ 0</strong></div>
-        <p class="example-note">Valores de exemplo para apresentação. Carbono usa a referência da pesquisa de kits; o resto será definido com Marchand e South.</p>
-        <div class="actions">
-          <button type="button" class="cta" id="cta">Agendar no Complexo South</button>
-          <button type="button" class="ghost" id="copy">Copiar orçamento</button>
-        </div>
-        <p class="feedback" id="feedback"></p>
-        <textarea id="copy-fallback" readonly hidden aria-label="Texto do orçamento"></textarea>
+        <div class="total" id="total-row" hidden><span>Total estimado</span><strong id="total">R$ 0</strong></div>
+        <a class="cta" id="cta" href="https://wa.me/554732241691" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#fff" d="M17.2 14.3c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1a7.6 7.6 0 0 1-3.8-3.3c-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2c-.2-.6-.5-.5-.7-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.5-.3z"/></svg>
+          Agendar no Complexo South
+        </a>
       </section>
     </aside>
   </main>
@@ -813,34 +808,23 @@ function renderSummary() {
   const sk = document.getElementById('skipped');
   sk.hidden = !skipped.length;
   sk.textContent = skipped.length === 1 ? 'Um serviço ficou de fora porque só é feito no Complexo South.' : skipped.length ? `${skipped.length} serviços ficaram de fora porque só são feitos no Complexo South.` : '';
+  document.getElementById('total-row').hidden = total === 0;
   if (reduced) { totalShown.v = total; totalEl.textContent = brl(total); }
   else gsap.to(totalShown, { v: total, duration: 0.6, ease: 'power2.out', overwrite: true, onUpdate: () => { totalEl.textContent = brl(Math.round(totalShown.v)); } });
-  document.getElementById('cta').textContent = state.mode === 'complexo' ? 'Agendar no Complexo South' : 'Finalizar pedido';
+  document.getElementById('cta').href = `${SOUTH_WHATSAPP}?text=${encodeURIComponent(orderMessage(lines, total))}`;
   return { lines, total };
 }
-function summaryText() {
-  const { lines, total } = renderSummary();
-  return [`Garagem South: ${carLabel(currentCar())}`,
-    state.mode === 'complexo' ? 'Atendimento no Complexo South' : 'Receber em casa',
-    '', ...lines.map(l => `- ${l.name} (${l.brand}): ${brl(l.p)}`), '', `Total estimado: ${brl(total)}`, '(valores de exemplo)'].join('\n');
+// Mesmo WhatsApp do rodapé do site (South Shop, (47) 3224-1691).
+const SOUTH_WHATSAPP = 'https://wa.me/554732241691';
+function orderMessage(lines, total) {
+  const car = carLabel(currentCar());
+  if (!lines.length) return `Olá, South! Quero agendar um atendimento no Complexo South para o meu ${car}.`;
+  return [`Olá, South! Quero agendar no Complexo South para o meu ${car}:`, '',
+    ...lines.map(l => `• ${l.name} (${l.brand}): ${brl(l.p)}`), '',
+    state.mode === 'casa' ? 'Prefiro receber os produtos em casa.' : '',
+    `Total estimado: ${brl(total)}`].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
 }
 
-const feedback = document.getElementById('feedback');
-document.getElementById('copy').addEventListener('click', () => {
-  const text = summaryText();
-  const fb = document.getElementById('copy-fallback');
-  navigator.clipboard.writeText(text).then(() => {
-    feedback.textContent = 'Orçamento copiado. Dá para colar direto no WhatsApp.'; fb.hidden = true;
-  }).catch(() => {
-    feedback.textContent = 'Não deu para copiar automaticamente. Selecione o texto abaixo.';
-    fb.value = text; fb.hidden = false; fb.select();
-  });
-});
-document.getElementById('cta').addEventListener('click', () => {
-  feedback.textContent = state.mode === 'complexo'
-    ? 'No site real, este botão abre a agenda do Complexo South com o orçamento preenchido.'
-    : 'No site real, este botão leva os produtos para o carrinho da Nuvemshop.';
-});
 
 /* ---------- Controles do topo ---------- */
 function setLayer(layer) {
@@ -864,7 +848,6 @@ for (const b of modeEl.querySelectorAll('button')) b.addEventListener('click', (
   if (!reduced) {
     gsap.fromTo('#lines li, #skipped', { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.04, ease: 'power2.out' });
     gsap.fromTo('#groups .opt, #groups .group-note', { opacity: 0.2 }, { opacity: (i, el) => (el.classList.contains('is-off') ? 0.45 : 1), duration: 0.5, stagger: 0.02 });
-    gsap.fromTo('#cta', { opacity: 0 }, { opacity: 1, duration: 0.4 });
   }
 });
 
@@ -1050,7 +1033,7 @@ canvas.addEventListener('pointerup', e => {
 });
 canvas.addEventListener('pointermove', e => { if (!e.buttons) canvas.style.cursor = hitsCar(e) ? 'pointer' : ''; });
 
-function update() { applyVisuals(); renderGroups(); renderSummary(); feedback.textContent = ''; }
+function update() { applyVisuals(); renderGroups(); renderSummary(); }
 
 /* ---------- Abertura + loop ---------- */
 renderGroups(); selectCar(state.carId); moveThumb();
