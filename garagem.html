@@ -589,7 +589,7 @@ function studioEnvironment() {
 scene.environment = studioEnvironment();
 
 const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 120);
-const HOME = { pos: [7.3, 3.3, 7.75], target: [0, 0.6, 0] }; // vista padrão: pódio inteiro e as plataformas do fundo
+const HOME = { pos: [0, 3.3, 10.65], target: [0, 0.6, 0] }; // vista padrão: lateral do carro (frente para a direita), pódio inteiro e as plataformas do fundo
 camera.position.set(...HOME.pos);
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(...HOME.target);
