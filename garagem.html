@@ -128,7 +128,7 @@ button, select { font: inherit; color: inherit; }
 
 /* Pontos clicáveis */
 #spots { position: absolute; inset: 0; pointer-events: none; }
-.spot { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; pointer-events: auto; border: 0; background: none; padding: 6px; cursor: pointer; transition: opacity .4s ease; --c: var(--south); }
+.spot { position: absolute; left: 0; top: 0; will-change: transform; display: flex; align-items: center; gap: 8px; pointer-events: auto; border: 0; background: none; padding: 6px; cursor: pointer; transition: opacity .4s ease; --c: var(--south); }
 .spot[data-layer="marchand"] { --c: var(--marchand); }
 .spot .dot { position: relative; width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px rgba(255,255,255,.9); flex: none;
   transition: transform .45s cubic-bezier(.34, 1.4, .64, 1), background-color .3s, box-shadow .3s; }
@@ -150,7 +150,8 @@ button, select { font: inherit; color: inherit; }
 /* Painel */
 .panel { position: absolute; top: 28px; right: 12px; bottom: 28px; width: 400px; display: flex; flex-direction: column; min-height: 0;
   background: rgba(9,12,20,.95); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: -20px 0 60px rgba(0,0,0,.45);
-  transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .4s ease, visibility 0s; }
+  transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .4s ease, visibility 0s;
+  will-change: transform; contain: layout paint; } /* camada própria e layout isolado: redesenhar o painel não mexe no resto da página */
 /* Interface recolhida: só o carro e os dois botões */
 .app.is-collapsed .panel { transform: translateX(calc(100% + 24px)); opacity: 0; visibility: hidden; pointer-events: none;
   transition: transform .45s cubic-bezier(.55, 0, .75, .2), opacity .35s ease, visibility 0s .45s; }
@@ -553,7 +554,8 @@ const state = {
 /* ---------- Cena 3D ---------- */
 const canvas = document.getElementById('scene');
 const viewport = document.getElementById('viewport');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+// Sem MSAA na tela nem transparência: a imagem final vem do pós-processamento (que já tem MSAA próprio) e cobre o fundo todo.
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, stencil: false, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
@@ -561,6 +563,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
+// Desenho sob demanda: só redesenha quando algo muda (câmera, animação, escolha). Parado, a GPU descansa.
+let frames = 2, shadowDirty = true;
+const invalidate = (n = 2) => { frames = Math.max(frames, n); };
+THREE.DefaultLoadingManager.onProgress = () => invalidate(); // texturas que terminam de carregar
 const pmrem = new THREE.PMREMGenerator(renderer);
 // Estúdio de foto automotiva: softbox grande em cima + faixas de luz que desenham os reflexos longos na lataria.
 function studioEnvironment() {
@@ -850,10 +856,13 @@ bokeh.materialBokeh.fragmentShader = bokeh.materialBokeh.fragmentShader.replace(
 composer.addPass(bokeh);
 composer.addPass(new OutputPass());
 renderer.shadowMap.autoUpdate = false; // o bokeh renderiza a cena de novo (profundidade): sombra calculada 1x por quadro
+let vw = 1, vh = 1;
 function resize() {
   const { clientWidth: w, clientHeight: h } = viewport;
+  vw = w; vh = h;
   renderer.setSize(w, h, false);
   composer.setSize(w, h);
+  invalidate();
   camera.aspect = w / h;
   camera.fov = w < 600 ? 42 : 32;
   applyViewShift();
@@ -866,23 +875,25 @@ resize();
 const spotsEl = document.getElementById('spots');
 const spots = GROUPS.filter(g => g.spot).map(g => {
   const b = document.createElement('button');
-  b.type = 'button'; b.className = 'spot is-off'; // nasce escondida: só aparece com o painel aberto b.dataset.layer = g.layer;
+  b.type = 'button'; b.className = 'spot is-off'; b.dataset.layer = g.layer; // nasce escondida: só aparece com o painel aberto
   b.innerHTML = `<span class="dot"></span><span class="tag">${g.spot.label}</span>`;
   b.setAttribute('aria-label', `Ver ${g.spot.label}`);
   b.addEventListener('click', () => focusGroup(g.id, true));
   spotsEl.append(b);
-  return { g, el: b, p: new THREE.Vector3(...g.spot.p), n: new THREE.Vector3(...g.spot.n).normalize() };
+  return { g, el: b, p: new THREE.Vector3(...g.spot.p), n: new THREE.Vector3(...g.spot.n).normalize(), shown: false, away: false };
 });
 const v = new THREE.Vector3(), toCam = new THREE.Vector3();
+// Só escreve no DOM o que mudou; bolinha escondida não é reposicionada.
 function placeSpots() {
-  const w = viewport.clientWidth, h = viewport.clientHeight;
   for (const s of spots) {
     const shown = state.panelOpen && !showroom.busy && s.g.layer === state.layer;
-    s.el.classList.toggle('is-off', !shown);
-    v.copy(s.p).project(camera);
+    if (shown !== s.shown) { s.el.classList.toggle('is-off', !shown); s.shown = shown; }
+    if (!shown) continue;
     toCam.copy(camera.position).sub(s.p);
-    s.el.classList.toggle('is-away', shown && s.n.dot(toCam) < 0);
-    s.el.style.transform = `translate(${(v.x + 1) / 2 * w - 14}px, ${(1 - v.y) / 2 * h - 14}px)`;
+    const away = s.n.dot(toCam) < 0;
+    if (away !== s.away) { s.el.classList.toggle('is-away', away); s.away = away; }
+    v.copy(s.p).project(camera);
+    s.el.style.transform = `translate3d(${(v.x + 1) / 2 * vw - 14}px, ${(1 - v.y) / 2 * vh - 14}px, 0)`;
   }
 }
 
@@ -971,7 +982,7 @@ function applyVisuals() {
   const smoke = Object.keys(SMOKE).find(id => state.checks.has(id));
   lensMat.color.set(smoke ? 0x08090b : 0xffffff); lensMat.opacity = smoke ? SMOKE[smoke] : 0.12;
   const matte = state.checks.has('ppf-matte');
-  paint.roughness = matte ? 0.62 : 0.38; paint.clearcoat = matte ? 0 : 1;
+  paint.roughness = matte ? 0.62 : 0.38; paint.clearcoat = matte ? 0.001 : 1; // 0 exato recompilaria o shader (engasgo)
   paint.userData.envBase = ['coat-d', 'coat-c', 'coat-f'].some(id => state.checks.has(id)) ? 1.3 : 1; setPaintEnv();
   const rim = RIMS.find(r => r.id === state.radio.rodas);
   tweenColor(rimMat, rim.hex);
@@ -980,6 +991,7 @@ function applyVisuals() {
   tweenColor(caliperMat, CALIPERS.find(p => p.id === state.radio.pincas).hex);
   paintSlots[1] = state.checks.has('capa-retro') ? carbon : paint;
   bladeSlots[1] = state.checks.has('blades') ? carbon : trim;
+  invalidate();
 }
 
 /* ---------- Painel ---------- */
@@ -1005,6 +1017,7 @@ function qtyControl(o) {
   return `<span class="qty" data-id="${o.id}"><button type="button" data-step="-1" aria-label="Menos" ${n <= 1 ? 'disabled' : ''}>−</button><output aria-live="polite">${n} ${unit}</output><button type="button" data-step="1" aria-label="Mais" ${n >= 9 ? 'disabled' : ''}>+</button></span>`;
 }
 function renderGroups() {
+  const scroll = groupsEl.scrollTop;
   groupsEl.innerHTML = '';
   for (const g of GROUPS.filter(g => g.layer === state.layer)) {
     const sec = document.createElement('section');
@@ -1039,7 +1052,7 @@ function renderGroups() {
         state.customPaint = e.target.value; state.radio[g.id] = 'custom';
         for (const r of wrap.querySelectorAll('input[type="radio"]')) r.checked = false;
         const sw = e.target.closest('.sw-custom'); sw.classList.add('is-on'); sw.querySelector('i').style.background = e.target.value;
-        gsap.killTweensOf(paint.color); paint.color.set(e.target.value); paint.userData.colorTarget = paint.color.getHex(); // arrastando: cor segue o seletor na hora
+        gsap.killTweensOf(paint.color); paint.color.set(e.target.value); paint.userData.colorTarget = paint.color.getHex(); invalidate(); // arrastando: cor segue o seletor na hora
         const cap = sec.querySelector('.sw-caption');
         cap.innerHTML = `<b>Cor personalizada (${e.target.value.toUpperCase()})</b><span>${brl(PAINTS.find(p => p.custom).price)}</span>`;
       });
@@ -1103,6 +1116,7 @@ function renderGroups() {
     body.append(inner); sec.append(body);
     groupsEl.append(sec);
   }
+  groupsEl.scrollTop = scroll;
   for (const s of spots) s.el.classList.toggle('is-active', s.g.id === state.active);
 }
 
@@ -1205,6 +1219,7 @@ function setLayer(layer) {
   state.layer = layer;
   document.querySelector('.layers').dataset.active = layer;
   for (const b of document.querySelectorAll('.layers button')) b.setAttribute('aria-selected', b.dataset.layer === layer);
+  invalidate();
   // Bolinhas da aba nova aparecem uma depois da outra; as da aba antiga somem juntas.
   let i = 0;
   for (const s of spots) s.el.style.transitionDelay = s.g.layer === layer && !reduced ? `${0.12 + 0.06 * i++}s` : '0s';
@@ -1418,14 +1433,22 @@ addForm.addEventListener('submit', e => {
 // Clique (sem arrastar) em cima do carro abre a garagem.
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 // Devolve 'car' (carro do pódio), o id de um carro do showroom, ou null.
+// Testa a caixa de cada carro (não os ~100 mil triângulos de cada um): passar o mouse no 3D fica leve.
+const carBox = new THREE.Box3(), pickBox = new THREE.Box3(), hitP = new THREE.Vector3();
 function pick(e) {
-  if (showroom.busy) return null;
+  if (showroom.busy || !showroom.ready) return null;
   const r = canvas.getBoundingClientRect();
   ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  for (const hit of ray.intersectObject(showroom.ready ? room : car, true))
-    for (let o = hit.object; o; o = o.parent) { if (o === car) return 'car'; if (o.userData.ghostOf) return o.userData.ghostOf; }
-  return null;
+  let best = null, bestD = Infinity;
+  for (const [id, pod] of showroom.pods) {
+    if (!pod.visible) continue;
+    pickBox.copy(carBox).applyMatrix4(pod.matrixWorld);
+    if (!ray.ray.intersectBox(pickBox, hitP)) continue;
+    const d = hitP.distanceToSquared(ray.ray.origin);
+    if (d < bestD) { bestD = d; best = id; }
+  }
+  return best === null ? null : best === state.carId ? 'car' : best;
 }
 let down = null;
 canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
@@ -1434,7 +1457,12 @@ canvas.addEventListener('pointerup', e => {
   const hit = pick(e);
   if (hit === 'car') openGarage(); else if (hit) selectCar(hit);
 });
-canvas.addEventListener('pointermove', e => { if (!e.buttons) canvas.style.cursor = pick(e) ? 'pointer' : ''; });
+let hoverEv = null; // hover: no máximo um teste por quadro
+canvas.addEventListener('pointermove', e => {
+  if (e.buttons) return;
+  if (!hoverEv) requestAnimationFrame(() => { canvas.style.cursor = pick(hoverEv) ? 'pointer' : ''; hoverEv = null; });
+  hoverEv = e;
+});
 
 document.getElementById('clear-all').addEventListener('click', () => {
   state.checks.clear(); state.qty = {}; state.notes = {};
@@ -1450,13 +1478,20 @@ function update() { applyVisuals(); renderGroups(); renderSummary(); updateChoos
 // vistas dos serviços, faróis — continua valendo sem mudança.)
 const FOG_SHOWROOM = { near: 16, far: 60 }, FOG_FOCUS = { near: 15, far: 24 }; // focado: só o pódio do carro fica visível
 scene.fog = new THREE.Fog(0x0a1224, FOG_SHOWROOM.near, FOG_SHOWROOM.far);
+// Com o painel aberto os outros carros somem na névoa; quando a névoa fecha, eles deixam de ser desenhados e o
+// desfoque (que só servia pra eles) é desligado: configurar o carro fica mais leve.
 function setFocusFog(on) {
   const f = on ? FOG_FOCUS : FOG_SHOWROOM;
-  if (reduced) Object.assign(scene.fog, f); else gsap.to(scene.fog, { ...f, duration: 1.2, ease: 'power2.inOut', overwrite: true });
+  showroom.focused = on;
+  if (!on) { showOthers(true); bokeh.enabled = true; }
+  const done = () => { if (showroom.focused && !showroom.busy) { showOthers(false); bokeh.enabled = false; } invalidate(); };
+  if (reduced) { Object.assign(scene.fog, f); done(); }
+  else gsap.to(scene.fog, { ...f, duration: 1.2, ease: 'power2.inOut', overwrite: true, onComplete: done });
 }
+function showOthers(on) { for (const [id, pod] of showroom.pods) pod.visible = on || id === state.carId; }
 const room = new THREE.Group();
 scene.add(room);
-const showroom = { ready: false, pods: new Map(), busy: null, beams: null }; // beams: grupo dos fachos, vai na plataforma do carro escolhido
+const showroom = { ready: false, pods: new Map(), busy: null, beams: null, focused: false }; // beams: grupo dos fachos, vai na plataforma do carro escolhido
 const HOME_AZ = Math.atan2(HOME.pos[0] - HOME.target[0], HOME.pos[2] - HOME.target[2]);
 const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
 const podR = () => Math.max(16, garage.length * 2.4); // raio do círculo: plataformas não encostam umas nas outras
@@ -1467,6 +1502,7 @@ function setRoom(theta) {
   const phi = theta - HOME_AZ, r = podR();
   room.rotation.y = -phi;
   room.position.set(-r * Math.sin(theta), 0, -r * Math.cos(theta)).applyAxisAngle(THREE.Object3D.DEFAULT_UP, -phi);
+  shadowDirty = true; invalidate(); // sombra só é recalculada quando a sala se move
 }
 function makeGhost(c) {
   const p = paint.clone(); p.color.set(c.cor.hex);
@@ -1495,6 +1531,7 @@ function syncShowroom() {
     showroom.pods.set(c.id, pod);
   }
   setRoom(podAngle(state.carId));
+  showOthers(!showroom.focused);
 }
 // Voo da câmera: afasta e sobe no meio do caminho, contorna o círculo e pousa na plataforma escolhida.
 function showroomSwap(prev, next) {
@@ -1510,6 +1547,7 @@ function showroomSwap(prev, next) {
   controls.enabled = false; controls.autoRotate = false; controls.maxDistance = 40;
   const k = { v: 0 };
   setRoom(t0);
+  showOthers(true); // no voo a plataforma de destino precisa aparecer, mesmo com o painel aberto
   showroom.busy = gsap.to(k, { v: 1, duration: 2.4, ease: 'power2.inOut',
     onUpdate: () => {
       setRoom(t0 + (t1 - t0) * k.v);
@@ -1521,29 +1559,50 @@ function showroomSwap(prev, next) {
       camera.position.copy(controls.target).add(off);
       controls.maxDistance = maxD; controls.enabled = true;
       showroom.busy = null;
+      if (showroom.focused) showOthers(false);
     } });
 }
 
 /* ---------- Abertura + loop ---------- */
 renderGroups(); selectCar(state.carId); moveThumb();
+// Qualquer animação GSAP rodando (câmera, cores, névoa, faróis) também pede quadro novo.
+const animating = () => gsap.globalTimeline.getChildren(false, true, false).length > 0;
+// Qualidade adaptativa: mede os primeiros quadros; se a máquina não segura ~45 fps, desenha em resolução 1x.
+const perf = { last: 0, dts: [] };
+function measure() {
+  const now = performance.now(), dt = now - perf.last;
+  perf.last = now;
+  if (perf.dts.length >= 90 || dt > 100) return; // pausas (aba parada, sem animação) não contam
+  perf.dts.push(dt);
+  if (perf.dts.length < 90) return;
+  const median = perf.dts.sort((a, b) => a - b)[45];
+  if (median > 22 && renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); composer.setPixelRatio(1); resize(); }
+}
 renderer.setAnimationLoop(() => {
-  controls.update();
+  const moved = controls.update();
+  if (!moved && frames <= 0 && !animating()) return; // nada mudou: não redesenha
+  frames = Math.max(0, frames - 1);
   bokeh.uniforms.focus.value = camera.position.distanceTo(controls.target);
-  renderer.shadowMap.needsUpdate = true;
+  if (shadowDirty) { renderer.shadowMap.needsUpdate = true; shadowDirty = false; }
   composer.render();
   if (!spotsEl.hidden) placeSpots();
+  if (showroom.ready) measure();
 });
 await loadCar.catch(err => {
   console.error(err);
   document.getElementById('loading').textContent = 'Não foi possível carregar o modelo 3D. Recarregue a página.';
   throw err;
 });
-document.getElementById('loading').remove();
 spotsEl.hidden = false;
 applyVisuals();
 showroom.ready = true;
 scene.remove(podium);
 syncShowroom();
+room.updateMatrixWorld(true);
+// Caixa de clique = lataria (as cópias do emblema nas rodas carregam a geometria inteira e inflariam a caixa), até o chão.
+// Sala em repouso: plataforma do carro = origem, então a caixa vale pra todas as plataformas.
+car.traverse(o => { if (o.material === paintSlots) carBox.setFromObject(o); });
+carBox.min.y = 0;
 // Faróis: acende faróis/lanternas e projeta dois fachos no pódio.
 const beams = [1, -1].map(side => {
   const b = new THREE.SpotLight(0xeaf2ff, 0, 5, 0.4, 0.95, 1.6); // facho cai dentro do pódio
@@ -1565,6 +1624,19 @@ function setLights(on, delay = 0) {
   for (const b of beams) gsap.to(b, { intensity: on ? 55 : 0, ...t });
 }
 lightsBtn.addEventListener('click', () => setLights(lightsBtn.getAttribute('aria-pressed') !== 'true'));
+
+// Pré-compila os shaders de tudo que pode aparecer depois (carbono nas peças) com um quadro de aquecimento escondido
+// embaixo do pódio: a primeira escolha de carbono não engasga. O "Carregando" só sai depois disso.
+{
+  const warm = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.01, 0.01), carbon);
+  warm.position.y = -2; warm.frustumCulled = false;
+  scene.add(warm);
+  renderer.shadowMap.needsUpdate = true;
+  composer.render();
+  scene.remove(warm); warm.geometry.dispose();
+  invalidate();
+}
+document.getElementById('loading').remove();
 
 if (reduced) setLights(true);
 else {
