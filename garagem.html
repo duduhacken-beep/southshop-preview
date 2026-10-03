@@ -601,6 +601,32 @@ controls.maxPolarAngle = 1.5;
 controls.autoRotate = !reduced;
 controls.autoRotateSpeed = 0.6;
 canvas.addEventListener('pointerdown', () => { controls.autoRotate = false; });
+// Os controles também se atualizam dentro dos próprios eventos (girar, pinça): sempre pede quadro novo.
+controls.addEventListener('change', () => invalidate());
+// Zoom suave na roda do mouse/trackpad: cada passo define uma distância-alvo e a câmera desliza até ela
+// (o zoom padrão pula de degrau em degrau). Captura antes dos controles; a pinça no celular continua com eles.
+const zoom = { d: null, last: 0 };
+canvas.addEventListener('wheel', e => {
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (!controls.enabled) return;
+  if (flight) flight.kill();
+  controls.autoRotate = false;
+  const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; // rolagem em linhas (Firefox) → pixels
+  const cur = zoom.d ?? camera.position.distanceTo(controls.target);
+  zoom.d = THREE.MathUtils.clamp(cur * Math.exp(dy * 0.0012), controls.minDistance, controls.maxDistance);
+  invalidate();
+}, { passive: false, capture: true });
+const zoomOff = new THREE.Vector3();
+function stepZoom(t) {
+  const dt = Math.min(0.05, (t - zoom.last) / 1000 || 0.016);
+  zoom.last = t;
+  if (zoom.d === null) return false;
+  zoomOff.copy(camera.position).sub(controls.target);
+  const d = zoomOff.length(), nd = d + (zoom.d - d) * (1 - Math.exp(-dt * 14)); // ~0,2 s até o alvo, igual em 60 ou 144 Hz
+  camera.position.copy(controls.target).addScaledVector(zoomOff, nd / d);
+  if (Math.abs(zoom.d - nd) < 0.003) zoom.d = null;
+  return true;
+}
 
 const key = new THREE.DirectionalLight(0xffffff, 1.6);
 key.position.set(4, 7, 3);
@@ -901,6 +927,7 @@ function placeSpots() {
 let flight = null;
 function fly({ pos, target }) {
   controls.autoRotate = false;
+  zoom.d = null; // voo da câmera manda: cancela o zoom em andamento
   const t0 = controls.target.clone(), t1 = new THREE.Vector3(...target);
   if (reduced) { camera.position.set(...pos); controls.target.copy(t1); return; }
   const s0 = new THREE.Spherical().setFromVector3(camera.position.clone().sub(t0));
@@ -1542,6 +1569,7 @@ function showroomSwap(prev, next) {
   gsap.killTweensOf(paint.color); paint.color.set(next.cor.hex); paint.userData.colorTarget = paint.color.getHex();
   if (reduced) return;
   if (flight) flight.kill();
+  zoom.d = null;
   const t0 = podAngle(prev.id), t1 = t0 + wrap(podAngle(next.id) - t0);
   const off = camera.position.clone().sub(controls.target), maxD = controls.maxDistance;
   controls.enabled = false; controls.autoRotate = false; controls.maxDistance = 40;
@@ -1578,8 +1606,9 @@ function measure() {
   const median = perf.dts.sort((a, b) => a - b)[45];
   if (median > 22 && renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); composer.setPixelRatio(1); resize(); }
 }
-renderer.setAnimationLoop(() => {
-  const moved = controls.update();
+renderer.setAnimationLoop(t => {
+  const zoomed = stepZoom(t);
+  const moved = controls.update() || zoomed;
   if (!moved && frames <= 0 && !animating()) return; // nada mudou: não redesenha
   frames = Math.max(0, frames - 1);
   bokeh.uniforms.focus.value = camera.position.distanceTo(controls.target);
