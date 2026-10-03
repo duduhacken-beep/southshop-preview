@@ -588,7 +588,7 @@ function studioEnvironment() {
 }
 scene.environment = studioEnvironment();
 
-const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 60);
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 120);
 const HOME = { pos: [5.0, 1.9, 5.3], target: [0, 0.6, 0] };
 camera.position.set(...HOME.pos);
 const controls = new OrbitControls(camera, canvas);
@@ -931,12 +931,15 @@ function openPanel(layer) {
     state.active = null; state.open = null; renderGroups(); animateGroupsIn();
   }
   if (wide()) shiftCar(Math.round(document.getElementById('panel').offsetWidth / 2) + 6);
+  setFocusFog(true); // os outros carros somem na névoa enquanto este é configurado
+  if (showroom.ready) setLights(false);
 }
 function closePanel() {
   state.panelOpen = false; state.active = null; state.open = null;
   appEl.classList.add('is-collapsed');
   viewport.classList.remove('is-focused');
   shiftCar(0);
+  setFocusFog(false);
   fly(HOME);
   updateChooserCounts();
 }
@@ -1451,13 +1454,18 @@ function update() { applyVisuals(); renderGroups(); renderSummary(); updateChoos
 // desfocados. Trocar de carro leva a câmera em voo pela borda do círculo até a plataforma dele.
 // (Na prática quem gira é a sala inteira em volta da câmera: tudo que já está ancorado no pódio — bolinhas,
 // vistas dos serviços, faróis — continua valendo sem mudança.)
-scene.fog = new THREE.Fog(0x0a1224, 14, 40);
+const FOG_SHOWROOM = { near: 14, far: 60 }, FOG_FOCUS = { near: 12, far: 20 }; // focado: só o pódio do carro fica visível
+scene.fog = new THREE.Fog(0x0a1224, FOG_SHOWROOM.near, FOG_SHOWROOM.far);
+function setFocusFog(on) {
+  const f = on ? FOG_FOCUS : FOG_SHOWROOM;
+  if (reduced) Object.assign(scene.fog, f); else gsap.to(scene.fog, { ...f, duration: 1.2, ease: 'power2.inOut', overwrite: true });
+}
 const room = new THREE.Group();
 scene.add(room);
-const showroom = { ready: false, pods: new Map(), busy: null };
+const showroom = { ready: false, pods: new Map(), busy: null, beams: null }; // beams: grupo dos fachos, vai na plataforma do carro escolhido
 const HOME_AZ = Math.atan2(HOME.pos[0] - HOME.target[0], HOME.pos[2] - HOME.target[2]);
 const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
-const podR = () => Math.max(10, garage.length * 1.6); // raio do círculo: plataformas não encostam umas nas outras
+const podR = () => Math.max(16, garage.length * 2.4); // raio do círculo: plataformas não encostam umas nas outras
 // Com 2 carros o outro fica de lado (não escondido bem atrás do escolhido).
 const podAngle = id => garage.findIndex(c => c.id === id) * 2 * Math.PI / Math.max(garage.length, 3);
 // Gira/move a sala para a plataforma no ângulo theta ficar na origem, na mesma posição de sempre.
@@ -1488,6 +1496,7 @@ function syncShowroom() {
     pod.position.set(r * Math.sin(a), 0, r * Math.cos(a));
     pod.rotation.y = a - HOME_AZ;
     pod.add(podium.clone(), c.id === state.carId ? car : makeGhost(c));
+    if (c.id === state.carId && showroom.beams) pod.add(showroom.beams);
     room.add(pod);
     showroom.pods.set(c.id, pod);
   }
@@ -1546,9 +1555,11 @@ const beams = [1, -1].map(side => {
   const b = new THREE.SpotLight(0xeaf2ff, 0, 5, 0.4, 0.95, 1.6); // facho cai dentro do pódio
   b.position.set(2.25, 0.74, side * 0.62);
   b.target.position.set(4.2, -0.6, side * 0.8);
-  scene.add(b, b.target);
   return b;
 });
+showroom.beams = new THREE.Group();
+showroom.beams.add(...beams, ...beams.map(b => b.target));
+showroom.pods.get(state.carId).add(showroom.beams);
 const lightsBtn = document.getElementById('ctl-lights');
 function setLights(on, delay = 0) {
   lightsBtn.setAttribute('aria-pressed', on);
