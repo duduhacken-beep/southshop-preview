@@ -859,7 +859,7 @@ const v = new THREE.Vector3(), toCam = new THREE.Vector3();
 function placeSpots() {
   const w = viewport.clientWidth, h = viewport.clientHeight;
   for (const s of spots) {
-    const shown = state.panelOpen && s.g.layer === state.layer;
+    const shown = state.panelOpen && !showroom.busy && s.g.layer === state.layer;
     s.el.classList.toggle('is-off', !shown);
     v.copy(s.p).project(camera);
     toCam.copy(camera.position).sub(s.p);
@@ -1354,9 +1354,10 @@ function selectCar(id) {
   note.textContent = has3D(c) ? '' : `O 3D do ${c.marca} ${c.modelo} está em preparação. Enquanto isso, a Macan mostra como cada serviço fica no carro.`;
   if (prev.id !== c.id) {
     state.radio.pintura = 'original';
-    if (!reduced) gsap.fromTo(car.scale, { x: 0.92, y: 0.92, z: 0.92 }, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'power3.out' });
+    showroomSwap(prev, c);
   }
   update();
+  if (!showroom.busy) syncShowroom();
 }
 document.getElementById('car-switch').addEventListener('click', openGarage);
 document.getElementById('garage-close').addEventListener('click', () => garageEl.close());
@@ -1375,6 +1376,7 @@ listEl.addEventListener('click', e => {
     confirmId = null;
     saveGarage();
     if (state.carId === id) selectCar(garage[0].id);
+    syncShowroom();
     renderGarage();
   }
 });
@@ -1394,19 +1396,25 @@ addForm.addEventListener('submit', e => {
 
 // Clique (sem arrastar) em cima do carro abre a garagem.
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-function hitsCar(e) {
+// Devolve 'car' (carro do pódio), o id de um carro do showroom, ou null.
+function pick(e) {
+  if (showroom.busy) return null;
   const r = canvas.getBoundingClientRect();
   ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  return ray.intersectObject(car, true).length > 0;
+  const hit = ray.intersectObjects([car, ...showroom.ghosts.values()], true)[0];
+  if (!hit) return null;
+  for (let o = hit.object; o; o = o.parent) if (o.userData.ghostOf) return o.userData.ghostOf;
+  return 'car';
 }
 let down = null;
 canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 canvas.addEventListener('pointerup', e => {
   if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6 || performance.now() - down.t > 400) return;
-  if (hitsCar(e)) openGarage();
+  const hit = pick(e);
+  if (hit === 'car') openGarage(); else if (hit) selectCar(hit);
 });
-canvas.addEventListener('pointermove', e => { if (!e.buttons) canvas.style.cursor = hitsCar(e) ? 'pointer' : ''; });
+canvas.addEventListener('pointermove', e => { if (!e.buttons) canvas.style.cursor = pick(e) ? 'pointer' : ''; });
 
 document.getElementById('clear-all').addEventListener('click', () => {
   state.checks.clear(); state.qty = {}; state.notes = {};
@@ -1415,9 +1423,87 @@ document.getElementById('clear-all').addEventListener('click', () => {
 });
 function update() { applyVisuals(); renderGroups(); renderSummary(); updateChooserCounts(); }
 
+/* ---------- Showroom: os outros carros da garagem flutuando no fundo ---------- */
+// Ficam num anel grande em volta do pódio, sumindo na névoa. Trocar de carro gira o anel: o escolhido vem do
+// fundo até o pódio e o atual volta pro lugar dele. Cópias reaproveitam geometria e materiais do carro principal
+// (só a pintura é própria), então custam só draw calls.
+scene.fog = new THREE.Fog(0x0a1224, 12, 28); // começa depois do pódio: o carro principal não embaça
+const SHOW_R = 18, SHOW_STEP = 0.42, FLOAT_Y = 0.6; // raio do anel (m), distância entre carros (rad ≈ 24°), altura
+const showroom = { ready: false, ghosts: new Map(), rot: Math.PI, busy: null };
+const slotAngle = (id, rot = showroom.rot) => garage.findIndex(c => c.id === id) * SHOW_STEP + rot;
+const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+function makeGhost(c) {
+  const p = paint.clone(); p.color.set(c.cor.hex);
+  const swap = m => (m === paint ? p : m === carbon ? trim : m);
+  const g = car.clone(); g.visible = true;
+  g.traverse(o => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map(swap) : swap(o.material); });
+  const h = new THREE.Group();
+  h.add(g);
+  h.userData = { ghostOf: c.id, paint: p, phase: Math.random() * 6 };
+  scene.add(h);
+  return h;
+}
+function dropGhost(h) { scene.remove(h); h.userData.paint.dispose(); }
+// Garante um carro no anel para cada carro da garagem, menos o que está no pódio.
+function syncShowroom() {
+  if (!showroom.ready) return;
+  for (const [id, h] of showroom.ghosts) if (id === state.carId || !garage.some(c => c.id === id)) { dropGhost(h); showroom.ghosts.delete(id); }
+  for (const c of garage) {
+    if (c.id === state.carId) continue;
+    if (!showroom.ghosts.has(c.id)) showroom.ghosts.set(c.id, makeGhost(c));
+    showroom.ghosts.get(c.id).userData.paint.color.set(c.cor.hex);
+  }
+}
+// Posição de descanso no anel: de perfil para o pódio, subindo e descendo devagar.
+function restPose(h, a, t) {
+  h.position.set(Math.sin(a) * SHOW_R, FLOAT_Y + Math.sin(t * 0.0007 + h.userData.phase) * 0.12, Math.cos(a) * SHOW_R);
+  h.rotation.y = a + 0.4;
+}
+function tickShowroom(t) {
+  for (const [id, h] of showroom.ghosts) if (!h.userData.flying) restPose(h, slotAngle(id), t);
+}
+function showroomSwap(prev, next) {
+  if (!showroom.ready || reduced) return;
+  if (showroom.busy) showroom.busy.progress(1); // troca rápida: termina a anterior na hora
+  const inc = showroom.ghosts.get(next.id) || makeGhost(next); // carro novo ainda não tem cópia: nasce no fundo
+  const out = makeGhost(prev); // cópia do carro atual, no lugar exato dele
+  showroom.ghosts.delete(next.id);
+  inc.userData.flying = out.userData.flying = true;
+  car.visible = false;
+  // Gira o anel para o escolhido partir de trás do pódio (do ponto de vista da câmera agora).
+  const behind = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z) + Math.PI;
+  const rot0 = showroom.rot, rot1 = rot0 + wrap(behind - slotAngle(next.id));
+  const from = inc.position.clone(), fromYaw = inc.rotation.y, t0 = performance.now();
+  const k = { v: 0 }, inOut = gsap.parseEase('power2.inOut'), clamp = v => Math.min(1, Math.max(0, v));
+  showroom.busy = gsap.to(k, { v: 1, duration: 2, ease: 'none',
+    onUpdate: () => {
+      const e = k.v;
+      showroom.rot = rot0 + (rot1 - rot0) * inOut(e);
+      // Saindo primeiro: o atual deixa o pódio e assume o lugar dele no anel.
+      const ao = slotAngle(prev.id), fo = inOut(clamp(e / 0.55));
+      out.position.set(Math.sin(ao) * SHOW_R * fo, FLOAT_Y * fo, Math.cos(ao) * SHOW_R * fo);
+      out.rotation.y = wrap(ao + 0.4) * fo;
+      // Entrando logo depois: o escolhido acompanha o giro do anel e então desce até o pódio.
+      const ai = slotAngle(next.id), fi = inOut(clamp((e - 0.2) / 0.8)), ride = clamp(e / 0.2);
+      const sx = from.x + (Math.sin(ai) * SHOW_R - from.x) * ride, sz = from.z + (Math.cos(ai) * SHOW_R - from.z) * ride;
+      inc.position.set(sx * (1 - fi), from.y * (1 - fi), sz * (1 - fi));
+      inc.rotation.y = fromYaw + wrap(0 - fromYaw) * fi;
+      tickShowroom(performance.now());
+    },
+    onComplete: () => {
+      dropGhost(inc);
+      out.userData.flying = false;
+      showroom.ghosts.get(prev.id) && dropGhost(showroom.ghosts.get(prev.id));
+      showroom.ghosts.set(prev.id, out);
+      car.visible = true;
+      showroom.busy = null;
+      syncShowroom();
+    } });
+}
+
 /* ---------- Abertura + loop ---------- */
 renderGroups(); selectCar(state.carId); moveThumb();
-renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); if (!spotsEl.hidden) placeSpots(); });
+renderer.setAnimationLoop(t => { controls.update(); if (!showroom.busy) tickShowroom(t); renderer.render(scene, camera); if (!spotsEl.hidden) placeSpots(); });
 await loadCar.catch(err => {
   console.error(err);
   document.getElementById('loading').textContent = 'Não foi possível carregar o modelo 3D. Recarregue a página.';
@@ -1426,6 +1512,8 @@ await loadCar.catch(err => {
 document.getElementById('loading').remove();
 spotsEl.hidden = false;
 applyVisuals();
+showroom.ready = true;
+syncShowroom();
 // Faróis: acende faróis/lanternas e projeta dois fachos no pódio.
 const beams = [1, -1].map(side => {
   const b = new THREE.SpotLight(0xeaf2ff, 0, 5, 0.4, 0.95, 1.6); // facho cai dentro do pódio
