@@ -64,6 +64,19 @@ button, select { font: inherit; color: inherit; }
 .garage-close { border: 0; background: none; color: var(--muted); cursor: pointer; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; line-height: 1; }
 .garage-close:hover { color: var(--white); background: rgba(255,255,255,.06); }
 .garage-list { list-style: none; margin: 0; padding: 4px 12px; display: grid; gap: 6px; }
+.garage-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: stretch; }
+.row-actions { display: flex; flex-direction: column; gap: 6px; }
+.icon-btn { flex: 1; width: 40px; min-height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: none; color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+.icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.icon-btn:hover:not(:disabled) { color: var(--white); border-color: rgba(244,246,249,.3); }
+.icon-btn.del:hover:not(:disabled) { color: #ff8a92; border-color: rgba(196,18,31,.6); background: var(--marchand-soft); }
+.icon-btn:disabled { opacity: .35; cursor: not-allowed; }
+.confirm-del { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 14px; border: 1px solid rgba(196,18,31,.55); border-radius: 14px; background: var(--marchand-soft); }
+.confirm-del span { flex: 1; min-width: 160px; font-size: 14px; }
+.confirm-del button { border-radius: 10px; padding: 8px 12px; cursor: pointer; font-weight: 500; min-height: 36px; }
+.confirm-del .keep { border: 1px solid var(--line); background: none; }
+.confirm-del .really { border: 0; background: var(--marchand); color: #fff; }
+.form-title { grid-column: 1 / -1; margin: 0; font: 600 16px var(--cond); }
 .garage-car { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: none; cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
 .garage-car:hover { background: rgba(255,255,255,.03); }
 .garage-car[aria-current="true"] { border-color: var(--south); background: var(--south-soft); }
@@ -269,14 +282,10 @@ button, select { font: inherit; color: inherit; }
   <div class="garage-add">
     <button type="button" id="add-open">+ Adicionar carro</button>
     <form class="add-form" id="add-form" hidden>
-      <label>Marca
-        <select id="add-brand" required>
-          <option>Porsche</option><option>BMW</option><option>Audi</option><option>Mercedes-Benz</option>
-          <option>Land Rover</option><option>Volvo</option><option>Outra</option>
-        </select>
-      </label>
-      <label>Modelo<input id="add-model" required placeholder="Ex.: Cayenne"></label>
-      <label>Ano<input id="add-year" type="number" inputmode="numeric" min="1960" max="2027" required placeholder="2021"></label>
+      <p class="form-title" id="form-title">Novo carro</p>
+      <label>Marca<select id="add-brand" required></select></label>
+      <label>Modelo<select id="add-model" required></select></label>
+      <label>Ano<select id="add-year" required></select></label>
       <fieldset class="add-color">
         <legend>Cor de fábrica</legend>
         <div class="swatches" id="add-colors" role="radiogroup" aria-label="Cor de fábrica"></div>
@@ -284,7 +293,7 @@ button, select { font: inherit; color: inherit; }
       </fieldset>
       <div class="row">
         <button type="button" class="cancel" id="add-cancel">Cancelar</button>
-        <button type="submit" class="save">Adicionar à garagem</button>
+        <button type="submit" class="save" id="add-submit">Adicionar à garagem</button>
       </div>
     </form>
   </div>
@@ -768,6 +777,20 @@ for (const b of modeEl.querySelectorAll('button')) b.addEventListener('click', (
 
 /* ---------- Garagem ---------- */
 // Só a Macan tem modelo 3D por enquanto; os outros carros entram na lista e o orçamento continua valendo.
+// Catálogo fechado de modelos (marca → modelo → anos). Ponto de partida: linha Porsche da pesquisa de Kits de Carbono.
+// Faixas de ano por geração atendida; revisar com a Marchand e acrescentar as outras marcas aqui.
+const CATALOGO = {
+  Porsche: [
+    { modelo: 'Macan', de: 2014, ate: 2026 },
+    { modelo: 'Cayenne', de: 2011, ate: 2026 },
+    { modelo: '911', de: 2005, ate: 2026 },
+    { modelo: 'Panamera', de: 2010, ate: 2026 },
+    { modelo: '718 Cayman', de: 2016, ate: 2026 },
+    { modelo: '718 Boxster', de: 2016, ate: 2026 },
+    { modelo: 'Taycan', de: 2020, ate: 2026 },
+  ],
+};
+// Só a Macan tem modelo 3D por enquanto; os outros carros entram na lista e o orçamento continua valendo.
 const has3D = c => c.marca === 'Porsche' && /macan/i.test(c.modelo);
 const carLabel = c => `${c.marca} ${c.modelo} ${c.ano}`;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -779,7 +802,7 @@ const FACTORY_COLORS = [
   { nome: 'Verde', hex: '#1d3a2b' }, { nome: 'Champanhe', hex: '#8c7b62' },
 ];
 const isHex = h => /^#[0-9a-f]{6}$/i.test(h);
-let garage = [{ id: 'macan', marca: 'Porsche', modelo: 'Macan GTS', ano: 2015, cor: FACTORY_COLORS[0] }];
+let garage = [{ id: 'macan', marca: 'Porsche', modelo: 'Macan', ano: 2015, cor: FACTORY_COLORS[0] }];
 try { const saved = JSON.parse(localStorage.getItem(GARAGE_KEY)); if (Array.isArray(saved) && saved.length) garage = saved; } catch {}
 garage = garage.map(c => (c.cor && isHex(c.cor.hex) ? c : { ...c, cor: FACTORY_COLORS[0] }));
 state.carId = garage[0].id;
@@ -793,16 +816,52 @@ function saveGarage() { try { localStorage.setItem(GARAGE_KEY, JSON.stringify(ga
 
 const garageEl = document.getElementById('garage'), listEl = document.getElementById('garage-list');
 const addForm = document.getElementById('add-form'), addOpen = document.getElementById('add-open');
+const brandSel = document.getElementById('add-brand'), modelSel = document.getElementById('add-model'), yearSel = document.getElementById('add-year');
+let editingId = null, confirmId = null;
+
+const ICON_EDIT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+const ICON_DEL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
 function renderGarage() {
-  listEl.innerHTML = garage.map(c => `<li><button type="button" class="garage-car" data-id="${esc(c.id)}" aria-current="${c.id === state.carId}">
-    <strong><i class="car-dot" style="background:${c.cor.hex}" aria-hidden="true"></i>${esc(c.marca)} ${esc(c.modelo)}</strong><em class="${has3D(c) ? 'ok' : ''}">${has3D(c) ? 'Ver em 3D' : '3D em breve'}</em><span>${esc(c.ano)}</span></button></li>`).join('');
+  const solo = garage.length === 1;
+  listEl.innerHTML = garage.map(c => {
+    const name = `${esc(c.marca)} ${esc(c.modelo)}`;
+    if (c.id === confirmId) return `<li class="garage-row" data-id="${esc(c.id)}"><div class="confirm-del">
+      <span>Excluir ${name} ${esc(c.ano)} da garagem?</span>
+      <button type="button" class="keep" data-act="keep">Manter</button><button type="button" class="really" data-act="really">Excluir</button></div></li>`;
+    return `<li class="garage-row" data-id="${esc(c.id)}">
+      <button type="button" class="garage-car" data-act="select" aria-current="${c.id === state.carId}">
+        <strong><i class="car-dot" style="background:${c.cor.hex}" aria-hidden="true"></i>${name}</strong><em class="${has3D(c) ? 'ok' : ''}">${has3D(c) ? 'Ver em 3D' : '3D em breve'}</em><span>${esc(c.ano)}</span></button>
+      <div class="row-actions">
+        <button type="button" class="icon-btn" data-act="edit" aria-label="Editar ${name}" title="Editar">${ICON_EDIT}</button>
+        <button type="button" class="icon-btn del" data-act="del" aria-label="Excluir ${name}" title="${solo ? 'A garagem precisa de pelo menos um carro' : 'Excluir'}" ${solo ? 'disabled' : ''}>${ICON_DEL}</button>
+      </div></li>`;
+  }).join('');
 }
+
+// Marca → modelo → ano, sempre a partir do catálogo.
+const opts = (list, sel) => list.map(v => `<option value="${esc(v)}" ${String(v) === String(sel) ? 'selected' : ''}>${esc(v)}</option>`).join('');
+function fillModels(sel) {
+  const models = CATALOGO[brandSel.value];
+  // Carro salvo antes do catálogo (ex.: "Macan GTS") cai no modelo de nome mais próximo.
+  const match = models.filter(m => String(sel || '').toLowerCase().startsWith(m.modelo.toLowerCase())).sort((a, b) => b.modelo.length - a.modelo.length)[0];
+  modelSel.innerHTML = opts(models.map(m => m.modelo), match ? match.modelo : models[0].modelo);
+}
+function fillYears(sel) {
+  const m = CATALOGO[brandSel.value].find(x => x.modelo === modelSel.value);
+  const years = [];
+  for (let y = m.ate; y >= m.de; y--) years.push(y);
+  yearSel.innerHTML = opts(years, years.includes(Number(sel)) ? sel : years[0]);
+}
+brandSel.addEventListener('change', () => { fillModels(); fillYears(); });
+modelSel.addEventListener('change', () => fillYears(yearSel.value));
+
 const colorsEl = document.getElementById('add-colors'), colorName = document.getElementById('add-color-name');
 let addColor = FACTORY_COLORS[0];
 function renderColorPicker() {
-  colorsEl.innerHTML = FACTORY_COLORS.map((c, i) => `<label class="sw" title="${c.nome}"><input type="radio" name="add-color" value="${i}" ${addColor === c ? 'checked' : ''} aria-label="${c.nome}"><i style="background:${c.hex}"></i></label>`).join('')
-    + `<label class="sw sw-custom${FACTORY_COLORS.includes(addColor) ? '' : ' is-on'}" title="Outra cor"><input type="color" id="add-color-custom" value="${FACTORY_COLORS.includes(addColor) ? '#5a3e2b' : addColor.hex}" aria-label="Escolher outra cor"><i${FACTORY_COLORS.includes(addColor) ? '' : ` style="background:${addColor.hex}"`}></i></label>`;
-  colorName.textContent = addColor.nome;
+  const preset = FACTORY_COLORS.find(c => c.hex.toLowerCase() === addColor.hex.toLowerCase());
+  colorsEl.innerHTML = FACTORY_COLORS.map((c, i) => `<label class="sw" title="${c.nome}"><input type="radio" name="add-color" value="${i}" ${preset === c ? 'checked' : ''} aria-label="${c.nome}"><i style="background:${c.hex}"></i></label>`).join('')
+    + `<label class="sw sw-custom${preset ? '' : ' is-on'}" title="Outra cor"><input type="color" id="add-color-custom" value="${preset ? '#5a3e2b' : addColor.hex}" aria-label="Escolher outra cor"><i${preset ? '' : ` style="background:${addColor.hex}"`}></i></label>`;
+  colorName.textContent = preset ? preset.nome : addColor.nome;
 }
 colorsEl.addEventListener('change', e => {
   if (e.target.name === 'add-color') { addColor = FACTORY_COLORS[Number(e.target.value)]; renderColorPicker(); }
@@ -815,7 +874,23 @@ colorsEl.addEventListener('input', e => {
   sw.classList.add('is-on'); sw.querySelector('i').style.background = addColor.hex;
   colorName.textContent = addColor.nome;
 });
-function openGarage() { renderGarage(); addForm.hidden = true; addOpen.hidden = false; addColor = FACTORY_COLORS[0]; renderColorPicker(); garageEl.showModal(); }
+
+function openForm(car) {
+  editingId = car ? car.id : null;
+  confirmId = null;
+  brandSel.innerHTML = opts(Object.keys(CATALOGO), car && CATALOGO[car.marca] ? car.marca : 'Porsche');
+  fillModels(car && car.modelo);
+  fillYears(car && car.ano);
+  addColor = car ? car.cor : FACTORY_COLORS[0];
+  renderColorPicker();
+  document.getElementById('form-title').textContent = car ? `Editar ${car.marca} ${car.modelo}` : 'Novo carro';
+  document.getElementById('add-submit').textContent = car ? 'Salvar alterações' : 'Adicionar à garagem';
+  addOpen.hidden = true; addForm.hidden = false;
+  renderGarage();
+  brandSel.focus();
+}
+function closeForm() { editingId = null; addForm.hidden = true; addOpen.hidden = false; }
+function openGarage() { confirmId = null; closeForm(); renderGarage(); garageEl.showModal(); }
 function selectCar(id) {
   const prev = currentCar();
   state.carId = id;
@@ -836,22 +911,33 @@ document.getElementById('car-switch').addEventListener('click', openGarage);
 document.getElementById('garage-close').addEventListener('click', () => garageEl.close());
 garageEl.addEventListener('click', e => { if (e.target === garageEl) garageEl.close(); });
 listEl.addEventListener('click', e => {
-  const b = e.target.closest('.garage-car');
+  const b = e.target.closest('[data-act]');
   if (!b) return;
-  selectCar(b.dataset.id);
-  garageEl.close();
+  const id = b.closest('.garage-row').dataset.id;
+  const act = b.dataset.act;
+  if (act === 'select') { selectCar(id); garageEl.close(); return; }
+  if (act === 'edit') { openForm(garage.find(c => c.id === id)); return; }
+  if (act === 'del') { confirmId = id; closeForm(); renderGarage(); listEl.querySelector('.keep').focus(); return; }
+  if (act === 'keep') { confirmId = null; renderGarage(); return; }
+  if (act === 'really') {
+    garage = garage.filter(c => c.id !== id);
+    confirmId = null;
+    saveGarage();
+    if (state.carId === id) selectCar(garage[0].id);
+    renderGarage();
+  }
 });
-addOpen.addEventListener('click', () => { addOpen.hidden = true; addForm.hidden = false; document.getElementById('add-model').focus(); });
-document.getElementById('add-cancel').addEventListener('click', () => { addForm.hidden = true; addOpen.hidden = false; });
+addOpen.addEventListener('click', () => openForm(null));
+document.getElementById('add-cancel').addEventListener('click', () => { closeForm(); renderGarage(); });
 addForm.addEventListener('submit', e => {
   e.preventDefault();
-  const c = { id: 'c' + Date.now(), marca: document.getElementById('add-brand').value,
-    modelo: document.getElementById('add-model').value.trim(), ano: Number(document.getElementById('add-year').value), cor: addColor };
-  garage.push(c);
+  const data = { marca: brandSel.value, modelo: modelSel.value, ano: Number(yearSel.value), cor: addColor };
+  let id = editingId;
+  if (id) Object.assign(garage.find(c => c.id === id), data);
+  else { id = 'c' + Date.now(); garage.push({ id, ...data }); }
   saveGarage();
-  addForm.reset();
-  addColor = FACTORY_COLORS[0];
-  selectCar(c.id);
+  closeForm();
+  selectCar(id);
   garageEl.close();
 });
 
