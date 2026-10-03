@@ -29,6 +29,8 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { height: 100%; }
+/* Espaço da barra de rolagem sempre reservado: se ela aparece/some, a largura não muda e o 3D não é redimensionado (era o que piscava). */
+html { scrollbar-gutter: stable; }
 body { margin: 0; background: var(--bg); color: var(--white); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
 button, select { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
@@ -140,7 +142,7 @@ button, select { font: inherit; color: inherit; }
 @keyframes pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
 
 /* Painel */
-.panel { display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 110px); position: sticky; top: 16px;
+.panel { display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 116px); position: sticky; top: 16px;
   background: var(--panel); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
 .layers { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
 .layers button { border: 0; background: none; padding: 14px 18px; text-align: left; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); min-height: 64px; }
