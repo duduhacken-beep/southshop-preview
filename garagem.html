@@ -45,7 +45,7 @@ button, select { font: inherit; color: inherit; }
 .lockup img { display: block; width: auto; }
 .lockup .south { height: 46px; }
 .lockup .marchand { height: 38px; }
-.wordmark { margin: 0; padding-left: 22px; border-left: 1px solid var(--line); font: 800 22px/1 var(--display); font-stretch: 125%; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.wordmark { margin: 0; padding-left: 22px; border-left: 1px solid var(--line); font: 800 22px/1 var(--display); font-stretch: 125%; letter-spacing: .06em; text-transform: uppercase; }
 .car-switch { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--band); border-radius: 12px; padding: 7px 12px 7px 14px; cursor: pointer; text-align: left; min-height: 44px; transition: border-color .2s; }
 .car-switch:hover { border-color: rgba(244,246,249,.3); }
 .car-switch small { display: block; color: var(--muted); font-size: 12px; line-height: 1.2; }
@@ -174,8 +174,8 @@ button, select { font: inherit; color: inherit; }
 .group-inner { min-height: 0; overflow: hidden; padding-inline: 8px; margin-inline: -8px; } /* folga lateral: anel da cor escolhida e foco não são cortados */
 .group-note { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
 .group-note.warn { color: #e9b7bb; }
-.opts { display: grid; gap: 8px; margin-top: 12px; }
-.opt { position: relative; display: grid; grid-template-columns: 18px 1fr auto; gap: 4px 12px; align-items: start; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; transition: border-color .2s, background .2s; }
+.opts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 12px; }
+.opt { position: relative; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; transition: border-color .2s, background .2s; }
 .opt input { position: absolute; opacity: 0; pointer-events: none; }
 .opt .box { width: 18px; height: 18px; margin-top: 2px; border: 1.5px solid var(--muted); border-radius: 5px; display: grid; place-items: center; }
 .opt input[type="radio"] + .box { border-radius: 50%; }
@@ -187,20 +187,20 @@ button, select { font: inherit; color: inherit; }
 .opt .price { font: 600 16px/1.3 var(--cond); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .opt.tier { padding: 14px 14px 13px; border-radius: 14px; align-items: center; background: linear-gradient(180deg, rgba(255,255,255,.03), transparent); }
 .opt.tier:hover { border-color: rgba(244,246,249,.22); }
-.opt.tier:has(input:checked) { border-color: var(--south); background: var(--south-soft); box-shadow: inset 0 0 0 1px var(--south); }
-.tier-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
-.tier-name { font: 800 13px/1.2 var(--display); font-stretch: 125%; letter-spacing: .08em; text-transform: uppercase; }
+.opt.tier:has(input:checked) { border-color: var(--c, var(--south)); background: color-mix(in srgb, var(--c, var(--south)) 16%, transparent); box-shadow: inset 0 0 0 1px var(--c, var(--south)); }
+.tier-head { min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.tier-name { font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; }
 .tier-bars { display: inline-flex; gap: 3px; }
 .tier-bars i { width: 14px; height: 4px; border-radius: 2px; background: rgba(244,246,249,.16); }
-.tier-bars i.on { background: var(--south); }
-.tier-badge { font: 600 10px/1 var(--sans); color: #fff; background: var(--south); padding: 4px 8px; border-radius: 999px; }
+.tier-bars i.on { background: var(--c, var(--south)); }
+.tier-badge { font: 600 10px/1 var(--sans); color: #fff; background: var(--c, var(--south)); padding: 4px 8px; border-radius: 999px; }
 .opt.tier .price { font-size: 20px; }
 .opt.tier .detail { margin-top: 2px; }
 .opt.tier .incl { display: none; padding-top: 10px; margin-top: 8px; border-top: 1px solid var(--line); }
 .opt.tier:has(input:checked) .incl { display: grid; }
 .incl { grid-column: 2 / 4; list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 14px; }
 .incl li { position: relative; padding-left: 14px; color: var(--muted); font-size: 12px; line-height: 1.35; }
-.incl li::before { content: "✓"; position: absolute; left: 0; color: var(--south); font-size: 11px; }
+.incl li::before { content: "✓"; position: absolute; left: 0; color: var(--c, var(--south)); font-size: 11px; }
 @media (max-width: 560px) { .incl { grid-template-columns: 1fr; } }
 .opt .detail { grid-column: 2 / 4; color: var(--muted); font-size: 13px; line-height: 1.45; }
 .opt.is-off { opacity: .45; cursor: not-allowed; }
@@ -392,10 +392,13 @@ const GROUPS = [
     spot: { label: 'Revisão', p: [1.6, 0.98, 0], n: [0.35, 1, 0] },
     view: { pos: [4.6, 2.9, 1.9], target: [1.3, 0.9, 0] },
     options: [
-      { id: 'essencial', name: 'Essencial', price: 2900, onde: 'servico', troca: ['premium'],
-        detail: 'Troca do óleo, filtros de óleo, ar e ar-condicionado, reset do aviso de inspeção e scanner de avarias eletrônicas.' },
-      { id: 'premium', name: 'Pacote Premium', price: 5400, onde: 'servico', troca: ['essencial'],
-        detail: 'Tudo do Essencial, mais higienização do ar-condicionado, inspeção de 54 itens, aditivos, alinhamento e balanceamento. Inclui estética CarPro: lavagem premium nível II, selante Reload e hidratação interna.' },
+      { id: 'essencial', name: 'Essencial', price: 2900, onde: 'servico', troca: ['premium'], level: 1,
+        tagline: 'Óleo, filtros e diagnóstico com peças originais.',
+        includes: ['Troca do óleo', 'Filtros de óleo, ar e ar-condicionado', 'Reset do aviso de inspeção', 'Scanner de avarias eletrônicas'] },
+      { id: 'premium', name: 'Pacote Premium', price: 5400, onde: 'servico', troca: ['essencial'], level: 2,
+        tagline: 'Revisão completa com estética CarPro.',
+        includes: ['Tudo do Essencial', 'Higienização do ar-condicionado', 'Inspeção de 54 itens (motor, suspensão e freios)', 'Aditivos: flush de óleo e limpeza via tanque',
+          'Alinhamento e balanceamento', 'Lavagem premium nível II', 'Selante CarPro Reload', 'Limpeza e hidratação interna'] },
     ] },
   { id: 'freios', layer: 'marchand', title: () => 'Freios', kind: 'check', note: () => partsNote(),
     spot: { label: 'Freios', p: [1.4, 0.45, 0.98], n: [0.2, 0, 1] },
@@ -449,9 +452,12 @@ const GROUPS = [
   { id: 'coating', layer: 'south', title: () => 'Coating cerâmico CarPro', kind: 'check', linePrefix: 'Coating',
     note: 'Credenciado oficial CarPro.',
     options: [
-      { id: 'coat-d', name: 'D.Quartz Pro (1 a 2 anos)', price: 2500, onde: 'servico', troca: ['coat-c', 'coat-f'] },
-      { id: 'coat-c', name: 'C.Quartz Professional (2 a 3 anos)', price: 3900, onde: 'servico', troca: ['coat-d', 'coat-f'] },
-      { id: 'coat-f', name: 'C.Quartz Finest Reserve (até 5 anos)', price: 6900, onde: 'servico', troca: ['coat-d', 'coat-c'] },
+      { id: 'coat-d', name: 'D.Quartz Pro', lineName: 'Coating D.Quartz Pro', price: 2500, onde: 'servico', troca: ['coat-c', 'coat-f'], level: 1,
+        tagline: 'Durabilidade de 1 a 2 anos.', includes: ['Alta hidrofobia', 'Resistência a contaminantes químicos', 'Brilho profundo'] },
+      { id: 'coat-c', name: 'C.Quartz Professional', lineName: 'Coating C.Quartz Professional', price: 3900, onde: 'servico', troca: ['coat-d', 'coat-f'], level: 2,
+        tagline: 'Durabilidade de 2 a 3 anos.', includes: ['Dureza 9H+', 'Anti-riscos finos', 'Acabamento espelhado', 'Proteção UV'] },
+      { id: 'coat-f', name: 'C.Quartz Finest Reserve', lineName: 'Coating C.Quartz Finest Reserve', price: 6900, onde: 'servico', troca: ['coat-d', 'coat-c'], level: 3, badge: 'Só credenciados',
+        tagline: 'Durabilidade de até 5 anos.', includes: ['Profundidade de cor única', 'Acabamento de cristal', 'Durabilidade de até 5 anos', 'Exclusivo para aplicadores credenciados'] },
       { id: 'cquartz-kit', name: 'Kit CarPro CQuartz para aplicar em casa', price: 890, onde: 'produto' },
     ] },
   { id: 'ppf', layer: 'south', title: () => 'PPF', kind: 'check', linePrefix: 'PPF',
@@ -923,7 +929,8 @@ function renderGroups() {
         const off = offInCasa(o);
         const detail = optDetail(o, g);
         if (o.level) { // cartão de plano (Lavação)
-          const bars = [1, 2, 3].map(n => `<i class="${n <= o.level ? 'on' : ''}"></i>`).join('');
+          const levels = g.options.filter(x => x.level).length;
+          const bars = Array.from({ length: levels }, (_, i) => `<i class="${i < o.level ? 'on' : ''}"></i>`).join('');
           wrap.insertAdjacentHTML('beforeend', `<label class="opt tier${off ? ' is-off' : ''}" for="${id}">
             <input type="checkbox" name="${g.id}" id="${id}" value="${o.id}" ${checked ? 'checked' : ''} ${off ? 'disabled' : ''}>
             <span class="box"></span>
