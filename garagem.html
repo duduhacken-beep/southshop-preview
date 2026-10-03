@@ -107,11 +107,11 @@ button, select { font: inherit; color: inherit; }
 .list-crest { height: 22px; width: auto; margin-right: 10px; vertical-align: -5px; }
 .chip-crest { height: 30px; width: auto; flex: none; }
 .car-dot { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); vertical-align: 1px; }
-.no-3d { position: absolute; right: 16px; top: 16px; max-width: 280px; margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.55); backdrop-filter: blur(10px); color: var(--muted); font-size: 13px; }
+.no-3d { position: absolute; left: 22px; top: 70px; max-width: 300px; margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(6,8,14,.85); color: var(--muted); font-size: 13px; }
 
 /* Palco */
-.stage { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 20px; padding-block: 16px; min-height: 0; }
-.viewport { position: relative; min-height: 520px; border-radius: 22px; overflow: hidden;
+.stage { position: relative; padding-block: 16px; min-height: 0; }
+.viewport { position: relative; height: calc(100vh - 116px); min-height: 520px; border-radius: 22px; overflow: hidden;
   background: radial-gradient(60% 55% at 50% 58%, #13254a 0%, #070b16 55%, #000 100%); }
 .viewport canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 .viewport canvas:active { cursor: grabbing; }
@@ -119,12 +119,11 @@ button, select { font: inherit; color: inherit; }
 .viewport.is-focused .stage-caption { opacity: 0; }
 .stage-caption h2 { margin: 0; display: flex; align-items: center; gap: 12px; font: 500 clamp(22px, 2.4vw, 32px)/1.1 var(--serif); text-wrap: balance; }
 .brand-crest { height: 1.3em; width: auto; flex: none; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); transition: opacity .4s; }
-.car-controls { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.5); backdrop-filter: blur(10px); }
+.car-controls { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid var(--line); background: rgba(6,8,14,.8); }
 .car-controls button { display: flex; align-items: center; gap: 8px; border: 0; background: none; border-radius: 999px; padding: 8px 14px; min-height: 40px; cursor: pointer; color: var(--muted); font-size: 13px; transition: background .3s, color .3s; }
 .car-controls button svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 .car-controls button[aria-pressed="true"] { background: var(--white); color: #000; }
 .car-controls button:hover:not([aria-pressed="true"]) { color: var(--white); }
-.view-reset { position: absolute; right: 16px; bottom: 16px; border: 1px solid var(--line); background: rgba(0,0,0,.45); backdrop-filter: blur(10px); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; min-height: 40px; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
 .drag-hint { position: absolute; left: 22px; bottom: 20px; color: var(--muted); font-size: 13px; pointer-events: none; }
 
@@ -136,7 +135,7 @@ button, select { font: inherit; color: inherit; }
   transition: transform .45s cubic-bezier(.34, 1.4, .64, 1), background-color .3s, box-shadow .3s; }
 .spot .dot { transition-delay: inherit; } /* bolinha cresce junto com o atraso escalonado da troca de aba */
 .spot .dot::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--c); animation: pulse 2.2s ease-out infinite; }
-.spot .tag { font: 500 15px/1 var(--cond); background: rgba(0,0,0,.6); backdrop-filter: blur(8px); border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+.spot .tag { font: 500 15px/1 var(--cond); background: rgba(6,8,14,.82); border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; white-space: nowrap;
   /* nome escondido: aparece deslizando quando passa o mouse, foca pelo teclado ou o ponto está ativo */
   opacity: 0; transform: translateX(-6px); clip-path: inset(0 100% 0 0 round 999px); pointer-events: none;
   transition: opacity .25s ease, transform .35s cubic-bezier(.2, .8, .2, 1), clip-path .35s cubic-bezier(.2, .8, .2, 1); }
@@ -150,10 +149,30 @@ button, select { font: inherit; color: inherit; }
 @keyframes pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
 
 /* Painel */
-.panel { display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 116px); position: sticky; top: 16px;
-  background: var(--panel); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
-.layers { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
-.layer-thumb { position: absolute; left: 0; top: 0; bottom: -1px; width: 50%; background: var(--marchand-soft); border-bottom: 2px solid var(--marchand); pointer-events: none;
+.panel { position: absolute; top: 28px; right: 12px; bottom: 28px; width: 400px; display: flex; flex-direction: column; min-height: 0;
+  background: rgba(9,12,20,.95); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: -20px 0 60px rgba(0,0,0,.45);
+  transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .4s ease, visibility 0s; }
+/* Interface recolhida: só o carro e os dois botões */
+.app.is-collapsed .panel { transform: translateX(calc(100% + 24px)); opacity: 0; visibility: hidden; pointer-events: none;
+  transition: transform .45s cubic-bezier(.55, 0, .75, .2), opacity .35s ease, visibility 0s .45s; }
+.chooser { position: absolute; top: 28px; right: 28px; display: grid; gap: 10px; width: 260px; z-index: 2;
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1), opacity .35s ease; }
+.app:not(.is-collapsed) .chooser { transform: translateX(30px); opacity: 0; pointer-events: none; }
+.chooser button { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 12px; text-align: left; padding: 16px 18px; border-radius: 16px; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(6,8,14,.82); color: var(--white); transition: border-color .25s, background .25s, transform .25s; }
+.chooser button:hover { transform: translateX(-3px); }
+.chooser button[data-layer="marchand"]:hover { border-color: var(--marchand); background: rgba(40,8,12,.85); }
+.chooser button[data-layer="south"]:hover { border-color: var(--south); background: rgba(10,20,44,.85); }
+.chooser strong { font: 800 15px/1.2 var(--display); font-stretch: 125%; letter-spacing: .07em; text-transform: uppercase; }
+.chooser span { grid-column: 1; color: var(--muted); font: 500 14px/1.3 var(--cond); }
+.chooser .pick { grid-row: span 2; grid-column: 2; width: 10px; height: 10px; border-radius: 50%; }
+.chooser button[data-layer="marchand"] .pick { background: var(--marchand); }
+.chooser button[data-layer="south"] .pick { background: var(--south); }
+.chooser .count { font: 600 12px var(--cond); color: var(--white); }
+.panel-close { position: absolute; z-index: 2; top: 10px; right: 10px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255,255,255,.06); color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
+.panel-close:hover { color: var(--white); background: rgba(255,255,255,.12); }
+.layers { position: relative; display: grid; grid-template-columns: 1fr 1fr 52px; border-bottom: 1px solid var(--line); }
+.layer-thumb { position: absolute; left: 0; top: 0; bottom: -1px; width: calc(50% - 26px); background: var(--marchand-soft); border-bottom: 2px solid var(--marchand); pointer-events: none;
   transition: transform .5s cubic-bezier(.65, 0, .35, 1), background-color .5s, border-color .5s; }
 .layers[data-active="south"] .layer-thumb { transform: translateX(100%); background: var(--south-soft); border-color: var(--south); }
 .layers button { position: relative; z-index: 1; border: 0; background: none; padding: 14px 18px; text-align: left; cursor: pointer; color: var(--muted); min-height: 64px; transition: color .35s; }
@@ -247,11 +266,12 @@ button, select { font: inherit; color: inherit; }
 .cta[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 
 @media (max-width: 980px) {
-  .stage { grid-template-columns: 1fr; }
-  .viewport { min-height: 0; height: 58vh; min-height: 360px; }
-  .panel { position: static; max-height: none; }
+  .viewport { height: 58vh; min-height: 360px; }
+  .panel { position: static; width: auto; margin-top: 16px; box-shadow: none; }
+  .app.is-collapsed .panel { display: none; }
+  .chooser { top: auto; bottom: 72px; right: 16px; left: 16px; width: auto; grid-template-columns: 1fr 1fr; }
   .groups { overflow: visible; }
-  .summary { position: sticky; bottom: 0; backdrop-filter: blur(18px); background: rgba(5,8,16,.92); }
+  .summary { position: sticky; bottom: 0; background: rgba(5,8,16,.96); }
 }
 @media (max-width: 560px) {
   .drag-hint { display: none; }
@@ -271,7 +291,7 @@ button, select { font: inherit; color: inherit; }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app is-collapsed">
   <header class="top">
     <div class="brand">
       <div class="lockup">
@@ -306,11 +326,18 @@ button, select { font: inherit; color: inherit; }
         <button type="button" id="ctl-lights" aria-pressed="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-3.5 0-6 3-6 7s2.5 7 6 7c1.5 0 2-1 2-7s-.5-7-2-7z"/><path d="M17 8h5M17 12h5M17 16h5"/></svg>Faróis
         </button>
+        <button type="button" id="reset-view">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v4h4"/></svg>Visão geral
+        </button>
       </div>
-      <button type="button" class="view-reset" id="reset-view">Visão geral</button>
+      <div class="chooser" id="chooser">
+        <button type="button" data-layer="marchand"><strong>Marchand</strong><i class="pick" aria-hidden="true"></i><span>Manutenção e peças <b class="count" id="count-marchand"></b></span></button>
+        <button type="button" data-layer="south"><strong>South Car</strong><i class="pick" aria-hidden="true"></i><span>Estética e serviços <b class="count" id="count-south"></b></span></button>
+      </div>
     </section>
 
-    <aside class="panel" aria-label="Configuração e orçamento">
+    <aside class="panel" id="panel" aria-label="Configuração e orçamento">
+      <button type="button" class="panel-close" id="panel-close" aria-label="Recolher e ver só o carro">×</button>
       <div class="layers" role="tablist" aria-label="Camadas" data-active="marchand">
         <span class="layer-thumb" aria-hidden="true"></span>
         <button type="button" role="tab" data-layer="marchand" aria-selected="true"><strong>Marchand</strong><span>Manutenção e peças</span></button>
@@ -519,7 +546,7 @@ const GROUPS = [
 ];
 
 const state = {
-  layer: 'marchand', mode: 'complexo', active: null, open: null, qty: {},
+  layer: 'marchand', mode: 'complexo', active: null, open: null, qty: {}, panelOpen: false,
   radio: { pintura: 'original', pincas: 'original', rodas: 'original' },
   checks: new Set(),
   notes: {},
@@ -529,7 +556,7 @@ const state = {
 const canvas = document.getElementById('scene');
 const viewport = document.getElementById('viewport');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
@@ -801,11 +828,17 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
   car.position.y = -new THREE.Box3().setFromObject(car).min.y; // pneus apoiados no pódio
 });
 
+const viewShift = { x: 0 }; // px que o carro anda para a esquerda quando o painel está aberto
+function applyViewShift() {
+  const { clientWidth: w, clientHeight: h } = viewport;
+  if (viewShift.x) camera.setViewOffset(w, h, viewShift.x, 0, w, h); else camera.clearViewOffset();
+}
 function resize() {
   const { clientWidth: w, clientHeight: h } = viewport;
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
   camera.fov = w < 600 ? 42 : 32;
+  applyViewShift();
   camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe(viewport);
@@ -815,7 +848,7 @@ resize();
 const spotsEl = document.getElementById('spots');
 const spots = GROUPS.filter(g => g.spot).map(g => {
   const b = document.createElement('button');
-  b.type = 'button'; b.className = 'spot'; b.dataset.layer = g.layer;
+  b.type = 'button'; b.className = 'spot is-off'; // nasce escondida: só aparece com o painel aberto b.dataset.layer = g.layer;
   b.innerHTML = `<span class="dot"></span><span class="tag">${g.spot.label}</span>`;
   b.setAttribute('aria-label', `Ver ${g.spot.label}`);
   b.addEventListener('click', () => focusGroup(g.id, true));
@@ -826,7 +859,7 @@ const v = new THREE.Vector3(), toCam = new THREE.Vector3();
 function placeSpots() {
   const w = viewport.clientWidth, h = viewport.clientHeight;
   for (const s of spots) {
-    const shown = s.g.layer === state.layer;
+    const shown = state.panelOpen && s.g.layer === state.layer;
     s.el.classList.toggle('is-off', !shown);
     v.copy(s.p).project(camera);
     toCam.copy(camera.position).sub(s.p);
@@ -855,7 +888,45 @@ function fly({ pos, target }) {
   } });
 }
 canvas.addEventListener('pointerdown', () => { if (flight) flight.kill(); }); // arrastar interrompe o voo
-document.getElementById('reset-view').addEventListener('click', () => { state.active = null; viewport.classList.remove('is-focused'); fly(HOME); renderGroups(); });
+document.getElementById('reset-view').addEventListener('click', () => { state.active = null; state.open = null; viewport.classList.remove('is-focused'); fly(HOME); syncGroups(); });
+
+/* ---------- Interface retrátil ---------- */
+const appEl = document.querySelector('.app');
+const wide = () => matchMedia('(min-width: 981px)').matches;
+function shiftCar(px) {
+  if (reduced) { viewShift.x = px; applyViewShift(); camera.updateProjectionMatrix(); return; }
+  gsap.to(viewShift, { x: px, duration: 0.7, ease: 'power3.inOut', overwrite: true, onUpdate: () => { applyViewShift(); camera.updateProjectionMatrix(); } });
+}
+function openPanel(layer) {
+  const wasOpen = state.panelOpen;
+  state.panelOpen = true;
+  appEl.classList.remove('is-collapsed');
+  if (state.layer !== layer || !wasOpen) {
+    if (state.layer !== layer) setLayer(layer);
+    else { let i = 0; for (const s of spots) s.el.style.transitionDelay = s.g.layer === layer && !reduced ? `${0.25 + 0.06 * i++}s` : '0s'; setTimeout(() => { for (const s of spots) s.el.style.transitionDelay = ''; }, 1400); }
+    state.active = null; state.open = null; renderGroups(); animateGroupsIn();
+  }
+  if (wide()) shiftCar(Math.round(document.getElementById('panel').offsetWidth / 2) + 6);
+}
+function closePanel() {
+  state.panelOpen = false; state.active = null; state.open = null;
+  appEl.classList.add('is-collapsed');
+  viewport.classList.remove('is-focused');
+  shiftCar(0);
+  fly(HOME);
+  updateChooserCounts();
+}
+// Quantos itens escolhidos em cada lado (aparece nos dois botões quando a interface está recolhida)
+function updateChooserCounts() {
+  const { lines } = lineItems();
+  for (const [layer, brand] of [['marchand', 'Marchand'], ['south', 'South']]) {
+    const n = lines.filter(l => l.brand === brand).length;
+    document.getElementById('count-' + layer).textContent = n ? `· ${n} escolhido${n > 1 ? 's' : ''}` : '';
+  }
+}
+for (const b of document.querySelectorAll('#chooser button')) b.addEventListener('click', () => openPanel(b.dataset.layer));
+document.getElementById('panel-close').addEventListener('click', closePanel);
+addEventListener('keydown', e => { if (e.key === 'Escape' && state.panelOpen && !document.getElementById('garage').open) closePanel(); });
 
 /* ---------- Visual do carro conforme escolhas ---------- */
 // Troca de cor suave: 1,2s com aceleração e frenagem; uma troca nova substitui a anterior (sem "briga"),
@@ -1342,7 +1413,7 @@ document.getElementById('clear-all').addEventListener('click', () => {
   state.radio = { pintura: 'original', pincas: 'original', rodas: 'original' };
   update();
 });
-function update() { applyVisuals(); renderGroups(); renderSummary(); }
+function update() { applyVisuals(); renderGroups(); renderSummary(); updateChooserCounts(); }
 
 /* ---------- Abertura + loop ---------- */
 renderGroups(); selectCar(state.carId); moveThumb();
