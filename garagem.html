@@ -342,20 +342,20 @@ const PAINTS = [
   { id: 'onix', label: 'Preto Ônix', hex: '#0b0c0f', price: 34000 },
   { id: 'custom', label: 'Cor personalizada', hex: '#5a3e2b', price: 38000, custom: true },
 ];
-// Pinças e rodas: o site da South Car informa "sob consulta" (price: null).
+// Pinças e rodas: o site diz "sob consulta"; valores ESTIMADOS (mercado premium, SUV) a pedido do Eduardo, 03/10/2026.
 const CALIPERS = [
   { id: 'original', label: 'Original (preto)', hex: '#141518', price: 0 },
-  { id: 'vermelho', label: 'Vermelho', hex: '#b3121f', price: null },
-  { id: 'amarelo', label: 'Amarelo', hex: '#e1ad01', price: null },
-  { id: 'azul', label: 'Azul', hex: '#2b59d6', price: null },
+  { id: 'vermelho', label: 'Vermelho', hex: '#b3121f', price: 2400 },
+  { id: 'amarelo', label: 'Amarelo', hex: '#e1ad01', price: 2400 },
+  { id: 'azul', label: 'Azul', hex: '#2b59d6', price: 2400 },
 ];
 const RIMS = [
   { id: 'original', label: 'Original (prata)', hex: '#d2d6dc', price: 0 },
-  { id: 'preto', label: 'Preto brilhante', hex: '#111215', price: null },
-  { id: 'grafite', label: 'Grafite acetinado', hex: '#3d4046', price: null },
-  { id: 'bronze', label: 'Bronze', hex: '#6e4c2c', price: null },
-  { id: 'branco', label: 'Branco', hex: '#e9ebee', price: null },
-  { id: 'lpf-fume', label: 'LPF Fumê (reversível)', hex: '#5a5e66', price: null },
+  { id: 'preto', label: 'Preto brilhante', hex: '#111215', price: 2800 },
+  { id: 'grafite', label: 'Grafite acetinado', hex: '#3d4046', price: 2800 },
+  { id: 'bronze', label: 'Bronze', hex: '#6e4c2c', price: 2800 },
+  { id: 'branco', label: 'Branco', hex: '#e9ebee', price: 2800 },
+  { id: 'lpf-fume', label: 'LPF Fumê (reversível)', hex: '#5a5e66', price: 1900 },
 ];
 const partsNote = () => (state.mode === 'casa' ? 'Peças originais, enviamos para todo o Brasil.' : 'Peças originais com instalação inclusa.');
 const GROUPS = [
@@ -385,7 +385,8 @@ const GROUPS = [
       { id: 'amort', name: 'Par de amortecedores dianteiros originais', price: 7200, inst: 1200, onde: 'ambos' },
       { id: 'buchas', name: 'Buchas e bieletas', price: 1600, inst: 600, onde: 'ambos' },
     ] },
-  // Serviços e preços conforme southcar.com.br (03/10/2026). price: null = "sob consulta" no site; from = "a partir de".
+  // Serviços conforme southcar.com.br (03/10/2026). Lavação e películas: preços do site (from = "a partir de").
+  // Coating, PPF, rodas e pinças: o site diz "sob consulta"; valores ESTIMADOS a pedido do Eduardo. Só o martelinho fica sob consulta (price: null).
   { id: 'lavacao', layer: 'south', title: () => 'Lavação premium', kind: 'check', linePrefix: 'Lavação premium',
     note: 'Produtos CarPro. O Nível 03 inclui retirada e limpeza das 4 rodas.',
     options: [
@@ -412,9 +413,9 @@ const GROUPS = [
   { id: 'coating', layer: 'south', title: () => 'Coating cerâmico CarPro', kind: 'check', linePrefix: 'Coating',
     note: 'Credenciado oficial CarPro.',
     options: [
-      { id: 'coat-d', name: 'D.Quartz Pro (1 a 2 anos)', price: null, onde: 'servico', troca: ['coat-c', 'coat-f'] },
-      { id: 'coat-c', name: 'C.Quartz Professional (2 a 3 anos)', price: null, onde: 'servico', troca: ['coat-d', 'coat-f'] },
-      { id: 'coat-f', name: 'C.Quartz Finest Reserve (até 5 anos)', price: null, onde: 'servico', troca: ['coat-d', 'coat-c'] },
+      { id: 'coat-d', name: 'D.Quartz Pro (1 a 2 anos)', price: 2500, onde: 'servico', troca: ['coat-c', 'coat-f'] },
+      { id: 'coat-c', name: 'C.Quartz Professional (2 a 3 anos)', price: 3900, onde: 'servico', troca: ['coat-d', 'coat-f'] },
+      { id: 'coat-f', name: 'C.Quartz Finest Reserve (até 5 anos)', price: 6900, onde: 'servico', troca: ['coat-d', 'coat-c'] },
       { id: 'cquartz-kit', name: 'Kit CarPro CQuartz para aplicar em casa', price: 890, onde: 'produto' },
     ] },
   { id: 'ppf', layer: 'south', title: () => 'PPF', kind: 'check', linePrefix: 'PPF',
@@ -422,15 +423,15 @@ const GROUPS = [
     spot: { label: 'PPF', p: [2.28, 0.6, 0.5], n: [1, 0.1, 0.3] },
     view: { pos: [5.4, 1.5, 1.9], target: [1.8, 0.75, 0] },
     options: [
-      { id: 'ppf-frente', name: 'Transparente frontal', price: null, onde: 'servico', troca: ['ppf-total'] },
-      { id: 'ppf-total', name: 'Transparente no carro inteiro', price: null, onde: 'servico', troca: ['ppf-frente'] },
-      { id: 'ppf-gloss', name: 'Colorido brilhante (Gloss)', price: null, onde: 'servico', troca: ['ppf-matte'] },
-      { id: 'ppf-matte', name: 'Colorido fosco (Matte)', price: null, onde: 'servico', troca: ['ppf-gloss'] },
-      { id: 'ppf-sunroof', name: 'Teto solar (Sunroof)', price: null, onde: 'servico' },
-      { id: 'ppf-antitrinco', name: 'Parabrisa anti-trinco', price: null, onde: 'servico' },
-      { id: 'smoke-30', name: 'Faróis smoke 30% (escuro)', price: null, onde: 'servico', troca: ['smoke-50', 'smoke-70'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
-      { id: 'smoke-50', name: 'Faróis smoke 50% (médio)', price: null, onde: 'servico', troca: ['smoke-30', 'smoke-70'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
-      { id: 'smoke-70', name: 'Faróis smoke 70% (claro)', price: null, onde: 'servico', troca: ['smoke-30', 'smoke-50'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
+      { id: 'ppf-frente', name: 'Transparente frontal', price: 7900, onde: 'servico', troca: ['ppf-total'] },
+      { id: 'ppf-total', name: 'Transparente no carro inteiro', price: 24000, onde: 'servico', troca: ['ppf-frente'] },
+      { id: 'ppf-gloss', name: 'Colorido brilhante (Gloss)', price: 28000, onde: 'servico', troca: ['ppf-matte'] },
+      { id: 'ppf-matte', name: 'Colorido fosco (Matte)', price: 30000, onde: 'servico', troca: ['ppf-gloss'] },
+      { id: 'ppf-sunroof', name: 'Teto solar (Sunroof)', price: 1800, onde: 'servico' },
+      { id: 'ppf-antitrinco', name: 'Parabrisa anti-trinco', price: 1500, onde: 'servico' },
+      { id: 'smoke-30', name: 'Faróis smoke 30% (escuro)', price: 900, onde: 'servico', troca: ['smoke-50', 'smoke-70'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
+      { id: 'smoke-50', name: 'Faróis smoke 50% (médio)', price: 900, onde: 'servico', troca: ['smoke-30', 'smoke-70'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
+      { id: 'smoke-70', name: 'Faróis smoke 70% (claro)', price: 900, onde: 'servico', troca: ['smoke-30', 'smoke-50'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
     ] },
   { id: 'peliculas', layer: 'south', title: () => 'Películas', kind: 'check', linePrefix: 'Película',
     note: 'Laterais e traseira: escolha uma. O parabrisa tem película própria.',
