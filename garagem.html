@@ -144,7 +144,7 @@ button, select { font: inherit; color: inherit; }
   background: var(--panel); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
 .layers { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
 .layers button { border: 0; background: none; padding: 14px 18px; text-align: left; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); min-height: 64px; }
-.layers button strong { display: block; font: 600 19px/1.15 var(--serif); color: inherit; }
+.layers button strong { display: block; margin-bottom: 4px; font: 800 15px/1.2 var(--display); font-stretch: 125%; letter-spacing: .07em; text-transform: uppercase; color: inherit; }
 .layers button span { font: 500 14px/1.3 var(--cond); }
 .layers button[aria-selected="true"] { color: var(--white); }
 .layers button[data-layer="marchand"][aria-selected="true"] { border-color: var(--marchand); background: var(--marchand-soft); }
@@ -265,8 +265,8 @@ button, select { font: inherit; color: inherit; }
 
     <aside class="panel" aria-label="Configuração e orçamento">
       <div class="layers" role="tablist" aria-label="Camadas">
-        <button type="button" role="tab" data-layer="marchand" aria-selected="true"><strong>Manutenção</strong><span>Marchand Service e Peças</span></button>
-        <button type="button" role="tab" data-layer="south" aria-selected="false"><strong>Estética</strong><span>South, South Paint e CarPro</span></button>
+        <button type="button" role="tab" data-layer="marchand" aria-selected="true"><strong>Marchand</strong><span>Manutenção e peças</span></button>
+        <button type="button" role="tab" data-layer="south" aria-selected="false"><strong>South Car</strong><span>Estética e serviços</span></button>
       </div>
       <div class="groups" id="groups"></div>
       <section class="summary" aria-live="polite">
