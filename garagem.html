@@ -338,6 +338,7 @@ const CALIPERS = [
   { id: 'amarelo', label: 'Amarelo', hex: '#e1ad01', price: 2400 },
   { id: 'azul', label: 'Azul', hex: '#2b59d6', price: 2400 },
 ];
+const partsNote = () => (state.mode === 'casa' ? 'Peças originais, enviamos para todo o Brasil.' : 'Peças originais com instalação inclusa.');
 const GROUPS = [
   { id: 'revisao', layer: 'marchand', title: () => 'Revisão', kind: 'check',
     note: 'Peças originais separadas pela Marchand.',
@@ -349,7 +350,7 @@ const GROUPS = [
       { id: 'premium', name: 'Pacote Premium', price: 5400, onde: 'servico', troca: ['essencial'],
         detail: 'Tudo do Essencial, mais higienização do ar-condicionado, inspeção de 54 itens, aditivos, alinhamento e balanceamento. Inclui estética CarPro: lavagem premium nível II, selante Reload e hidratação interna.' },
     ] },
-  { id: 'freios', layer: 'marchand', title: () => 'Freios', kind: 'check',
+  { id: 'freios', layer: 'marchand', title: () => 'Freios', kind: 'check', note: () => partsNote(),
     spot: { label: 'Freios', p: [1.4, 0.45, 0.98], n: [0.2, 0, 1] },
     view: { pos: [2.9, 0.75, 3.1], target: [1.4, 0.4, 0.7] },
     options: [
@@ -357,7 +358,7 @@ const GROUPS = [
       { id: 'discos', name: 'Discos e pastilhas dianteiros', price: 6800, inst: 900, onde: 'ambos' },
       { id: 'fluido', name: 'Fluido de freio DOT 4', price: 380, inst: 250, onde: 'ambos' },
     ] },
-  { id: 'suspensao', layer: 'marchand', title: () => 'Suspensão', kind: 'check',
+  { id: 'suspensao', layer: 'marchand', title: () => 'Suspensão', kind: 'check', note: () => partsNote(),
     spot: { label: 'Suspensão', p: [-1.4, 0.82, 0.98], n: [-0.1, 0.2, 1] },
     view: { pos: [-2.9, 0.9, 3.2], target: [-1.4, 0.5, 0.7] },
     options: [
@@ -708,7 +709,7 @@ function priceLabel(o) {
 function optDetail(o, g) {
   const bits = [];
   if (o.detail) bits.push(o.detail);
-  if (o.onde === 'ambos') bits.push(state.mode === 'casa' ? 'Enviamos para todo o Brasil.' : g.layer === 'marchand' ? 'Peça + instalação.' : `Peça ${brl(o.price)} + instalação ${brl(o.inst)}.`);
+  if (o.onde === 'ambos' && g.layer !== 'marchand') bits.push(state.mode === 'casa' ? 'Enviamos para todo o Brasil.' : `Peça ${brl(o.price)} + instalação ${brl(o.inst)}.`);
   if (o.onde === 'produto') bits.push('Enviamos para todo o Brasil.');
   if (offInCasa(o)) bits.push('Serviço feito no Complexo South.');
   return bits.join(' ');
@@ -723,7 +724,7 @@ function renderGroups() {
     const count = g.kind === 'check' ? g.options.filter(o => state.checks.has(o.id)).length : 0;
     sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : g.layer === 'marchand' ? '' : 'Ver no carro'}</span></button>`;
     sec.querySelector('.group-head').addEventListener('click', () => focusGroup(g.id, false));
-    const note = state.notes[g.id] || (groupOff ? 'Serviço feito no Complexo South. Fica fora do orçamento de envio.' : g.note);
+    const note = state.notes[g.id] || (groupOff ? 'Serviço feito no Complexo South. Fica fora do orçamento de envio.' : typeof g.note === 'function' ? g.note() : g.note);
     if (note) sec.insertAdjacentHTML('beforeend', `<p class="group-note${state.notes[g.id] || groupOff ? ' warn' : ''}">${note}</p>`);
 
     if (g.kind === 'swatch') {
