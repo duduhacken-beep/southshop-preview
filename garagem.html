@@ -175,7 +175,6 @@ button, select { font: inherit; color: inherit; }
 .opt input:focus-visible + .box { outline: 2px solid var(--white); outline-offset: 2px; }
 .opt:has(input:checked) { border-color: color-mix(in srgb, var(--c, var(--south)) 70%, transparent); background: rgba(255,255,255,.03); }
 .opt .name { font-weight: 500; }
-.opt .price small { display: block; font: 500 10px/1.2 var(--sans); color: var(--muted); }
 .opt .price { font: 600 16px/1.3 var(--cond); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .opt .detail { grid-column: 2 / 4; color: var(--muted); font-size: 13px; line-height: 1.45; }
 .opt.is-off { opacity: .45; cursor: not-allowed; }
@@ -385,7 +384,7 @@ const GROUPS = [
       { id: 'amort', name: 'Par de amortecedores dianteiros originais', price: 7200, inst: 1200, onde: 'ambos' },
       { id: 'buchas', name: 'Buchas e bieletas', price: 1600, inst: 600, onde: 'ambos' },
     ] },
-  // Serviços conforme southcar.com.br (03/10/2026). Lavação e películas: preços do site (from = "a partir de").
+  // Serviços conforme southcar.com.br (03/10/2026). Lavação e películas: preços do site (películas usam o valor "a partir de" do site como preço).
   // Coating, PPF, rodas e pinças: o site diz "sob consulta"; valores ESTIMADOS a pedido do Eduardo. Só o martelinho fica sob consulta (price: null).
   { id: 'lavacao', layer: 'south', title: () => 'Lavação premium', kind: 'check', linePrefix: 'Lavação premium',
     note: 'Produtos CarPro. O Nível 03 inclui retirada e limpeza das 4 rodas.',
@@ -438,11 +437,11 @@ const GROUPS = [
     spot: { label: 'Películas', p: [-0.45, 1.18, 0.86], n: [0, 0.35, 1] },
     view: { pos: [0.6, 1.5, 4.6], target: [-0.3, 1.0, 0.4] },
     options: [
-      { id: 'film-carbono', name: 'Nano-carbono', price: 900, from: true, onde: 'servico', troca: ['film-ceramica', 'film-refletiva', 'film-seguranca'] },
-      { id: 'film-ceramica', name: 'Nano-cerâmica', price: 1500, from: true, onde: 'servico', troca: ['film-carbono', 'film-refletiva', 'film-seguranca'] },
-      { id: 'film-refletiva', name: 'Semi-refletiva metalizada', price: 1000, from: true, onde: 'servico', troca: ['film-carbono', 'film-ceramica', 'film-seguranca'] },
-      { id: 'film-seguranca', name: 'Segurança PS4 a PS16', price: 1500, from: true, onde: 'servico', troca: ['film-carbono', 'film-ceramica', 'film-refletiva'] },
-      { id: 'film-parabrisa', name: 'Parabrisa nano-cerâmica', price: 1200, from: true, onde: 'servico' },
+      { id: 'film-carbono', name: 'Nano-carbono', price: 900, onde: 'servico', troca: ['film-ceramica', 'film-refletiva', 'film-seguranca'] },
+      { id: 'film-ceramica', name: 'Nano-cerâmica', price: 1500, onde: 'servico', troca: ['film-carbono', 'film-refletiva', 'film-seguranca'] },
+      { id: 'film-refletiva', name: 'Semi-refletiva metalizada', price: 1000, onde: 'servico', troca: ['film-carbono', 'film-ceramica', 'film-seguranca'] },
+      { id: 'film-seguranca', name: 'Segurança PS4 a PS16', price: 1500, onde: 'servico', troca: ['film-carbono', 'film-ceramica', 'film-refletiva'] },
+      { id: 'film-parabrisa', name: 'Parabrisa nano-cerâmica', price: 1200, onde: 'servico' },
     ] },
   { id: 'rodas', layer: 'south', title: () => 'Rodas', kind: 'swatch', items: RIMS, onde: 'servico',
     note: 'Pintura automotiva ou LPF Liquid Armor PRO, que é reversível.',
@@ -820,7 +819,6 @@ const groupsEl = document.getElementById('groups');
 const offInCasa = o => state.mode === 'casa' && o.onde === 'servico';
 function priceLabel(o, n = 1) {
   if (o.price === null) return 'Sob consulta';
-  if (o.from) return `<small>a partir de</small>${brl(o.price)}`;
   if (!o.price) return 'Incluso';
   if (n > 1) return brl(o.price * n);
   if (o.onde === 'ambos') return state.mode === 'complexo' ? `${brl(o.price + o.inst)}` : brl(o.price);
@@ -951,7 +949,7 @@ function lineItems() {
       const n = qtyOf(o);
       const p = o.price === null ? null : (o.price + (state.mode === 'complexo' && o.inst ? o.inst : 0)) * n;
       const label = o.lineName || (g.linePrefix ? `${g.linePrefix} ${o.name.charAt(0).toLowerCase()}${o.name.slice(1)}` : g.id === 'reparo' ? `Reparo ${o.name.toLowerCase()}` : name);
-      lines.push({ id: o.id || `${g.id}-${state.radio[g.id]}`, name: n > 1 ? `${label} × ${n}` : label, p, brand, from: !!o.from });
+      lines.push({ id: o.id || `${g.id}-${state.radio[g.id]}`, name: n > 1 ? `${label} × ${n}` : label, p, brand });
     }
   }
   return { lines, skipped };
@@ -960,7 +958,7 @@ const totalEl = document.getElementById('total'), totalShown = { v: 0 };
 function renderSummary() {
   const { lines, skipped } = lineItems();
   const total = lines.reduce((s, l) => s + (l.p || 0), 0);
-  const fmt = l => (l.p === null ? 'Sob consulta' : (l.from ? 'a partir de ' : '') + brl(l.p));
+  const fmt = l => (l.p === null ? 'Sob consulta' : brl(l.p));
   document.getElementById('lines').innerHTML = lines.length
     ? lines.map(l => `<li class="${l.brand === 'Marchand' ? 'm' : ''}"><span>${l.name} <span class="k">${l.brand}</span></span><span class="p">${fmt(l)}</span></li>`).join('')
     : '<li><span class="k">Nada escolhido ainda. Toque num ponto do carro para começar.</span><span></span></li>';
@@ -993,7 +991,7 @@ function orderMessage(lines, total) {
   const car = carLabel(currentCar());
   if (!lines.length) return `Olá, South! Quero agendar um atendimento no Complexo South para o meu ${car}.`;
   return [`Olá, South! Quero agendar no Complexo South para o meu ${car}:`, '',
-    ...lines.map(l => `• ${l.name} (${l.brand}): ${l.p === null ? 'sob consulta' : (l.from ? 'a partir de ' : '') + brl(l.p)}`), '',
+    ...lines.map(l => `• ${l.name} (${l.brand}): ${l.p === null ? 'sob consulta' : brl(l.p)}`), '',
     state.mode === 'casa' ? 'Prefiro receber os produtos em casa.' : '',
     `Total estimado: ${brl(total)}`].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
 }
