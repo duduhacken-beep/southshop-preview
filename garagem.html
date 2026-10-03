@@ -194,6 +194,7 @@ button, select { font: inherit; color: inherit; }
 .cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; border-radius: 12px; padding: 14px 16px; background: var(--white); color: #000; font-weight: 600; text-decoration: none; min-height: 50px; transition: transform .2s, box-shadow .2s; }
 .cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(244,246,249,.12); }
 .cta svg { width: 20px; height: 20px; flex: none; }
+.cta[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 
 @media (max-width: 980px) {
   .stage { grid-template-columns: 1fr; }
@@ -271,8 +272,9 @@ button, select { font: inherit; color: inherit; }
         <p class="skipped" id="skipped" hidden></p>
         <div class="total" id="total-row" hidden><span>Total estimado</span><strong id="total">R$ 0</strong></div>
         <a class="cta" id="cta" href="https://wa.me/554732241691" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#fff" d="M17.2 14.3c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1a7.6 7.6 0 0 1-3.8-3.3c-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2c-.2-.6-.5-.5-.7-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.5-.3z"/></svg>
-          Agendar no Complexo South
+          <svg class="ic-wa" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#fff" d="M17.2 14.3c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1a7.6 7.6 0 0 1-3.8-3.3c-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2c-.2-.6-.5-.5-.7-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.5-.3z"/></svg>
+          <svg class="ic-cart" viewBox="0 0 24 24" aria-hidden="true" hidden><path fill="none" stroke="currentColor" stroke-width="2" d="M3 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 6H6"/><circle cx="9" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg>
+          <span id="cta-label">Agendar no Complexo South</span>
         </a>
       </section>
     </aside>
@@ -337,15 +339,14 @@ const CALIPERS = [
   { id: 'azul', label: 'Azul', hex: '#2b59d6', price: 2400 },
 ];
 const GROUPS = [
-  { id: 'revisao', layer: 'marchand', title: () => 'Revisão', kind: 'radio',
-    note: 'Peças originais separadas pela Marchand Peças para o seu carro.',
+  { id: 'revisao', layer: 'marchand', title: () => 'Revisão', kind: 'check',
+    note: 'Peças originais separadas pela Marchand.',
     spot: { label: 'Revisão', p: [1.6, 0.98, 0], n: [0.35, 1, 0] },
     view: { pos: [4.6, 2.9, 1.9], target: [1.3, 0.9, 0] },
     options: [
-      { id: 'nao', name: 'Agora não', price: 0 },
-      { id: 'essencial', name: 'Essencial', price: 2900, onde: 'servico',
+      { id: 'essencial', name: 'Essencial', price: 2900, onde: 'servico', troca: ['premium'],
         detail: 'Troca do óleo, filtros de óleo, ar e ar-condicionado, reset do aviso de inspeção e scanner de avarias eletrônicas.' },
-      { id: 'premium', name: 'Pacote Premium', price: 5400, onde: 'servico',
+      { id: 'premium', name: 'Pacote Premium', price: 5400, onde: 'servico', troca: ['essencial'],
         detail: 'Tudo do Essencial, mais higienização do ar-condicionado, inspeção de 54 itens, aditivos, alinhamento e balanceamento. Inclui estética CarPro: lavagem premium nível II, selante Reload e hidratação interna.' },
     ] },
   { id: 'freios', layer: 'marchand', title: () => 'Freios', kind: 'check',
@@ -394,7 +395,7 @@ const GROUPS = [
 
 const state = {
   layer: 'marchand', mode: 'complexo', active: null,
-  radio: { revisao: 'premium', pintura: 'original', pincas: 'original' },
+  radio: { pintura: 'original', pincas: 'original' },
   checks: new Set(),
   notes: {},
 };
@@ -704,10 +705,10 @@ function priceLabel(o) {
   if (o.onde === 'ambos') return state.mode === 'complexo' ? `${brl(o.price + o.inst)}` : brl(o.price);
   return brl(o.price);
 }
-function optDetail(o) {
+function optDetail(o, g) {
   const bits = [];
   if (o.detail) bits.push(o.detail);
-  if (o.onde === 'ambos') bits.push(state.mode === 'complexo' ? `Peça ${brl(o.price)} + instalação ${brl(o.inst)}.` : 'Enviamos para todo o Brasil.');
+  if (o.onde === 'ambos') bits.push(state.mode === 'casa' ? 'Enviamos para todo o Brasil.' : g.layer === 'marchand' ? 'Peça + instalação.' : `Peça ${brl(o.price)} + instalação ${brl(o.inst)}.`);
   if (o.onde === 'produto') bits.push('Enviamos para todo o Brasil.');
   if (offInCasa(o)) bits.push('Serviço feito no Complexo South.');
   return bits.join(' ');
@@ -720,7 +721,7 @@ function renderGroups() {
     sec.dataset.layer = g.layer; sec.id = 'g-' + g.id;
     const groupOff = state.mode === 'casa' && g.onde === 'servico';
     const count = g.kind === 'check' ? g.options.filter(o => state.checks.has(o.id)).length : 0;
-    sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : 'Ver no carro'}</span></button>`;
+    sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : g.layer === 'marchand' ? '' : 'Ver no carro'}</span></button>`;
     sec.querySelector('.group-head').addEventListener('click', () => focusGroup(g.id, false));
     const note = state.notes[g.id] || (groupOff ? 'Serviço feito no Complexo South. Fica fora do orçamento de envio.' : g.note);
     if (note) sec.insertAdjacentHTML('beforeend', `<p class="group-note${state.notes[g.id] || groupOff ? ' warn' : ''}">${note}</p>`);
@@ -742,7 +743,7 @@ function renderGroups() {
         const id = `${g.id}-${o.id}`;
         const checked = g.kind === 'radio' ? state.radio[g.id] === o.id : state.checks.has(o.id);
         const off = offInCasa(o);
-        const detail = optDetail(o);
+        const detail = optDetail(o, g);
         wrap.insertAdjacentHTML('beforeend', `<label class="opt${off ? ' is-off' : ''}" for="${id}">
           <input type="${g.kind === 'radio' ? 'radio' : 'checkbox'}" name="${g.id}" id="${id}" value="${o.id}" ${checked ? 'checked' : ''} ${off ? 'disabled' : ''}>
           <span class="box"></span><span class="name">${o.name}</span><span class="price">${priceLabel(o)}</span>
@@ -755,6 +756,7 @@ function renderGroups() {
         else if (e.target.checked) {
           state.checks.add(o.id);
           for (const x of o.excl || []) if (state.checks.delete(x)) state.notes[g.id] = `${o.name} já cobre ${g.options.find(y => y.id === x).name.toLowerCase()}, então tiramos o item repetido.`;
+          for (const x of o.troca || []) state.checks.delete(x);
         } else state.checks.delete(o.id);
         state.active = g.id;
         update();
@@ -790,10 +792,10 @@ function lineItems() {
       if (it.price) picks = [{ name: `${g.title()}: ${it.label}`, price: it.price, onde: g.onde }];
     }
     for (const o of picks) {
-      const name = g.kind === 'radio' ? `${g.title()}, ${o.name}` : o.name;
+      const name = g.kind === 'radio' || g.id === 'revisao' ? `${g.title()}, ${o.name}` : o.name;
       if (offInCasa(o)) { skipped.push(name); continue; }
       const p = o.price + (state.mode === 'complexo' && o.inst ? o.inst : 0);
-      lines.push({ name, p, brand });
+      lines.push({ id: o.id || `${g.id}-${state.radio[g.id]}`, name, p, brand });
     }
   }
   return { lines, skipped };
@@ -811,7 +813,21 @@ function renderSummary() {
   document.getElementById('total-row').hidden = total === 0;
   if (reduced) { totalShown.v = total; totalEl.textContent = brl(total); }
   else gsap.to(totalShown, { v: total, duration: 0.6, ease: 'power2.out', overwrite: true, onUpdate: () => { totalEl.textContent = brl(Math.round(totalShown.v)); } });
-  document.getElementById('cta').href = `${SOUTH_WHATSAPP}?text=${encodeURIComponent(orderMessage(lines, total))}`;
+  const cta = document.getElementById('cta'), casa = state.mode === 'casa';
+  cta.querySelector('.ic-wa').hidden = casa;
+  cta.querySelector('.ic-cart').hidden = !casa;
+  document.getElementById('cta-label').textContent = casa ? 'Finalizar compra' : 'Agendar no Complexo South';
+  if (casa) {
+    // Compra online: leva os produtos ao checkout da South Shop (mesmo formato de carrinho das outras páginas).
+    const cart = lines.map(l => ({ id: l.id, name: l.name, price: l.p, variant: l.brand === 'Marchand' ? 'Marchand Peças' : 'South Shop', qty: 1 }));
+    cta.href = 'checkout-redirect.html?cart=' + encodeURIComponent(JSON.stringify(cart));
+    cta.target = '_self';
+    cta.setAttribute('aria-disabled', !lines.length);
+  } else {
+    cta.href = `${SOUTH_WHATSAPP}?text=${encodeURIComponent(orderMessage(lines, total))}`;
+    cta.target = '_blank';
+    cta.removeAttribute('aria-disabled');
+  }
   return { lines, total };
 }
 // Mesmo WhatsApp do rodapé do site (South Shop, (47) 3224-1691).
