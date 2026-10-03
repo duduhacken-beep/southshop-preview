@@ -114,6 +114,11 @@ button, select { font: inherit; color: inherit; }
 .stage-caption { position: absolute; left: 22px; top: 18px; max-width: min(70%, 560px); pointer-events: none; transition: opacity .4s; }
 .viewport.is-focused .stage-caption { opacity: 0; }
 .stage-caption h2 { margin: 0; font: 500 clamp(22px, 2.4vw, 32px)/1.1 var(--serif); text-wrap: balance; }
+.car-controls { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.5); backdrop-filter: blur(10px); }
+.car-controls button { display: flex; align-items: center; gap: 8px; border: 0; background: none; border-radius: 999px; padding: 8px 14px; min-height: 40px; cursor: pointer; color: var(--muted); font-size: 13px; transition: background .3s, color .3s; }
+.car-controls button svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.car-controls button[aria-pressed="true"] { background: var(--white); color: #000; }
+.car-controls button:hover:not([aria-pressed="true"]) { color: var(--white); }
 .view-reset { position: absolute; right: 16px; bottom: 16px; border: 1px solid var(--line); background: rgba(0,0,0,.45); backdrop-filter: blur(10px); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; min-height: 40px; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
 .drag-hint { position: absolute; left: 22px; bottom: 20px; color: var(--muted); font-size: 13px; pointer-events: none; }
@@ -203,6 +208,7 @@ button, select { font: inherit; color: inherit; }
   .spot .tag { display: none; }
   .spot.is-active .tag { display: block; }
   .drag-hint { display: none; }
+  .car-controls { left: 16px; transform: none; }
   .mode { width: 100%; }
   .mode button { flex: 1; }
   .lockup .south { height: 34px; }
@@ -248,6 +254,11 @@ button, select { font: inherit; color: inherit; }
       <p class="loading" id="loading">Carregando a Macan…</p>
       <p class="no-3d" id="no-3d" hidden></p>
       <span class="drag-hint">Arraste para girar, use o scroll para aproximar</span>
+      <div class="car-controls" role="toolbar" aria-label="Controles do carro">
+        <button type="button" id="ctl-lights" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-3.5 0-6 3-6 7s2.5 7 6 7c1.5 0 2-1 2-7s-.5-7-2-7z"/><path d="M17 8h5M17 12h5M17 16h5"/></svg>Faróis
+        </button>
+      </div>
       <button type="button" class="view-reset" id="reset-view">Visão geral</button>
     </section>
 
@@ -504,8 +515,9 @@ const rimMat = new THREE.MeshStandardMaterial({ color: 0xd2d6dc, metalness: 0.75
 const discMat = new THREE.MeshStandardMaterial({ map: tex('disc.png', true), normalMap: tex('disc_n.png'), metalness: 0.9, roughness: 0.4 });
 const caliperMat = new THREE.MeshPhysicalMaterial({ color: CALIPERS[0].hex, roughness: 0.3, clearcoat: 1, normalMap: tex('caliper_n.png') });
 const lightsTex = tex('lights.png', true), lightsN = tex('lights_n.png');
-const headMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, metalness: 0.6, roughness: 0.15, emissive: 0xe8f0ff, emissiveMap: lightsTex, emissiveIntensity: 0 });
-const tailMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, color: 0xff3040, metalness: 0.3, roughness: 0.2, emissive: 0xff1a2a, emissiveMap: lightsTex, emissiveIntensity: 0 });
+// Máscaras de emissão originais do modelo: canal verde = faróis/luz diurna, canal vermelho = lanternas.
+const headMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, metalness: 0.6, roughness: 0.15, emissive: 0xeef4ff, emissiveMap: tex('lights_e_head.png'), emissiveIntensity: 0 });
+const tailMat = new THREE.MeshStandardMaterial({ map: lightsTex, normalMap: lightsN, color: 0xff3040, metalness: 0.3, roughness: 0.2, emissive: 0xff1a2a, emissiveMap: tex('lights_e_tail.png'), emissiveIntensity: 0 });
 const carbon = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d');
@@ -525,13 +537,16 @@ const carbon = (() => {
 const car = new THREE.Group();
 scene.add(car);
 const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x0b0e14, metalness: 0, roughness: 0, clearcoat: 1, transparent: true, opacity: 0.5, envMapIntensity: 1.6 });
+const tailLensMat = new THREE.MeshPhysicalMaterial({ color: 0x8a0a14, metalness: 0, roughness: 0.05, clearcoat: 1, transparent: true, opacity: 0.8, emissive: 0xff1020, emissiveIntensity: 0 });
+const lensMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0, clearcoat: 1, transparent: true, opacity: 0.12, envMapIntensity: 1.2 });
 const chrome = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 1, roughness: 0.12 });
+const tailChrome = new THREE.MeshStandardMaterial({ color: 0x8c0c16, metalness: 1, roughness: 0.25, emissive: 0xff1020, emissiveIntensity: 0 });
 const badgeMat = new THREE.MeshStandardMaterial({ map: tex('badges.png', true), normalMap: tex('badges_n.png'), metalness: 0.7, roughness: 0.25, alphaTest: 0.4 });
 const interiorMat = new THREE.MeshStandardMaterial({ map: tex('interior.png', true), roughness: 0.75 });
 const plateMat = new THREE.MeshStandardMaterial({ map: tex('plate.png', true), roughness: 0.4, metalness: 0.2 });
 const MATS = {
   M_Paint_Metal_High: paint, M_Caliper_High: caliperMat, M_BrakeDisc_High: discMat, M_Rim_High: rimMat, M_Tire_High: tireMat,
-  M_GlassLights_High: glassMat, M_GlassColor_High: glassMat, M_GlassSurround_High: trim, M_Opaque_PlasticSmooth_High: trim,
+  M_GlassLights_High: glassMat, M_GlassColor_High: tailLensMat, M_GlassSurround_High: trim, M_Opaque_PlasticSmooth_High: trim,
   M_Chassis_High: trim, M_Grille_A_High: trim, M_Opaque_ExhaustGlow_High: trim, M_Internal_Interior_High: interiorMat,
   M_Badges_High: badgeMat, M_LightRefracted_High: chrome, M_LicensePlate_High: plateMat,
 };
@@ -584,6 +599,11 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
         if (side > 0.9 && m.y > 0.12 && m.y < 0.4 && m.z > -0.85 && m.z < 0.9) return 2;
         return 0;
       }, paintSlots);
+    } else if (name === 'M_GlassLights_High') {
+      // Mesma malha tem janelas e capas dos faróis/lanternas: capa fica transparente, janela fica fumê.
+      splitByRegion(o, m => (m.z > 1.6 && m.y < 1.0 ? 1 : m.z < -2.0 && m.y < 1.02 ? 2 : 0), [glassMat, lensMat, tailLensMat]);
+    } else if (name === 'M_LightRefracted_High') {
+      splitByRegion(o, m => (m.z > 0 ? 0 : 1), [chrome, tailChrome]); // refletor traseiro é vermelho
     } else if (name === 'M_LightCluster_High') {
       splitByRegion(o, m => (m.z > 0 ? 0 : 1), [headMat, tailMat]);
     } else {
@@ -1023,12 +1043,31 @@ await loadCar.catch(err => {
 document.getElementById('loading').remove();
 spotsEl.hidden = false;
 applyVisuals();
-if (reduced) { headMat.emissiveIntensity = 3; tailMat.emissiveIntensity = 2.2; }
+// Faróis: acende faróis/lanternas e projeta dois fachos no pódio.
+const beams = [1, -1].map(side => {
+  const b = new THREE.SpotLight(0xeaf2ff, 0, 5, 0.4, 0.95, 1.6); // facho cai dentro do pódio
+  b.position.set(2.25, 0.74, side * 0.62);
+  b.target.position.set(4.2, -0.6, side * 0.8);
+  scene.add(b, b.target);
+  return b;
+});
+const lightsBtn = document.getElementById('ctl-lights');
+function setLights(on, delay = 0) {
+  lightsBtn.setAttribute('aria-pressed', on);
+  const t = { duration: reduced ? 0 : 0.45, delay: reduced ? 0 : delay, overwrite: true };
+  gsap.to(headMat, { emissiveIntensity: on ? 8 : 0, ...t });
+  gsap.to(tailMat, { emissiveIntensity: on ? 5 : 0, ...t });
+  gsap.to(tailLensMat, { emissiveIntensity: on ? 1.4 : 0, ...t });
+  gsap.to(tailChrome, { emissiveIntensity: on ? 0.8 : 0, ...t });
+  for (const b of beams) gsap.to(b, { intensity: on ? 55 : 0, ...t });
+}
+lightsBtn.addEventListener('click', () => setLights(lightsBtn.getAttribute('aria-pressed') !== 'true'));
+
+if (reduced) setLights(true);
 else {
   camera.position.set(-7.5, 1.4, 4.5);
   gsap.to(camera.position, { x: HOME.pos[0], y: HOME.pos[1], z: HOME.pos[2], duration: 2.6, ease: 'power3.out' });
-  gsap.to(headMat, { emissiveIntensity: 3, duration: 0.5, delay: 1.3 });
-  gsap.to(tailMat, { emissiveIntensity: 2.2, duration: 0.5, delay: 1.5 });
+  setLights(true, 1.3);
 }
 </script>
 </body>
