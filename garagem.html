@@ -81,6 +81,15 @@ button, select { font: inherit; color: inherit; }
 .add-form .row button { border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 500; }
 .add-form .save { border: 0; background: var(--white); color: #000; }
 .add-form .cancel { border: 1px solid var(--line); background: none; }
+.add-color { grid-column: 1 / -1; margin: 0; padding: 0; border: 0; min-width: 0; }
+.add-color legend { padding: 0; font-size: 12px; color: var(--muted); }
+.add-color .swatches { margin-top: 6px; gap: 8px; }
+.add-color .sw i { width: 32px; height: 32px; }
+.add-color .sw-caption { margin-top: 6px; }
+.sw-custom i { background: conic-gradient(#e33, #ec3, #3c5, #3ae, #73e, #e33); }
+.sw-custom input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
+.sw-custom.is-on i { border-color: var(--white); box-shadow: 0 0 0 3px #000, 0 0 0 5px var(--white); }
+.car-dot { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); vertical-align: 1px; }
 .no-3d { position: absolute; right: 16px; top: 16px; max-width: 280px; margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.55); backdrop-filter: blur(10px); color: var(--muted); font-size: 13px; }
 
 /* Palco */
@@ -268,6 +277,11 @@ button, select { font: inherit; color: inherit; }
       </label>
       <label>Modelo<input id="add-model" required placeholder="Ex.: Cayenne"></label>
       <label>Ano<input id="add-year" type="number" inputmode="numeric" min="1960" max="2027" required placeholder="2021"></label>
+      <fieldset class="add-color">
+        <legend>Cor de fábrica</legend>
+        <div class="swatches" id="add-colors" role="radiogroup" aria-label="Cor de fábrica"></div>
+        <div class="sw-caption"><b id="add-color-name"></b></div>
+      </fieldset>
       <div class="row">
         <button type="button" class="cancel" id="add-cancel">Cancelar</button>
         <button type="submit" class="save">Adicionar à garagem</button>
@@ -579,7 +593,7 @@ function tweenColor(mat, hex) {
   gsap.to(mat.color, { r: c.r, g: c.g, b: c.b, duration: 0.9, ease: 'power2.out' });
 }
 function applyVisuals() {
-  tweenColor(paint, PAINTS.find(p => p.id === state.radio.pintura).hex);
+  tweenColor(paint, swatchItem(GROUPS.find(g => g.id === 'pintura'), PAINTS.find(p => p.id === state.radio.pintura)).hex);
   tweenColor(caliperMat, CALIPERS.find(p => p.id === state.radio.pincas).hex);
   paintSlots[1] = state.checks.has('capa-retro') ? carbon : paint;
   paintSlots[2] = state.checks.has('blades') ? carbon : paint;
@@ -617,14 +631,14 @@ function renderGroups() {
     if (g.kind === 'swatch') {
       const wrap = document.createElement('div'); wrap.className = 'swatches';
       wrap.setAttribute('role', 'radiogroup'); wrap.setAttribute('aria-label', g.title());
-      for (const it of g.items) {
-        const id = `${g.id}-${it.id}`;
-        wrap.insertAdjacentHTML('beforeend', `<label class="sw" title="${it.label}"><input type="radio" name="${g.id}" id="${id}" value="${it.id}" ${state.radio[g.id] === it.id ? 'checked' : ''} aria-label="${it.label}"><i style="background:${it.hex}"></i></label>`);
+      for (const raw of g.items) {
+        const it = swatchItem(g, raw), id = `${g.id}-${it.id}`;
+        wrap.insertAdjacentHTML('beforeend', `<label class="sw" title="${esc(it.label)}"><input type="radio" name="${g.id}" id="${id}" value="${it.id}" ${state.radio[g.id] === it.id ? 'checked' : ''} aria-label="${esc(it.label)}"><i style="background:${it.hex}"></i></label>`);
       }
       wrap.addEventListener('change', e => { state.radio[g.id] = e.target.value; state.active = g.id; update(); });
       sec.append(wrap);
-      const cur = g.items.find(i => i.id === state.radio[g.id]);
-      sec.insertAdjacentHTML('beforeend', `<div class="sw-caption"><b>${cur.label}</b><span>${cur.price ? brl(cur.price) : 'Sem custo'}</span></div>`);
+      const cur = swatchItem(g, g.items.find(i => i.id === state.radio[g.id]));
+      sec.insertAdjacentHTML('beforeend', `<div class="sw-caption"><b>${esc(cur.label)}</b><span>${cur.price ? brl(cur.price) : 'Sem custo'}</span></div>`);
     } else {
       const wrap = document.createElement('div'); wrap.className = 'opts';
       for (const o of g.options) {
@@ -758,19 +772,50 @@ const has3D = c => c.marca === 'Porsche' && /macan/i.test(c.modelo);
 const carLabel = c => `${c.marca} ${c.modelo} ${c.ano}`;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 const GARAGE_KEY = 'garagem-south:carros';
-let garage = [{ id: 'macan', marca: 'Porsche', modelo: 'Macan GTS', ano: 2015 }];
+// Cores de fábrica (tons ajustados para como renderizam no 3D com verniz).
+const FACTORY_COLORS = [
+  { nome: 'Prata', hex: '#6d7176' }, { nome: 'Branco', hex: '#dcdfe2' }, { nome: 'Grafite', hex: '#34373c' },
+  { nome: 'Preto', hex: '#0b0c0f' }, { nome: 'Azul', hex: '#1b2b55' }, { nome: 'Vermelho', hex: '#7a0d15' },
+  { nome: 'Verde', hex: '#1d3a2b' }, { nome: 'Champanhe', hex: '#8c7b62' },
+];
+const isHex = h => /^#[0-9a-f]{6}$/i.test(h);
+let garage = [{ id: 'macan', marca: 'Porsche', modelo: 'Macan GTS', ano: 2015, cor: FACTORY_COLORS[0] }];
 try { const saved = JSON.parse(localStorage.getItem(GARAGE_KEY)); if (Array.isArray(saved) && saved.length) garage = saved; } catch {}
+garage = garage.map(c => (c.cor && isHex(c.cor.hex) ? c : { ...c, cor: FACTORY_COLORS[0] }));
 state.carId = garage[0].id;
 const currentCar = () => garage.find(c => c.id === state.carId) || garage[0];
+function swatchItem(g, it) {
+  if (g.id !== 'pintura' || it.id !== 'original') return it;
+  const cor = currentCar().cor;
+  return { ...it, hex: cor.hex, label: `Cor original (${cor.nome})` };
+}
 function saveGarage() { try { localStorage.setItem(GARAGE_KEY, JSON.stringify(garage)); } catch {} }
 
 const garageEl = document.getElementById('garage'), listEl = document.getElementById('garage-list');
 const addForm = document.getElementById('add-form'), addOpen = document.getElementById('add-open');
 function renderGarage() {
   listEl.innerHTML = garage.map(c => `<li><button type="button" class="garage-car" data-id="${esc(c.id)}" aria-current="${c.id === state.carId}">
-    <strong>${esc(c.marca)} ${esc(c.modelo)}</strong><em class="${has3D(c) ? 'ok' : ''}">${has3D(c) ? 'Ver em 3D' : '3D em breve'}</em><span>${esc(c.ano)}</span></button></li>`).join('');
+    <strong><i class="car-dot" style="background:${c.cor.hex}" aria-hidden="true"></i>${esc(c.marca)} ${esc(c.modelo)}</strong><em class="${has3D(c) ? 'ok' : ''}">${has3D(c) ? 'Ver em 3D' : '3D em breve'}</em><span>${esc(c.ano)}</span></button></li>`).join('');
 }
-function openGarage() { renderGarage(); addForm.hidden = true; addOpen.hidden = false; garageEl.showModal(); }
+const colorsEl = document.getElementById('add-colors'), colorName = document.getElementById('add-color-name');
+let addColor = FACTORY_COLORS[0];
+function renderColorPicker() {
+  colorsEl.innerHTML = FACTORY_COLORS.map((c, i) => `<label class="sw" title="${c.nome}"><input type="radio" name="add-color" value="${i}" ${addColor === c ? 'checked' : ''} aria-label="${c.nome}"><i style="background:${c.hex}"></i></label>`).join('')
+    + `<label class="sw sw-custom${FACTORY_COLORS.includes(addColor) ? '' : ' is-on'}" title="Outra cor"><input type="color" id="add-color-custom" value="${FACTORY_COLORS.includes(addColor) ? '#5a3e2b' : addColor.hex}" aria-label="Escolher outra cor"><i${FACTORY_COLORS.includes(addColor) ? '' : ` style="background:${addColor.hex}"`}></i></label>`;
+  colorName.textContent = addColor.nome;
+}
+colorsEl.addEventListener('change', e => {
+  if (e.target.name === 'add-color') { addColor = FACTORY_COLORS[Number(e.target.value)]; renderColorPicker(); }
+});
+colorsEl.addEventListener('input', e => {
+  if (e.target.type !== 'color') return;
+  addColor = { nome: 'Personalizada', hex: e.target.value };
+  for (const r of colorsEl.querySelectorAll('input[type="radio"]')) r.checked = false;
+  const sw = e.target.closest('.sw-custom');
+  sw.classList.add('is-on'); sw.querySelector('i').style.background = addColor.hex;
+  colorName.textContent = addColor.nome;
+});
+function openGarage() { renderGarage(); addForm.hidden = true; addOpen.hidden = false; addColor = FACTORY_COLORS[0]; renderColorPicker(); garageEl.showModal(); }
 function selectCar(id) {
   const prev = currentCar();
   state.carId = id;
@@ -781,8 +826,11 @@ function selectCar(id) {
   const note = document.getElementById('no-3d');
   note.hidden = has3D(c);
   note.textContent = has3D(c) ? '' : `O 3D do ${c.marca} ${c.modelo} está em preparação. Enquanto isso, a Macan mostra como cada serviço fica no carro.`;
-  if (prev.id !== c.id && !reduced) gsap.fromTo(car.scale, { x: 0.92, y: 0.92, z: 0.92 }, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'power3.out' });
-  renderSummary();
+  if (prev.id !== c.id) {
+    state.radio.pintura = 'original';
+    if (!reduced) gsap.fromTo(car.scale, { x: 0.92, y: 0.92, z: 0.92 }, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'power3.out' });
+  }
+  update();
 }
 document.getElementById('car-switch').addEventListener('click', openGarage);
 document.getElementById('garage-close').addEventListener('click', () => garageEl.close());
@@ -798,10 +846,11 @@ document.getElementById('add-cancel').addEventListener('click', () => { addForm.
 addForm.addEventListener('submit', e => {
   e.preventDefault();
   const c = { id: 'c' + Date.now(), marca: document.getElementById('add-brand').value,
-    modelo: document.getElementById('add-model').value.trim(), ano: Number(document.getElementById('add-year').value) };
+    modelo: document.getElementById('add-model').value.trim(), ano: Number(document.getElementById('add-year').value), cor: addColor };
   garage.push(c);
   saveGarage();
   addForm.reset();
+  addColor = FACTORY_COLORS[0];
   selectCar(c.id);
   garageEl.close();
 });
