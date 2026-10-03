@@ -854,10 +854,17 @@ canvas.addEventListener('pointerdown', () => { if (flight) flight.kill(); }); //
 document.getElementById('reset-view').addEventListener('click', () => { state.active = null; viewport.classList.remove('is-focused'); fly(HOME); renderGroups(); });
 
 /* ---------- Visual do carro conforme escolhas ---------- */
+// Troca de cor suave: 1,2s com aceleração e frenagem; uma troca nova substitui a anterior (sem "briga"),
+// e chamar de novo com a mesma cor não reinicia a animação.
+const glint = { v: 0 }; // brilho extra que passa pela lataria durante a troca de cor da pintura
+function setPaintEnv() { paint.envMapIntensity = (paint.userData.envBase || 1) * (1 + glint.v); }
 function tweenColor(mat, hex) {
   const c = new THREE.Color(hex);
+  if (mat.userData.colorTarget === c.getHex()) return;
+  mat.userData.colorTarget = c.getHex();
   if (reduced) { mat.color.copy(c); return; }
-  gsap.to(mat.color, { r: c.r, g: c.g, b: c.b, duration: 0.9, ease: 'power2.out' });
+  gsap.to(mat.color, { r: c.r, g: c.g, b: c.b, duration: 1.2, ease: 'power2.inOut', overwrite: true });
+  if (mat === paint) gsap.fromTo(glint, { v: 0 }, { v: 0.8, duration: 0.6, ease: 'sine.out', yoyo: true, repeat: 1, overwrite: true, onUpdate: setPaintEnv });
 }
 // Películas escurecem os vidros; a semi-refletiva espelha. Smoke escurece a capa dos faróis. Matte tira o brilho da pintura.
 const FILMS = { 'film-carbono': [0.86, 0], 'film-ceramica': [0.7, 0], 'film-refletiva': [0.78, 0.75], 'film-seguranca': [0.58, 0] };
@@ -869,7 +876,7 @@ function applyVisuals() {
   lensMat.color.set(smoke ? 0x08090b : 0xffffff); lensMat.opacity = smoke ? SMOKE[smoke] : 0.12;
   const matte = state.checks.has('ppf-matte');
   paint.roughness = matte ? 0.62 : 0.38; paint.clearcoat = matte ? 0 : 1;
-  paint.envMapIntensity = ['coat-d', 'coat-c', 'coat-f'].some(id => state.checks.has(id)) ? 1.3 : 1;
+  paint.userData.envBase = ['coat-d', 'coat-c', 'coat-f'].some(id => state.checks.has(id)) ? 1.3 : 1; setPaintEnv();
   const rim = RIMS.find(r => r.id === state.radio.rodas);
   tweenColor(rimMat, rim.hex);
   rimMat.metalness = rim.id === 'original' ? 0.75 : rim.id === 'lpf-fume' ? 0.6 : 0.25;
@@ -936,7 +943,7 @@ function renderGroups() {
         state.customPaint = e.target.value; state.radio[g.id] = 'custom';
         for (const r of wrap.querySelectorAll('input[type="radio"]')) r.checked = false;
         const sw = e.target.closest('.sw-custom'); sw.classList.add('is-on'); sw.querySelector('i').style.background = e.target.value;
-        paint.color.set(e.target.value);
+        gsap.killTweensOf(paint.color); paint.color.set(e.target.value); paint.userData.colorTarget = paint.color.getHex(); // arrastando: cor segue o seletor na hora
         const cap = sec.querySelector('.sw-caption');
         cap.innerHTML = `<b>Cor personalizada (${e.target.value.toUpperCase()})</b><span>${brl(PAINTS.find(p => p.custom).price)}</span>`;
       });
