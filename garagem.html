@@ -185,6 +185,19 @@ button, select { font: inherit; color: inherit; }
 .opt:has(input:checked) { border-color: color-mix(in srgb, var(--c, var(--south)) 70%, transparent); background: rgba(255,255,255,.03); }
 .opt .name { font-weight: 500; }
 .opt .price { font: 600 16px/1.3 var(--cond); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.opt.tier { padding: 14px 14px 13px; border-radius: 14px; align-items: center; background: linear-gradient(180deg, rgba(255,255,255,.03), transparent); }
+.opt.tier:hover { border-color: rgba(244,246,249,.22); }
+.opt.tier:has(input:checked) { border-color: var(--south); background: var(--south-soft); box-shadow: inset 0 0 0 1px var(--south); }
+.tier-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.tier-name { font: 800 13px/1.2 var(--display); font-stretch: 125%; letter-spacing: .08em; text-transform: uppercase; }
+.tier-bars { display: inline-flex; gap: 3px; }
+.tier-bars i { width: 14px; height: 4px; border-radius: 2px; background: rgba(244,246,249,.16); }
+.tier-bars i.on { background: var(--south); }
+.tier-badge { font: 600 10px/1 var(--sans); color: #fff; background: var(--south); padding: 4px 8px; border-radius: 999px; }
+.opt.tier .price { font-size: 20px; }
+.opt.tier .detail { margin-top: 2px; }
+.opt.tier .incl { display: none; padding-top: 10px; margin-top: 8px; border-top: 1px solid var(--line); }
+.opt.tier:has(input:checked) .incl { display: grid; }
 .incl { grid-column: 2 / 4; list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 14px; }
 .incl li { position: relative; padding-left: 14px; color: var(--muted); font-size: 12px; line-height: 1.35; }
 .incl li::before { content: "✓"; position: absolute; left: 0; color: var(--south); font-size: 11px; }
@@ -405,14 +418,14 @@ const GROUPS = [
   { id: 'lavacao', layer: 'south', title: () => 'Lavação premium', kind: 'check', linePrefix: 'Lavação premium',
     note: 'Produtos oficiais CarPro.',
     options: [
-      { id: 'lav-1', name: 'Nível 01', price: 450, onde: 'servico', troca: ['lav-2', 'lav-3'],
+      { id: 'lav-1', name: 'Nível 01', price: 450, onde: 'servico', troca: ['lav-2', 'lav-3'], level: 1, tagline: 'Lavação técnica completa com selante CarPro.',
         includes: ['Pré-lavagem técnica detalhada', 'Limpeza interna', 'Aspiração interna', 'Limpeza dos vidros', 'Limpeza das rodas e caixa de rodas',
           'Condicionamento de pneus', 'Condicionamento de plásticos externos', 'Limpeza do cofre de motor', 'Aplicação de selante CarPro'] },
-      { id: 'lav-2', name: 'Nível 02', price: 750, onde: 'servico', troca: ['lav-1', 'lav-3'],
+      { id: 'lav-2', name: 'Nível 02', price: 750, onde: 'servico', troca: ['lav-1', 'lav-3'], level: 2, badge: 'Mais escolhido', tagline: 'Inclui teto, forrações e selante CarPro Reload.',
         includes: ['Pré-lavagem técnica detalhada', 'Limpeza interna', 'Limpeza do teto e forrações', 'Aspiração interna', 'Limpeza dos vidros',
           'Limpeza das rodas e caixa de rodas', 'Condicionamento de pneus', 'Condicionamento de plásticos internos e externos', 'Limpeza do cofre de motor',
           'Aplicação de selante CarPro Reload'] },
-      { id: 'lav-3', name: 'Nível 03', price: 1490, onde: 'servico', troca: ['lav-1', 'lav-2'],
+      { id: 'lav-3', name: 'Nível 03', price: 1490, onde: 'servico', troca: ['lav-1', 'lav-2'], level: 3, tagline: 'Inclui retirada e limpeza completa das 4 rodas.',
         includes: ['Pré-lavagem técnica detalhada', 'Limpeza interna', 'Limpeza do teto e forrações', 'Aspiração interna', 'Limpeza dos vidros',
           'Retirada das 4 rodas', 'Limpeza das rodas por dentro e por fora', 'Limpeza da caixa de rodas', 'Condicionamento de pneus',
           'Condicionamento de plásticos internos e externos', 'Aplicação de selante CarPro Reload'] },
@@ -909,6 +922,17 @@ function renderGroups() {
         const checked = g.kind === 'radio' ? state.radio[g.id] === o.id : state.checks.has(o.id);
         const off = offInCasa(o);
         const detail = optDetail(o, g);
+        if (o.level) { // cartão de plano (Lavação)
+          const bars = [1, 2, 3].map(n => `<i class="${n <= o.level ? 'on' : ''}"></i>`).join('');
+          wrap.insertAdjacentHTML('beforeend', `<label class="opt tier${off ? ' is-off' : ''}" for="${id}">
+            <input type="checkbox" name="${g.id}" id="${id}" value="${o.id}" ${checked ? 'checked' : ''} ${off ? 'disabled' : ''}>
+            <span class="box"></span>
+            <span class="tier-head"><span class="tier-name">${o.name}</span><span class="tier-bars" aria-hidden="true">${bars}</span>${o.badge ? `<span class="tier-badge">${o.badge}</span>` : ''}</span>
+            <span class="price">${priceLabel(o)}</span>
+            <span class="detail">${o.tagline}</span>
+            <ul class="incl">${o.includes.map(i => `<li>${i}</li>`).join('')}</ul></label>`);
+          continue;
+        }
         wrap.insertAdjacentHTML('beforeend', `<label class="opt${off ? ' is-off' : ''}" for="${id}">
           <input type="${g.kind === 'radio' ? 'radio' : 'checkbox'}" name="${g.id}" id="${id}" value="${o.id}" ${checked ? 'checked' : ''} ${off ? 'disabled' : ''}>
           <span class="box"></span><span class="name">${o.name}</span><span class="price">${priceLabel(o, qtyOf(o))}</span>
