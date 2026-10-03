@@ -649,7 +649,7 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
       projectUV(o);
       splitByRegion(o, m => {
         const side = Math.abs(m.x);
-        if (side > 0.89 && m.y > 0.86 && m.z > 0.28 && m.z < 0.62) return 1;
+        if (side > 0.85 && m.y > 0.905 && m.y < 1.06 && m.z > 0.37 && m.z < 0.61) return 1; // capa do retrovisor (casca de cima; a base fica na cor do carro)
         return 0;
       }, paintSlots);
     } else if (name === 'M_GlassLights_High') {
