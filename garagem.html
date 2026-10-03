@@ -38,12 +38,11 @@ button, select { font: inherit; color: inherit; }
 /* Topo */
 .top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding-block: 14px; border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 22px; margin-right: auto; min-width: 0; }
-.lockup { display: flex; align-items: center; gap: 14px; }
+.lockup { display: flex; align-items: center; gap: 18px; }
 .lockup a { display: block; }
 .lockup img { display: block; width: auto; }
 .lockup .south { height: 46px; }
 .lockup .marchand { height: 38px; }
-.lockup .x { color: var(--muted); font: 500 18px var(--sans); }
 .wordmark { margin: 0; padding-left: 22px; border-left: 1px solid var(--line); font: 800 22px/1 var(--display); font-stretch: 125%; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .car-switch { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--band); border-radius: 12px; padding: 7px 12px 7px 14px; cursor: pointer; text-align: left; min-height: 44px; transition: border-color .2s; }
 .car-switch:hover { border-color: rgba(244,246,249,.3); }
@@ -90,10 +89,9 @@ button, select { font: inherit; color: inherit; }
   background: radial-gradient(60% 55% at 50% 58%, #13254a 0%, #070b16 55%, #000 100%); }
 .viewport canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 .viewport canvas:active { cursor: grabbing; }
-.stage-caption { position: absolute; left: 22px; top: 18px; max-width: 30ch; pointer-events: none; transition: opacity .4s; }
+.stage-caption { position: absolute; left: 22px; top: 18px; max-width: min(70%, 560px); pointer-events: none; transition: opacity .4s; }
 .viewport.is-focused .stage-caption { opacity: 0; }
 .stage-caption h2 { margin: 0; font: 500 clamp(28px, 3.4vw, 44px)/1.05 var(--serif); text-wrap: balance; }
-.stage-caption p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
 .view-reset { position: absolute; right: 16px; bottom: 16px; border: 1px solid var(--line); background: rgba(0,0,0,.45); backdrop-filter: blur(10px); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; min-height: 40px; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
 .drag-hint { position: absolute; left: 22px; bottom: 20px; color: var(--muted); font-size: 13px; pointer-events: none; }
@@ -182,7 +180,7 @@ button, select { font: inherit; color: inherit; }
 @media (max-width: 560px) {
   .spot .tag { display: none; }
   .spot.is-active .tag { display: block; }
-  .stage-caption p, .drag-hint { display: none; }
+  .drag-hint { display: none; }
   .mode { width: 100%; }
   .mode button { flex: 1; }
   .lockup .south { height: 34px; }
@@ -203,7 +201,6 @@ button, select { font: inherit; color: inherit; }
     <div class="brand">
       <div class="lockup">
         <a href="index.html" aria-label="Voltar para a South Shop"><img class="south" src="assets/img/logo-south-shop.png" alt="South Shop"></a>
-        <span class="x" aria-hidden="true">×</span>
         <img class="marchand" src="assets/img/logo-marchand.png" alt="Marchand">
       </div>
       <h1 class="wordmark">Garagem South</h1>
@@ -223,8 +220,7 @@ button, select { font: inherit; color: inherit; }
     <section class="viewport" id="viewport" aria-label="Sua Macan em 3D">
       <canvas id="scene" aria-hidden="true"></canvas>
       <div class="stage-caption">
-        <h2 id="stage-title">Seu carro, revisado e do seu jeito.</h2>
-        <p>Toque nos pontos do carro para ver o que dá para fazer em cada parte.</p>
+        <h2 id="stage-title">Porsche Macan GTS 2015</h2>
       </div>
       <div id="spots" hidden></div>
       <p class="loading" id="loading">Carregando a Macan…</p>
@@ -778,6 +774,7 @@ function selectCar(id) {
   state.carId = id;
   const c = currentCar();
   document.getElementById('car-name').textContent = carLabel(c);
+  document.getElementById('stage-title').textContent = carLabel(c);
   viewport.setAttribute('aria-label', `${carLabel(c)} em 3D`);
   const note = document.getElementById('no-3d');
   note.hidden = has3D(c);
