@@ -541,7 +541,9 @@ const tailLensMat = new THREE.MeshPhysicalMaterial({ color: 0x8a0a14, metalness:
 const lensMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0, clearcoat: 1, transparent: true, opacity: 0.12, envMapIntensity: 1.2 });
 const chrome = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 1, roughness: 0.12 });
 const tailChrome = new THREE.MeshStandardMaterial({ color: 0x8c0c16, metalness: 1, roughness: 0.25, emissive: 0xff1020, emissiveIntensity: 0 });
+// Os emblemas usam o 2º mapa de UV do modelo (o 1º vem colapsado nessa peça).
 const badgeMat = new THREE.MeshStandardMaterial({ map: tex('badges.png', true), normalMap: tex('badges_n.png'), metalness: 0.7, roughness: 0.25, alphaTest: 0.4 });
+badgeMat.map.channel = 1; badgeMat.normalMap.channel = 1;
 const interiorMat = new THREE.MeshStandardMaterial({ map: tex('interior.png', true), roughness: 0.75 });
 const plateMat = new THREE.MeshStandardMaterial({ map: tex('plate.png', true), roughness: 0.4, metalness: 0.2 });
 const MATS = {
@@ -583,11 +585,13 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
   car.add(model);
   car.updateMatrixWorld(true);
   const wheelParts = [];
+  let badges = null;
   model.traverse(o => {
     if (!o.isMesh) return;
     const name = o.name.replace(/lod0$/, ''); // nome da malha = nome da peça no modelo
     o.castShadow = true;
     if (WHEEL_PARTS.includes(name)) wheelParts.push(o);
+    if (name === 'M_Badges_High') badges = o;
     if (name === 'M_Paint_Metal_High') {
       // UV nova por projeção lateral, para a trama do carbono ficar em escala real (~1,5 cm por célula).
       const uv = [], p = o.geometry.attributes.position, v = new THREE.Vector3();
@@ -610,6 +614,22 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
       o.material = MATS[name] || trim;
     }
   });
+  // Os brasões das calotas vêm junto com os emblemas da carroceria, no centro da roda: separa e leva pra roda.
+  if (badges) {
+    const g = badges.geometry, pos = g.attributes.position, idx = Array.from(g.index.array);
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), body = [], cap = [];
+    for (let i = 0; i < idx.length; i += 3) {
+      a.fromBufferAttribute(pos, idx[i]); b.fromBufferAttribute(pos, idx[i + 1]); c.fromBufferAttribute(pos, idx[i + 2]);
+      const m = a.add(b).add(c).divideScalar(3).applyMatrix4(badges.matrixWorld);
+      (Math.abs(m.z) < 0.35 && Math.abs(m.y) < 0.35 && Math.abs(m.x) < 0.2 ? cap : body).push(idx[i], idx[i + 1], idx[i + 2]);
+    }
+    const capMesh = badges.clone();
+    capMesh.geometry = g.clone();
+    capMesh.geometry.setIndex(cap);
+    g.setIndex(body);
+    badges.parent.add(capMesh);
+    wheelParts.push(capMesh);
+  }
   // As peças da roda vêm uma vez só, centradas na origem: monta as 4 rodas.
   const proto = new THREE.Group();
   for (const part of wheelParts) proto.attach(part); // attach mantém o deslocamento interno de cada peça
