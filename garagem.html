@@ -127,9 +127,11 @@ button, select { font: inherit; color: inherit; }
 
 /* Pontos clicáveis */
 #spots { position: absolute; inset: 0; pointer-events: none; }
-.spot { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; pointer-events: auto; border: 0; background: none; padding: 6px; cursor: pointer; transition: opacity .25s; --c: var(--south); }
+.spot { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; pointer-events: auto; border: 0; background: none; padding: 6px; cursor: pointer; transition: opacity .4s ease; --c: var(--south); }
 .spot[data-layer="marchand"] { --c: var(--marchand); }
-.spot .dot { position: relative; width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px rgba(255,255,255,.9); flex: none; }
+.spot .dot { position: relative; width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px rgba(255,255,255,.9); flex: none;
+  transition: transform .45s cubic-bezier(.34, 1.4, .64, 1), background-color .3s, box-shadow .3s; }
+.spot .dot { transition-delay: inherit; } /* bolinha cresce junto com o atraso escalonado da troca de aba */
 .spot .dot::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--c); animation: pulse 2.2s ease-out infinite; }
 .spot .tag { font: 500 15px/1 var(--cond); background: rgba(0,0,0,.6); backdrop-filter: blur(8px); border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; white-space: nowrap;
   /* nome escondido: aparece deslizando quando passa o mouse, foca pelo teclado ou o ponto está ativo */
@@ -137,20 +139,24 @@ button, select { font: inherit; color: inherit; }
   transition: opacity .25s ease, transform .35s cubic-bezier(.2, .8, .2, 1), clip-path .35s cubic-bezier(.2, .8, .2, 1); }
 .spot:hover .tag, .spot:focus-visible .tag, .spot.is-active .tag { opacity: 1; transform: none; clip-path: inset(0 0 0 0 round 999px); }
 .spot.is-active .dot { box-shadow: 0 0 0 3px var(--white), 0 0 0 9px var(--c); }
-.spot.is-away { opacity: 0; pointer-events: none; }
+/* Fora da aba atual ou atrás do carro: some encolhendo (e volta crescendo com um leve "pulo") */
+.spot.is-away, .spot.is-off { opacity: 0; pointer-events: none; }
+.spot.is-away .dot, .spot.is-off .dot { transform: scale(.3); transition-timing-function: ease-in; }
+.spot.is-off .tag, .spot.is-away .tag { opacity: 0; }
 .spot[hidden] { display: none; }
 @keyframes pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
 
 /* Painel */
 .panel { display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 116px); position: sticky; top: 16px;
   background: var(--panel); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
-.layers { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
-.layers button { border: 0; background: none; padding: 14px 18px; text-align: left; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); min-height: 64px; }
+.layers { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+.layer-thumb { position: absolute; left: 0; top: 0; bottom: -1px; width: 50%; background: var(--marchand-soft); border-bottom: 2px solid var(--marchand); pointer-events: none;
+  transition: transform .5s cubic-bezier(.65, 0, .35, 1), background-color .5s, border-color .5s; }
+.layers[data-active="south"] .layer-thumb { transform: translateX(100%); background: var(--south-soft); border-color: var(--south); }
+.layers button { position: relative; z-index: 1; border: 0; background: none; padding: 14px 18px; text-align: left; cursor: pointer; color: var(--muted); min-height: 64px; transition: color .35s; }
 .layers button strong { display: block; margin-bottom: 4px; font: 800 15px/1.2 var(--display); font-stretch: 125%; letter-spacing: .07em; text-transform: uppercase; color: inherit; }
 .layers button span { font: 500 14px/1.3 var(--cond); }
 .layers button[aria-selected="true"] { color: var(--white); }
-.layers button[data-layer="marchand"][aria-selected="true"] { border-color: var(--marchand); background: var(--marchand-soft); }
-.layers button[data-layer="south"][aria-selected="true"] { border-color: var(--south); background: var(--south-soft); }
 
 .groups { overflow-y: auto; padding: 6px 0; flex: 1; overscroll-behavior: contain; }
 .group { padding: 14px 20px; border-left: 2px solid transparent; transition: background .3s, border-color .3s; }
@@ -298,7 +304,8 @@ button, select { font: inherit; color: inherit; }
     </section>
 
     <aside class="panel" aria-label="Configuração e orçamento">
-      <div class="layers" role="tablist" aria-label="Camadas">
+      <div class="layers" role="tablist" aria-label="Camadas" data-active="marchand">
+        <span class="layer-thumb" aria-hidden="true"></span>
         <button type="button" role="tab" data-layer="marchand" aria-selected="true"><strong>Marchand</strong><span>Manutenção e peças</span></button>
         <button type="button" role="tab" data-layer="south" aria-selected="false"><strong>South Car</strong><span>Estética e serviços</span></button>
       </div>
@@ -813,11 +820,10 @@ function placeSpots() {
   const w = viewport.clientWidth, h = viewport.clientHeight;
   for (const s of spots) {
     const shown = s.g.layer === state.layer;
-    s.el.hidden = !shown;
-    if (!shown) continue;
+    s.el.classList.toggle('is-off', !shown);
     v.copy(s.p).project(camera);
     toCam.copy(camera.position).sub(s.p);
-    s.el.classList.toggle('is-away', s.n.dot(toCam) < 0);
+    s.el.classList.toggle('is-away', shown && s.n.dot(toCam) < 0);
     s.el.style.transform = `translate(${(v.x + 1) / 2 * w - 14}px, ${(1 - v.y) / 2 * h - 14}px)`;
   }
 }
@@ -1001,7 +1007,7 @@ function focusGroup(id, fromSpot) {
   if (switched) setLayer(g.layer);
   state.active = id; state.open = id;
   if (g.view) { viewport.classList.add('is-focused'); fly(g.view); }
-  if (switched) renderGroups(); else syncGroups();
+  if (switched) { renderGroups(); animateGroupsIn(); } else syncGroups();
   const el = document.getElementById('g-' + id);
   if (el) setTimeout(() => el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' }), reduced ? 0 : 360);
 }
@@ -1075,10 +1081,24 @@ function orderMessage(lines, total) {
 
 /* ---------- Controles do topo ---------- */
 function setLayer(layer) {
+  if (state.layer === layer) return;
   state.layer = layer;
+  document.querySelector('.layers').dataset.active = layer;
   for (const b of document.querySelectorAll('.layers button')) b.setAttribute('aria-selected', b.dataset.layer === layer);
+  // Bolinhas da aba nova aparecem uma depois da outra; as da aba antiga somem juntas.
+  let i = 0;
+  for (const s of spots) s.el.style.transitionDelay = s.g.layer === layer && !reduced ? `${0.12 + 0.06 * i++}s` : '0s';
+  setTimeout(() => { for (const s of spots) s.el.style.transitionDelay = ''; }, 1200);
 }
-for (const b of document.querySelectorAll('.layers button')) b.addEventListener('click', () => { setLayer(b.dataset.layer); state.active = null; state.open = null; renderGroups(); });
+// Seções da aba nova entram em sequência.
+function animateGroupsIn() {
+  if (reduced) return;
+  gsap.fromTo('#groups .group', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.04, ease: 'power2.out', clearProps: 'opacity,transform' });
+}
+for (const b of document.querySelectorAll('.layers button')) b.addEventListener('click', () => {
+  if (state.layer === b.dataset.layer) return;
+  setLayer(b.dataset.layer); state.active = null; state.open = null; renderGroups(); animateGroupsIn();
+});
 const modeEl = document.querySelector('.mode'), thumb = modeEl.querySelector('.mode-thumb');
 function moveThumb() {
   const b = modeEl.querySelector('[aria-pressed="true"]');
