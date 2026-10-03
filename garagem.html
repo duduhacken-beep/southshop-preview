@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,800&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap">
 <style>
 /* Layout: palco 3D à esquerda (carro + pontos clicáveis), painel de vidro à direita com camadas e orçamento; no celular empilha. Tema único escuro (identidade South travada). */
 :root {
@@ -24,8 +24,10 @@
   --serif: "Cormorant Garamond", "Cormorant", Georgia, serif;
   --cond: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --sans: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Archivo", "Arial Black", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--white); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
 button, select { font: inherit; color: inherit; }
@@ -35,16 +37,52 @@ button, select { font: inherit; color: inherit; }
 
 /* Topo */
 .top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding-block: 14px; border-bottom: 1px solid var(--line); }
-.brand { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: center; margin-right: auto; }
-.home-link { grid-row: span 2; display: block; }
-.home-link img { height: 40px; width: auto; display: block; }
-.wordmark { font: 600 26px/1 var(--serif); letter-spacing: .01em; }
-.brand small { color: var(--muted); font-size: 13px; margin-top: 4px; }
-.car { display: flex; align-items: center; gap: 10px; font-family: var(--cond); font-size: 17px; }
-.car select { background: var(--band); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-family: var(--cond); font-size: 16px; }
-.mode { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.03); }
-.mode button { border: 0; background: none; padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; color: var(--muted); min-height: 40px; }
-.mode button[aria-pressed="true"] { background: var(--white); color: #000; font-weight: 500; }
+.brand { display: flex; align-items: center; gap: 22px; margin-right: auto; min-width: 0; }
+.lockup { display: flex; align-items: center; gap: 14px; }
+.lockup a { display: block; }
+.lockup img { display: block; width: auto; }
+.lockup .south { height: 46px; }
+.lockup .marchand { height: 38px; }
+.lockup .x { color: var(--muted); font: 500 18px var(--sans); }
+.wordmark { margin: 0; padding-left: 22px; border-left: 1px solid var(--line); font: 800 22px/1 var(--display); font-stretch: 125%; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.car-switch { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--band); border-radius: 12px; padding: 7px 12px 7px 14px; cursor: pointer; text-align: left; min-height: 44px; transition: border-color .2s; }
+.car-switch:hover { border-color: rgba(244,246,249,.3); }
+.car-switch small { display: block; color: var(--muted); font-size: 12px; line-height: 1.2; }
+.car-switch strong { display: block; font: 600 17px/1.2 var(--cond); }
+.car-switch svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.mode { position: relative; display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.03); }
+.mode-thumb { position: absolute; top: 3px; bottom: 3px; left: 3px; width: 0; border-radius: 999px; background: var(--white); transition: transform .55s cubic-bezier(.65, 0, .35, 1), width .55s cubic-bezier(.65, 0, .35, 1); }
+.mode button { position: relative; z-index: 1; border: 0; background: none; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-size: 14px; color: var(--muted); min-height: 40px; transition: color .35s; }
+.mode button[aria-pressed="true"] { color: #000; font-weight: 500; }
+
+/* Garagem (seletor de carros) */
+.garage { width: min(440px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 20px; background: #070b16; color: var(--white); box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.garage::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(4px); }
+.garage[open] { animation: garage-in .35s cubic-bezier(.2, .8, .2, 1); }
+@keyframes garage-in { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+.garage-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 10px; }
+.garage-head h2 { margin: 0; font: 800 18px/1 var(--display); font-stretch: 125%; letter-spacing: .05em; text-transform: uppercase; }
+.garage-close { border: 0; background: none; color: var(--muted); cursor: pointer; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; line-height: 1; }
+.garage-close:hover { color: var(--white); background: rgba(255,255,255,.06); }
+.garage-list { list-style: none; margin: 0; padding: 4px 12px; display: grid; gap: 6px; }
+.garage-car { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: none; cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
+.garage-car:hover { background: rgba(255,255,255,.03); }
+.garage-car[aria-current="true"] { border-color: var(--south); background: var(--south-soft); }
+.garage-car strong { font: 600 18px/1.2 var(--cond); }
+.garage-car span { color: var(--muted); font-size: 13px; }
+.garage-car em { grid-row: span 2; font-style: normal; font-size: 12px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.garage-car em.ok { color: var(--white); border-color: var(--south); }
+.garage-add { margin: 10px 12px 16px; display: grid; gap: 10px; }
+.garage-add > button { border: 1px dashed rgba(244,246,249,.25); background: none; border-radius: 14px; padding: 13px; cursor: pointer; font-weight: 500; }
+.garage-add > button:hover { border-color: var(--white); }
+.add-form { display: grid; grid-template-columns: 1fr 1fr 90px; gap: 8px; }
+.add-form label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.add-form input, .add-form select { width: 100%; background: #0d1220; color: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; font: 15px var(--sans); }
+.add-form .row { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
+.add-form .row button { border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 500; }
+.add-form .save { border: 0; background: var(--white); color: #000; }
+.add-form .cancel { border: 1px solid var(--line); background: none; }
+.no-3d { position: absolute; right: 16px; top: 16px; max-width: 280px; margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.55); backdrop-filter: blur(10px); color: var(--muted); font-size: 13px; }
 
 /* Palco */
 .stage { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 20px; padding-block: 16px; min-height: 0; }
@@ -54,7 +92,7 @@ button, select { font: inherit; color: inherit; }
 .viewport canvas:active { cursor: grabbing; }
 .stage-caption { position: absolute; left: 22px; top: 18px; max-width: 30ch; pointer-events: none; transition: opacity .4s; }
 .viewport.is-focused .stage-caption { opacity: 0; }
-.stage-caption h1 { margin: 0; font: 500 clamp(28px, 3.4vw, 44px)/1.05 var(--serif); text-wrap: balance; }
+.stage-caption h2 { margin: 0; font: 500 clamp(28px, 3.4vw, 44px)/1.05 var(--serif); text-wrap: balance; }
 .stage-caption p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
 .view-reset { position: absolute; right: 16px; bottom: 16px; border: 1px solid var(--line); background: rgba(0,0,0,.45); backdrop-filter: blur(10px); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; min-height: 40px; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
@@ -144,10 +182,14 @@ button, select { font: inherit; color: inherit; }
 @media (max-width: 560px) {
   .spot .tag { display: none; }
   .spot.is-active .tag { display: block; }
-  .stage-caption p, .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
-.drag-hint { display: none; }
+  .stage-caption p, .drag-hint { display: none; }
   .mode { width: 100%; }
   .mode button { flex: 1; }
+  .lockup .south { height: 34px; }
+  .lockup .marchand { height: 28px; }
+  .wordmark { font-size: 16px; padding-left: 14px; }
+  .brand { gap: 14px; }
+  .add-form { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .spot .dot::after { animation: none; }
@@ -159,21 +201,19 @@ button, select { font: inherit; color: inherit; }
 <div class="app">
   <header class="top">
     <div class="brand">
-      <a href="index.html" class="home-link" aria-label="Voltar para a South Shop"><img src="assets/img/logo.png" alt="South Shop"></a>
-      <span class="wordmark">Garagem South</span>
-      <small>South Shop e Marchand Service, no mesmo complexo</small>
+      <div class="lockup">
+        <a href="index.html" aria-label="Voltar para a South Shop"><img class="south" src="assets/img/logo-south-shop.png" alt="South Shop"></a>
+        <span class="x" aria-hidden="true">×</span>
+        <img class="marchand" src="assets/img/logo-marchand.png" alt="Marchand">
+      </div>
+      <h1 class="wordmark">Garagem South</h1>
     </div>
-    <div class="car">
-      <label for="km">Porsche Macan 2020</label>
-      <select id="km" aria-label="Quilometragem atual">
-        <option value="10.000">10.000 km</option>
-        <option value="20.000">20.000 km</option>
-        <option value="30.000" selected>30.000 km</option>
-        <option value="40.000">40.000 km</option>
-        <option value="60.000">60.000 km</option>
-      </select>
-    </div>
+    <button type="button" class="car-switch" id="car-switch" aria-haspopup="dialog">
+      <span><small>Seu carro</small><strong id="car-name">Porsche Macan GTS 2015</strong></span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
     <div class="mode" role="group" aria-label="Como você quer o orçamento">
+      <span class="mode-thumb" aria-hidden="true"></span>
       <button type="button" data-mode="complexo" aria-pressed="true">Levar ao Complexo South</button>
       <button type="button" data-mode="casa" aria-pressed="false">Receber em casa</button>
     </div>
@@ -183,11 +223,12 @@ button, select { font: inherit; color: inherit; }
     <section class="viewport" id="viewport" aria-label="Sua Macan em 3D">
       <canvas id="scene" aria-hidden="true"></canvas>
       <div class="stage-caption">
-        <h1>Sua Macan, revisada e do seu jeito.</h1>
+        <h2 id="stage-title">Seu carro, revisado e do seu jeito.</h2>
         <p>Toque nos pontos do carro para ver o que dá para fazer em cada parte.</p>
       </div>
       <div id="spots" hidden></div>
       <p class="loading" id="loading">Carregando a Macan…</p>
+      <p class="no-3d" id="no-3d" hidden></p>
       <span class="drag-hint">Arraste para girar, use o scroll para aproximar</span>
       <button type="button" class="view-reset" id="reset-view">Visão geral</button>
     </section>
@@ -213,6 +254,31 @@ button, select { font: inherit; color: inherit; }
     </aside>
   </main>
 </div>
+
+<dialog class="garage" id="garage" aria-labelledby="garage-title">
+  <div class="garage-head">
+    <h2 id="garage-title">Sua garagem</h2>
+    <button type="button" class="garage-close" id="garage-close" aria-label="Fechar">×</button>
+  </div>
+  <ul class="garage-list" id="garage-list"></ul>
+  <div class="garage-add">
+    <button type="button" id="add-open">+ Adicionar carro</button>
+    <form class="add-form" id="add-form" hidden>
+      <label>Marca
+        <select id="add-brand" required>
+          <option>Porsche</option><option>BMW</option><option>Audi</option><option>Mercedes-Benz</option>
+          <option>Land Rover</option><option>Volvo</option><option>Outra</option>
+        </select>
+      </label>
+      <label>Modelo<input id="add-model" required placeholder="Ex.: Cayenne"></label>
+      <label>Ano<input id="add-year" type="number" inputmode="numeric" min="1960" max="2027" required placeholder="2021"></label>
+      <div class="row">
+        <button type="button" class="cancel" id="add-cancel">Cancelar</button>
+        <button type="submit" class="save">Adicionar à garagem</button>
+      </div>
+    </form>
+  </div>
+</dialog>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script type="importmap">
@@ -247,7 +313,7 @@ const CALIPERS = [
   { id: 'azul', label: 'Azul', hex: '#2b59d6', price: 2400 },
 ];
 const GROUPS = [
-  { id: 'revisao', layer: 'marchand', title: () => `Revisão de ${state.km} km`, kind: 'radio',
+  { id: 'revisao', layer: 'marchand', title: () => 'Revisão', kind: 'radio',
     note: 'Peças originais separadas pela Marchand Peças para o seu carro.',
     spot: { label: 'Revisão', p: [1.6, 0.98, 0], n: [0.35, 1, 0] },
     view: { pos: [4.6, 2.9, 1.9], target: [1.3, 0.9, 0] },
@@ -303,7 +369,7 @@ const GROUPS = [
 ];
 
 const state = {
-  layer: 'marchand', mode: 'complexo', km: '30.000', active: null,
+  layer: 'marchand', mode: 'complexo', active: null,
   radio: { revisao: 'premium', pintura: 'original', pincas: 'original' },
   checks: new Set(),
   notes: {},
@@ -623,6 +689,7 @@ function lineItems() {
   }
   return { lines, skipped };
 }
+const totalEl = document.getElementById('total'), totalShown = { v: 0 };
 function renderSummary() {
   const { lines, skipped } = lineItems();
   const total = lines.reduce((s, l) => s + l.p, 0);
@@ -632,13 +699,14 @@ function renderSummary() {
   const sk = document.getElementById('skipped');
   sk.hidden = !skipped.length;
   sk.textContent = skipped.length === 1 ? 'Um serviço ficou de fora porque só é feito no Complexo South.' : skipped.length ? `${skipped.length} serviços ficaram de fora porque só são feitos no Complexo South.` : '';
-  document.getElementById('total').textContent = brl(total);
+  if (reduced) { totalShown.v = total; totalEl.textContent = brl(total); }
+  else gsap.to(totalShown, { v: total, duration: 0.6, ease: 'power2.out', overwrite: true, onUpdate: () => { totalEl.textContent = brl(Math.round(totalShown.v)); } });
   document.getElementById('cta').textContent = state.mode === 'complexo' ? 'Agendar no Complexo South' : 'Finalizar pedido';
   return { lines, total };
 }
 function summaryText() {
   const { lines, total } = renderSummary();
-  return [`Garagem South: Porsche Macan 2020, ${state.km} km`,
+  return [`Garagem South: ${carLabel(currentCar())}`,
     state.mode === 'complexo' ? 'Atendimento no Complexo South' : 'Receber em casa',
     '', ...lines.map(l => `- ${l.name} (${l.brand}): ${brl(l.p)}`), '', `Total estimado: ${brl(total)}`, '(valores de exemplo)'].join('\n');
 }
@@ -666,17 +734,99 @@ function setLayer(layer) {
   for (const b of document.querySelectorAll('.layers button')) b.setAttribute('aria-selected', b.dataset.layer === layer);
 }
 for (const b of document.querySelectorAll('.layers button')) b.addEventListener('click', () => { setLayer(b.dataset.layer); state.active = null; renderGroups(); });
-for (const b of document.querySelectorAll('.mode button')) b.addEventListener('click', () => {
+const modeEl = document.querySelector('.mode'), thumb = modeEl.querySelector('.mode-thumb');
+function moveThumb() {
+  const b = modeEl.querySelector('[aria-pressed="true"]');
+  thumb.style.width = b.offsetWidth + 'px';
+  thumb.style.transform = `translateX(${b.offsetLeft - 3}px)`;
+}
+new ResizeObserver(moveThumb).observe(modeEl);
+for (const b of modeEl.querySelectorAll('button')) b.addEventListener('click', () => {
+  if (state.mode === b.dataset.mode) return;
   state.mode = b.dataset.mode;
-  for (const x of document.querySelectorAll('.mode button')) x.setAttribute('aria-pressed', x === b);
+  for (const x of modeEl.querySelectorAll('button')) x.setAttribute('aria-pressed', x === b);
+  moveThumb();
   update();
+  if (!reduced) {
+    gsap.fromTo('#lines li, #skipped', { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.04, ease: 'power2.out' });
+    gsap.fromTo('#groups .opt, #groups .group-note', { opacity: 0.2 }, { opacity: (i, el) => (el.classList.contains('is-off') ? 0.45 : 1), duration: 0.5, stagger: 0.02 });
+    gsap.fromTo('#cta', { opacity: 0 }, { opacity: 1, duration: 0.4 });
+  }
 });
-document.getElementById('km').addEventListener('change', e => { state.km = e.target.value; update(); });
+
+/* ---------- Garagem ---------- */
+// Só a Macan tem modelo 3D por enquanto; os outros carros entram na lista e o orçamento continua valendo.
+const has3D = c => c.marca === 'Porsche' && /macan/i.test(c.modelo);
+const carLabel = c => `${c.marca} ${c.modelo} ${c.ano}`;
+const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const GARAGE_KEY = 'garagem-south:carros';
+let garage = [{ id: 'macan', marca: 'Porsche', modelo: 'Macan GTS', ano: 2015 }];
+try { const saved = JSON.parse(localStorage.getItem(GARAGE_KEY)); if (Array.isArray(saved) && saved.length) garage = saved; } catch {}
+state.carId = garage[0].id;
+const currentCar = () => garage.find(c => c.id === state.carId) || garage[0];
+function saveGarage() { try { localStorage.setItem(GARAGE_KEY, JSON.stringify(garage)); } catch {} }
+
+const garageEl = document.getElementById('garage'), listEl = document.getElementById('garage-list');
+const addForm = document.getElementById('add-form'), addOpen = document.getElementById('add-open');
+function renderGarage() {
+  listEl.innerHTML = garage.map(c => `<li><button type="button" class="garage-car" data-id="${esc(c.id)}" aria-current="${c.id === state.carId}">
+    <strong>${esc(c.marca)} ${esc(c.modelo)}</strong><em class="${has3D(c) ? 'ok' : ''}">${has3D(c) ? 'Ver em 3D' : '3D em breve'}</em><span>${esc(c.ano)}</span></button></li>`).join('');
+}
+function openGarage() { renderGarage(); addForm.hidden = true; addOpen.hidden = false; garageEl.showModal(); }
+function selectCar(id) {
+  const prev = currentCar();
+  state.carId = id;
+  const c = currentCar();
+  document.getElementById('car-name').textContent = carLabel(c);
+  viewport.setAttribute('aria-label', `${carLabel(c)} em 3D`);
+  const note = document.getElementById('no-3d');
+  note.hidden = has3D(c);
+  note.textContent = has3D(c) ? '' : `O 3D do ${c.marca} ${c.modelo} está em preparação. Enquanto isso, a Macan mostra como cada serviço fica no carro.`;
+  if (prev.id !== c.id && !reduced) gsap.fromTo(car.scale, { x: 0.92, y: 0.92, z: 0.92 }, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'power3.out' });
+  renderSummary();
+}
+document.getElementById('car-switch').addEventListener('click', openGarage);
+document.getElementById('garage-close').addEventListener('click', () => garageEl.close());
+garageEl.addEventListener('click', e => { if (e.target === garageEl) garageEl.close(); });
+listEl.addEventListener('click', e => {
+  const b = e.target.closest('.garage-car');
+  if (!b) return;
+  selectCar(b.dataset.id);
+  garageEl.close();
+});
+addOpen.addEventListener('click', () => { addOpen.hidden = true; addForm.hidden = false; document.getElementById('add-model').focus(); });
+document.getElementById('add-cancel').addEventListener('click', () => { addForm.hidden = true; addOpen.hidden = false; });
+addForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const c = { id: 'c' + Date.now(), marca: document.getElementById('add-brand').value,
+    modelo: document.getElementById('add-model').value.trim(), ano: Number(document.getElementById('add-year').value) };
+  garage.push(c);
+  saveGarage();
+  addForm.reset();
+  selectCar(c.id);
+  garageEl.close();
+});
+
+// Clique (sem arrastar) em cima do carro abre a garagem.
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function hitsCar(e) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  return ray.intersectObject(car, true).length > 0;
+}
+let down = null;
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+canvas.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6 || performance.now() - down.t > 400) return;
+  if (hitsCar(e)) openGarage();
+});
+canvas.addEventListener('pointermove', e => { if (!e.buttons) canvas.style.cursor = hitsCar(e) ? 'pointer' : ''; });
 
 function update() { applyVisuals(); renderGroups(); renderSummary(); feedback.textContent = ''; }
 
 /* ---------- Abertura + loop ---------- */
-renderGroups(); renderSummary();
+renderGroups(); selectCar(state.carId); moveThumb();
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); if (!spotsEl.hidden) placeSpots(); });
 await loadCar.catch(err => {
   console.error(err);
