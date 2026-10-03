@@ -129,7 +129,11 @@ button, select { font: inherit; color: inherit; }
 .spot[data-layer="marchand"] { --c: var(--marchand); }
 .spot .dot { position: relative; width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px rgba(255,255,255,.9); flex: none; }
 .spot .dot::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--c); animation: pulse 2.2s ease-out infinite; }
-.spot .tag { font: 500 15px/1 var(--cond); background: rgba(0,0,0,.6); backdrop-filter: blur(8px); border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
+.spot .tag { font: 500 15px/1 var(--cond); background: rgba(0,0,0,.6); backdrop-filter: blur(8px); border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+  /* nome escondido: aparece deslizando quando passa o mouse, foca pelo teclado ou o ponto está ativo */
+  opacity: 0; transform: translateX(-6px); clip-path: inset(0 100% 0 0 round 999px); pointer-events: none;
+  transition: opacity .25s ease, transform .35s cubic-bezier(.2, .8, .2, 1), clip-path .35s cubic-bezier(.2, .8, .2, 1); }
+.spot:hover .tag, .spot:focus-visible .tag, .spot.is-active .tag { opacity: 1; transform: none; clip-path: inset(0 0 0 0 round 999px); }
 .spot.is-active .dot { box-shadow: 0 0 0 3px var(--white), 0 0 0 9px var(--c); }
 .spot.is-away { opacity: 0; pointer-events: none; }
 .spot[hidden] { display: none; }
@@ -204,8 +208,6 @@ button, select { font: inherit; color: inherit; }
   .summary { position: sticky; bottom: 0; backdrop-filter: blur(18px); background: rgba(5,8,16,.92); }
 }
 @media (max-width: 560px) {
-  .spot .tag { display: none; }
-  .spot.is-active .tag { display: block; }
   .drag-hint { display: none; }
   .car-controls { left: 16px; transform: none; }
   .mode { width: 100%; }
