@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Garagem South | South Shop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap">
+<style>
+/* Layout: palco 3D à esquerda (carro + pontos clicáveis), painel de vidro à direita com camadas e orçamento; no celular empilha. Tema único escuro (identidade South travada). */
+:root {
+  color-scheme: dark;
+  --bg: #000000;
+  --band: #0f1d3a;
+  --panel: rgba(13, 18, 32, .78);
+  --line: rgba(244, 246, 249, .09);
+  --white: #f4f6f9;
+  --muted: #8891a1;
+  --south: #3a5fb0;
+  --south-soft: rgba(58, 95, 176, .18);
+  --marchand: #c4121f;
+  --marchand-soft: rgba(196, 18, 31, .16);
+  --serif: "Cormorant Garamond", "Cormorant", Georgia, serif;
+  --cond: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --sans: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--white); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+button, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+
+.app { display: grid; grid-template-rows: auto 1fr; min-height: 100%; padding-inline: 16px; }
+
+/* Topo */
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: center; margin-right: auto; }
+.home-link { grid-row: span 2; display: block; }
+.home-link img { height: 40px; width: auto; display: block; }
+.wordmark { font: 600 26px/1 var(--serif); letter-spacing: .01em; }
+.brand small { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.car { display: flex; align-items: center; gap: 10px; font-family: var(--cond); font-size: 17px; }
+.car select { background: var(--band); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-family: var(--cond); font-size: 16px; }
+.mode { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.03); }
+.mode button { border: 0; background: none; padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; color: var(--muted); min-height: 40px; }
+.mode button[aria-pressed="true"] { background: var(--white); color: #000; font-weight: 500; }
+
+/* Palco */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 20px; padding-block: 16px; min-height: 0; }
+.viewport { position: relative; min-height: 520px; border-radius: 22px; overflow: hidden;
+  background: radial-gradient(60% 55% at 50% 58%, #13254a 0%, #070b16 55%, #000 100%); }
+.viewport canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.viewport canvas:active { cursor: grabbing; }
+.stage-caption { position: absolute; left: 22px; top: 18px; max-width: 30ch; pointer-events: none; transition: opacity .4s; }
+.viewport.is-focused .stage-caption { opacity: 0; }
+.stage-caption h1 { margin: 0; font: 500 clamp(28px, 3.4vw, 44px)/1.05 var(--serif); text-wrap: balance; }
+.stage-caption p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.view-reset { position: absolute; right: 16px; bottom: 16px; border: 1px solid var(--line); background: rgba(0,0,0,.45); backdrop-filter: blur(10px); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; min-height: 40px; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
+.drag-hint { position: absolute; left: 22px; bottom: 20px; color: var(--muted); font-size: 13px; pointer-events: none; }
+
+/* Pontos clicáveis */
+#spots { position: absolute; inset: 0; pointer-events: none; }
+.spot { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; pointer-events: auto; border: 0; background: none; padding: 6px; cursor: pointer; transition: opacity .25s; --c: var(--south); }
+.spot[data-layer="marchand"] { --c: var(--marchand); }
+.spot .dot { position: relative; width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px rgba(255,255,255,.9); flex: none; }
+.spot .dot::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--c); animation: pulse 2.2s ease-out infinite; }
+.spot .tag { font: 500 15px/1 var(--cond); background: rgba(0,0,0,.6); backdrop-filter: blur(8px); border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
+.spot.is-active .dot { box-shadow: 0 0 0 3px var(--white), 0 0 0 9px var(--c); }
+.spot.is-away { opacity: 0; pointer-events: none; }
+.spot[hidden] { display: none; }
+@keyframes pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
+
+/* Painel */
+.panel { display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 110px); position: sticky; top: 16px;
+  background: var(--panel); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+.layers { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+.layers button { border: 0; background: none; padding: 14px 18px; text-align: left; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); min-height: 64px; }
+.layers button strong { display: block; font: 600 19px/1.15 var(--serif); color: inherit; }
+.layers button span { font: 500 14px/1.3 var(--cond); }
+.layers button[aria-selected="true"] { color: var(--white); }
+.layers button[data-layer="marchand"][aria-selected="true"] { border-color: var(--marchand); background: var(--marchand-soft); }
+.layers button[data-layer="south"][aria-selected="true"] { border-color: var(--south); background: var(--south-soft); }
+
+.groups { overflow-y: auto; padding: 6px 0; flex: 1; overscroll-behavior: contain; }
+.group { padding: 14px 20px; border-left: 2px solid transparent; transition: background .3s, border-color .3s; }
+.group.is-active { background: rgba(255,255,255,.035); border-left-color: var(--c, var(--south)); }
+.group[data-layer="marchand"] { --c: var(--marchand); }
+.group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; border: 0; background: none; padding: 0; text-align: left; cursor: pointer; }
+.group-head h3 { margin: 0; font: 600 22px/1.15 var(--serif); }
+.group-head span { color: var(--muted); font: 500 14px var(--cond); white-space: nowrap; }
+.group-note { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.group-note.warn { color: #e9b7bb; }
+.opts { display: grid; gap: 8px; margin-top: 12px; }
+.opt { position: relative; display: grid; grid-template-columns: 18px 1fr auto; gap: 4px 12px; align-items: start; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; transition: border-color .2s, background .2s; }
+.opt input { position: absolute; opacity: 0; pointer-events: none; }
+.opt .box { width: 18px; height: 18px; margin-top: 2px; border: 1.5px solid var(--muted); border-radius: 5px; display: grid; place-items: center; }
+.opt input[type="radio"] + .box { border-radius: 50%; }
+.opt input:checked + .box { border-color: var(--c, var(--south)); background: var(--c, var(--south)); }
+.opt input:checked + .box::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+.opt input:focus-visible + .box { outline: 2px solid var(--white); outline-offset: 2px; }
+.opt:has(input:checked) { border-color: color-mix(in srgb, var(--c, var(--south)) 70%, transparent); background: rgba(255,255,255,.03); }
+.opt .name { font-weight: 500; }
+.opt .price { font: 600 16px/1.3 var(--cond); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.opt .detail { grid-column: 2 / 4; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.opt.is-off { opacity: .45; cursor: not-allowed; }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.sw { position: relative; cursor: pointer; }
+.sw input { position: absolute; opacity: 0; }
+.sw i { display: block; width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--line); box-shadow: inset 0 -8px 14px rgba(0,0,0,.35), inset 0 6px 10px rgba(255,255,255,.18); }
+.sw input:checked + i { border-color: var(--white); box-shadow: 0 0 0 3px #000, 0 0 0 5px var(--white); }
+.sw input:focus-visible + i { outline: 2px solid var(--white); outline-offset: 4px; }
+.sw-caption { margin-top: 10px; display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.sw-caption b { font-weight: 500; }
+.sw-caption span { font: 600 16px var(--cond); font-variant-numeric: tabular-nums; }
+
+/* Orçamento */
+.summary { border-top: 1px solid var(--line); padding: 16px 20px 18px; background: rgba(0,0,0,.35); }
+.summary-lines { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; max-height: 150px; overflow-y: auto; font-size: 13px; }
+.summary-lines li { display: grid; grid-template-columns: 8px 1fr auto; gap: 10px; align-items: baseline; }
+.summary-lines li::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--south); transform: translateY(-1px); }
+.summary-lines li.m::before { background: var(--marchand); }
+.summary-lines .p { font: 600 15px var(--cond); font-variant-numeric: tabular-nums; }
+.summary-lines .k { color: var(--muted); }
+.skipped { margin: -4px 0 12px; color: #e9b7bb; font-size: 13px; }
+.total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.total span { color: var(--muted); font-size: 14px; }
+.total strong { font: 600 34px/1 var(--cond); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.example-note { margin: 4px 0 12px; color: var(--muted); font-size: 12px; }
+.actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.cta { border: 0; border-radius: 12px; padding: 13px 16px; background: var(--white); color: #000; font-weight: 600; cursor: pointer; min-height: 46px; }
+.ghost { border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; background: none; cursor: pointer; min-height: 46px; }
+.feedback { margin: 10px 0 0; font-size: 13px; color: var(--muted); min-height: 1em; }
+#copy-fallback { width: 100%; margin-top: 8px; min-height: 120px; background: #05070c; color: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: 12px/1.5 var(--sans); }
+
+@media (max-width: 980px) {
+  .stage { grid-template-columns: 1fr; }
+  .viewport { min-height: 0; height: 58vh; min-height: 360px; }
+  .panel { position: static; max-height: none; }
+  .groups { overflow: visible; }
+  .summary { position: sticky; bottom: 0; backdrop-filter: blur(18px); background: rgba(5,8,16,.92); }
+}
+@media (max-width: 560px) {
+  .spot .tag { display: none; }
+  .spot.is-active .tag { display: block; }
+  .stage-caption p, .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font: 500 17px var(--cond); pointer-events: none; }
+.drag-hint { display: none; }
+  .mode { width: 100%; }
+  .mode button { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spot .dot::after { animation: none; }
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <a href="index.html" class="home-link" aria-label="Voltar para a South Shop"><img src="assets/img/logo.png" alt="South Shop"></a>
+      <span class="wordmark">Garagem South</span>
+      <small>South Shop e Marchand Service, no mesmo complexo</small>
+    </div>
+    <div class="car">
+      <label for="km">Porsche Macan 2020</label>
+      <select id="km" aria-label="Quilometragem atual">
+        <option value="10.000">10.000 km</option>
+        <option value="20.000">20.000 km</option>
+        <option value="30.000" selected>30.000 km</option>
+        <option value="40.000">40.000 km</option>
+        <option value="60.000">60.000 km</option>
+      </select>
+    </div>
+    <div class="mode" role="group" aria-label="Como você quer o orçamento">
+      <button type="button" data-mode="complexo" aria-pressed="true">Levar ao Complexo South</button>
+      <button type="button" data-mode="casa" aria-pressed="false">Receber em casa</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <section class="viewport" id="viewport" aria-label="Sua Macan em 3D">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="stage-caption">
+        <h1>Sua Macan, revisada e do seu jeito.</h1>
+        <p>Toque nos pontos do carro para ver o que dá para fazer em cada parte.</p>
+      </div>
+      <div id="spots" hidden></div>
+      <p class="loading" id="loading">Carregando a Macan…</p>
+      <span class="drag-hint">Arraste para girar, use o scroll para aproximar</span>
+      <button type="button" class="view-reset" id="reset-view">Visão geral</button>
+    </section>
+
+    <aside class="panel" aria-label="Configuração e orçamento">
+      <div class="layers" role="tablist" aria-label="Camadas">
+        <button type="button" role="tab" data-layer="marchand" aria-selected="true"><strong>Manutenção</strong><span>Marchand Service e Peças</span></button>
+        <button type="button" role="tab" data-layer="south" aria-selected="false"><strong>Estética</strong><span>South, South Paint e CarPro</span></button>
+      </div>
+      <div class="groups" id="groups"></div>
+      <section class="summary" aria-live="polite">
+        <ul class="summary-lines" id="lines"></ul>
+        <p class="skipped" id="skipped" hidden></p>
+        <div class="total"><span>Total estimado</span><strong id="total">R$ 0</strong></div>
+        <p class="example-note">Valores de exemplo para apresentação. Carbono usa a referência da pesquisa de kits; o resto será definido com Marchand e South.</p>
+        <div class="actions">
+          <button type="button" class="cta" id="cta">Agendar no Complexo South</button>
+          <button type="button" class="ghost" id="copy">Copiar orçamento</button>
+        </div>
+        <p class="feedback" id="feedback"></p>
+        <textarea id="copy-fallback" readonly hidden aria-label="Texto do orçamento"></textarea>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const brl = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+
+/* ---------- Dados ----------
+   onde: 'servico' = só no Complexo South | 'produto' = envia pro Brasil todo | 'ambos' = produto + instalação opcional (inst) */
+const PAINTS = [
+  { id: 'original', label: 'Cor original', hex: '#6d7176', price: 0 },
+  { id: 'azul', label: 'Azul Noturno', hex: '#1b2b55', price: 38000 },
+  { id: 'carmim', label: 'Vermelho Carmim', hex: '#7a0d15', price: 38000 },
+  { id: 'verde', label: 'Verde Inglês', hex: '#1d3a2b', price: 38000 },
+  { id: 'gelo', label: 'Branco Gelo', hex: '#dcdfe2', price: 34000 },
+  { id: 'onix', label: 'Preto Ônix', hex: '#0b0c0f', price: 34000 },
+];
+const CALIPERS = [
+  { id: 'original', label: 'Original (preto)', hex: '#141518', price: 0 },
+  { id: 'vermelho', label: 'Vermelho', hex: '#b3121f', price: 2400 },
+  { id: 'amarelo', label: 'Amarelo', hex: '#e1ad01', price: 2400 },
+  { id: 'azul', label: 'Azul', hex: '#2b59d6', price: 2400 },
+];
+const GROUPS = [
+  { id: 'revisao', layer: 'marchand', title: () => `Revisão de ${state.km} km`, kind: 'radio',
+    note: 'Peças originais separadas pela Marchand Peças para o seu carro.',
+    spot: { label: 'Revisão', p: [1.6, 0.98, 0], n: [0.35, 1, 0] },
+    view: { pos: [4.6, 2.9, 1.9], target: [1.3, 0.9, 0] },
+    options: [
+      { id: 'nao', name: 'Agora não', price: 0 },
+      { id: 'essencial', name: 'Essencial', price: 2900, onde: 'servico',
+        detail: 'Troca do óleo, filtros de óleo, ar e ar-condicionado, reset do aviso de inspeção e scanner de avarias eletrônicas.' },
+      { id: 'premium', name: 'Pacote Premium', price: 5400, onde: 'servico',
+        detail: 'Tudo do Essencial, mais higienização do ar-condicionado, inspeção de 54 itens, aditivos, alinhamento e balanceamento. Inclui estética CarPro: lavagem premium nível II, selante Reload e hidratação interna.' },
+    ] },
+  { id: 'freios', layer: 'marchand', title: () => 'Freios', kind: 'check',
+    spot: { label: 'Freios', p: [1.4, 0.45, 0.98], n: [0.2, 0, 1] },
+    view: { pos: [2.9, 0.75, 3.1], target: [1.4, 0.4, 0.7] },
+    options: [
+      { id: 'pastilhas', name: 'Pastilhas dianteiras originais', price: 1900, inst: 450, onde: 'ambos' },
+      { id: 'discos', name: 'Discos e pastilhas dianteiros', price: 6800, inst: 900, onde: 'ambos' },
+      { id: 'fluido', name: 'Fluido de freio DOT 4', price: 380, inst: 250, onde: 'ambos' },
+    ] },
+  { id: 'suspensao', layer: 'marchand', title: () => 'Suspensão', kind: 'check',
+    spot: { label: 'Suspensão', p: [-1.4, 0.82, 0.98], n: [-0.1, 0.2, 1] },
+    view: { pos: [-2.9, 0.9, 3.2], target: [-1.4, 0.5, 0.7] },
+    options: [
+      { id: 'insp-susp', name: 'Inspeção completa da suspensão', price: 350, onde: 'servico' },
+      { id: 'amort', name: 'Par de amortecedores dianteiros originais', price: 7200, inst: 1200, onde: 'ambos' },
+      { id: 'buchas', name: 'Buchas e bieletas', price: 1600, inst: 600, onde: 'ambos' },
+    ] },
+  { id: 'pintura', layer: 'south', title: () => 'Pintura', kind: 'swatch', items: PAINTS, onde: 'servico',
+    note: 'Repintura completa feita pela South Paint.',
+    spot: { label: 'Pintura', p: [-0.3, 0.72, 1.06], n: [0, 0.1, 1] },
+    view: { pos: [0.4, 1.5, 5.9], target: [0, 0.75, 0] } },
+  { id: 'protecao', layer: 'south', title: () => 'Proteção', kind: 'check',
+    spot: { label: 'Proteção', p: [2.28, 0.6, 0.5], n: [1, 0.1, 0.3] },
+    view: { pos: [5.4, 1.5, 1.9], target: [1.8, 0.75, 0] },
+    options: [
+      { id: 'ppf-frente', name: 'PPF frontal', price: 7900, onde: 'servico', excl: ['ppf-total'],
+        detail: 'Para-choque, capô, faróis e retrovisores.' },
+      { id: 'ppf-total', name: 'PPF no carro inteiro', price: 24000, onde: 'servico', excl: ['ppf-frente'] },
+      { id: 'cquartz-apl', name: 'Vitrificação CarPro CQuartz aplicada', price: 3500, onde: 'servico' },
+      { id: 'cquartz-kit', name: 'Kit CarPro CQuartz para aplicar em casa', price: 890, onde: 'produto' },
+    ] },
+  { id: 'carbono', layer: 'south', title: () => 'Carbono', kind: 'check',
+    spot: { label: 'Carbono', p: [0.45, 1.0, 1.1], n: [0.2, 0.3, 1] },
+    view: { pos: [2.2, 1.6, 3.0], target: [0.45, 0.9, 0.8] },
+    options: [
+      { id: 'capa-retro', name: 'Capas de retrovisor em carbono', price: 3200, inst: 300, onde: 'ambos' },
+      { id: 'blades', name: 'Side blades em carbono', price: 3800, inst: 500, onde: 'ambos' },
+      { id: 'console', name: 'Moldura do console interno em carbono', price: 2300, inst: 250, onde: 'ambos' },
+    ] },
+  { id: 'pincas', layer: 'south', title: () => 'Pinças de freio', kind: 'swatch', items: CALIPERS, onde: 'servico',
+    note: 'Pintura das pinças pela South Paint.',
+    spot: { label: 'Pinças', p: [1.25, 0.22, 0.98], n: [0.2, -0.1, 1] },
+    view: { pos: [2.7, 0.55, 2.9], target: [1.4, 0.4, 0.7] } },
+];
+
+const state = {
+  layer: 'marchand', mode: 'complexo', km: '30.000', active: null,
+  radio: { revisao: 'premium', pintura: 'original', pincas: 'original' },
+  checks: new Set(),
+  notes: {},
+};
+
+/* ---------- Cena 3D ---------- */
+const canvas = document.getElementById('scene');
+const viewport = document.getElementById('viewport');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 60);
+const HOME = { pos: [5.0, 1.9, 5.3], target: [0, 0.6, 0] };
+camera.position.set(...HOME.pos);
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(...HOME.target);
+controls.enableDamping = true;
+controls.enablePan = false;
+controls.minDistance = 2.6;
+controls.maxDistance = 11;
+controls.maxPolarAngle = 1.5;
+controls.autoRotate = !reduced;
+controls.autoRotateSpeed = 0.6;
+canvas.addEventListener('pointerdown', () => { controls.autoRotate = false; });
+
+const key = new THREE.DirectionalLight(0xffffff, 2.2);
+key.position.set(4, 7, 3);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4 });
+key.shadow.radius = 6;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x5b7fd6, 1.4);
+rim.position.set(-5, 3, -4);
+scene.add(rim);
+
+// Pódio
+const floor = new THREE.Mesh(new THREE.CylinderGeometry(3.7, 3.8, 0.12, 96),
+  new THREE.MeshStandardMaterial({ color: 0x05070c, roughness: 0.7, metalness: 0.1, envMapIntensity: 0.15 }));
+floor.position.y = -0.06;
+floor.receiveShadow = true;
+scene.add(floor);
+const ring = new THREE.Mesh(new THREE.TorusGeometry(3.72, 0.012, 8, 160),
+  new THREE.MeshBasicMaterial({ color: 0x3a5fb0 }));
+ring.rotation.x = Math.PI / 2;
+ring.position.y = 0.002;
+scene.add(ring);
+
+// Materiais
+const paint = new THREE.MeshPhysicalMaterial({ color: PAINTS[0].hex, metalness: 0.45, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 0.75 });
+const trim = new THREE.MeshStandardMaterial({ color: 0x0b0c0f, roughness: 0.55, metalness: 0.2 });
+const tireMat = new THREE.MeshStandardMaterial({ color: 0x0d0d0f, roughness: 0.85 });
+const rimMat = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, metalness: 0.9, roughness: 0.22 });
+const discMat = new THREE.MeshStandardMaterial({ color: 0x5c6066, metalness: 0.85, roughness: 0.35 });
+const caliperMat = new THREE.MeshPhysicalMaterial({ color: CALIPERS[0].hex, roughness: 0.3, clearcoat: 1 });
+const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xe8f0ff, emissiveIntensity: 0 });
+const tailMat = new THREE.MeshStandardMaterial({ color: 0x400006, emissive: 0xff1a2a, emissiveIntensity: 0 });
+const carbon = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d');
+  for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
+    const g = x.createLinearGradient(i * 8, j * 8, i * 8 + 8, j * 8 + 8);
+    const lit = (i + j) % 2 === 0;
+    g.addColorStop(0, lit ? '#2b2e33' : '#0d0e10'); g.addColorStop(1, lit ? '#121316' : '#232529');
+    x.fillStyle = g; x.fillRect(i * 8, j * 8, 8, 8);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.MeshPhysicalMaterial({ map: t, metalness: 0.3, roughness: 0.35, clearcoat: 1, clearcoatRoughness: 0.03 });
+})();
+
+// Modelo: Porsche Macan GTS 2015 (Sketchfab, VuckyZ123, CC BY-NC-SA). Uso só para apresentação, não para o site comercial.
+// Convertido de FBX para GLB sem as texturas do jogo; os materiais abaixo são aplicados pelo nome de cada malha.
+const car = new THREE.Group();
+scene.add(car);
+const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x0a0d14, metalness: 0, roughness: 0.04, clearcoat: 1, transparent: true, opacity: 0.62 });
+const chrome = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 1, roughness: 0.12 });
+const interiorMat = new THREE.MeshStandardMaterial({ color: 0x17181b, roughness: 0.8 });
+const plateMat = new THREE.MeshStandardMaterial({ color: 0xe8ebef, roughness: 0.5 });
+const MATS = {
+  M_Paint_Metal_High: paint, M_Caliper_High: caliperMat, M_BrakeDisc_High: discMat, M_Rim_High: rimMat, M_Tire_High: tireMat,
+  M_GlassLights_High: glassMat, M_GlassColor_High: glassMat, M_GlassSurround_High: trim, M_Opaque_PlasticSmooth_High: trim,
+  M_Chassis_High: trim, M_Grille_A_High: trim, M_Opaque_ExhaustGlow_High: trim, M_Internal_Interior_High: interiorMat,
+  M_Badges_High: chrome, M_LightRefracted_High: chrome, M_LicensePlate_High: plateMat,
+};
+const WHEEL_PARTS = ['M_Rim_High', 'M_Tire_High', 'M_BrakeDisc_High', 'M_Caliper_High'];
+// Eixos medidos no modelo (frente = +z do arquivo): entre-eixos ~2,8 m, bitola ~1,66 m.
+const WHEELS = [[0.83, 1.4], [-0.83, 1.4], [0.83, -1.4], [-0.83, -1.4]];
+const WHEEL_Y = 0.37;
+const paintSlots = [paint, paint, paint]; // 0 carroceria, 1 retrovisores, 2 laterais (side blades)
+
+// Separa os triângulos de uma malha em grupos de material, pela posição do centro de cada triângulo.
+function splitByRegion(mesh, classify, materials) {
+  const g = mesh.geometry, pos = g.attributes.position;
+  const idx = g.index ? Array.from(g.index.array) : [...Array(pos.count).keys()];
+  const buckets = materials.map(() => []);
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  for (let i = 0; i < idx.length; i += 3) {
+    a.fromBufferAttribute(pos, idx[i]); b.fromBufferAttribute(pos, idx[i + 1]); c.fromBufferAttribute(pos, idx[i + 2]);
+    const m = a.add(b).add(c).divideScalar(3).applyMatrix4(mesh.matrixWorld);
+    buckets[classify(m)].push(idx[i], idx[i + 1], idx[i + 2]);
+  }
+  g.setIndex(buckets.flat());
+  g.clearGroups();
+  let start = 0;
+  buckets.forEach((bk, i) => { g.addGroup(start, bk.length, i); start += bk.length; });
+  mesh.material = materials;
+}
+
+// O modelo vem embutido em base64 num .js porque o artifact não serve arquivos .glb.
+const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 }) => {
+  const bytes = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
+  return new GLTFLoader().parseAsync(bytes.buffer, './');
+}).then(gltf => {
+  const model = gltf.scene;
+  car.add(model);
+  car.updateMatrixWorld(true);
+  const wheelParts = [];
+  model.traverse(o => {
+    if (!o.isMesh) return;
+    const name = o.name.replace(/lod0$/, ''); // nome da malha = nome da peça no modelo
+    o.castShadow = true;
+    if (WHEEL_PARTS.includes(name)) wheelParts.push(o);
+    if (name === 'M_Paint_Metal_High') {
+      // UV nova por projeção lateral, para a trama do carbono ficar em escala real (~1,5 cm por célula).
+      const uv = [], p = o.geometry.attributes.position, v = new THREE.Vector3();
+      for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld); uv.push(v.z * 8, v.y * 8); }
+      o.geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+      splitByRegion(o, m => {
+        const side = Math.abs(m.x);
+        if (side > 0.89 && m.y > 0.86 && m.z > 0.28 && m.z < 0.62) return 1;
+        if (side > 0.9 && m.y > 0.12 && m.y < 0.4 && m.z > -0.85 && m.z < 0.9) return 2;
+        return 0;
+      }, paintSlots);
+    } else if (name === 'M_LightCluster_High') {
+      splitByRegion(o, m => (m.z > 0 ? 0 : 1), [headMat, tailMat]);
+    } else {
+      o.material = MATS[name] || trim;
+    }
+  });
+  // As peças da roda vêm uma vez só, centradas na origem: monta as 4 rodas.
+  const proto = new THREE.Group();
+  for (const part of wheelParts) proto.add(part);
+  for (const [x, z] of WHEELS) {
+    const w = proto.clone();
+    w.position.set(x, WHEEL_Y, z);
+    if (x < 0) w.scale.x = -1;
+    car.add(w);
+  }
+  car.rotation.y = Math.PI / 2; // frente do carro para +x da cena
+});
+
+function resize() {
+  const { clientWidth: w, clientHeight: h } = viewport;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.fov = w < 600 ? 42 : 32;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(viewport);
+resize();
+
+/* ---------- Pontos clicáveis ---------- */
+const spotsEl = document.getElementById('spots');
+const spots = GROUPS.map(g => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'spot'; b.dataset.layer = g.layer;
+  b.innerHTML = `<span class="dot"></span><span class="tag">${g.spot.label}</span>`;
+  b.setAttribute('aria-label', `Ver ${g.spot.label}`);
+  b.addEventListener('click', () => focusGroup(g.id, true));
+  spotsEl.append(b);
+  return { g, el: b, p: new THREE.Vector3(...g.spot.p), n: new THREE.Vector3(...g.spot.n).normalize() };
+});
+const v = new THREE.Vector3(), toCam = new THREE.Vector3();
+function placeSpots() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  for (const s of spots) {
+    const shown = s.g.layer === state.layer;
+    s.el.hidden = !shown;
+    if (!shown) continue;
+    v.copy(s.p).project(camera);
+    toCam.copy(camera.position).sub(s.p);
+    s.el.classList.toggle('is-away', s.n.dot(toCam) < 0);
+    s.el.style.transform = `translate(${(v.x + 1) / 2 * w - 14}px, ${(1 - v.y) / 2 * h - 14}px)`;
+  }
+}
+
+function fly({ pos, target }) {
+  controls.autoRotate = false;
+  if (reduced) { camera.position.set(...pos); controls.target.set(...target); return; }
+  const o = { duration: 1.4, ease: 'power3.inOut', overwrite: true };
+  gsap.to(camera.position, { x: pos[0], y: pos[1], z: pos[2], ...o });
+  gsap.to(controls.target, { x: target[0], y: target[1], z: target[2], ...o });
+}
+document.getElementById('reset-view').addEventListener('click', () => { state.active = null; viewport.classList.remove('is-focused'); fly(HOME); renderGroups(); });
+
+/* ---------- Visual do carro conforme escolhas ---------- */
+function tweenColor(mat, hex) {
+  const c = new THREE.Color(hex);
+  if (reduced) { mat.color.copy(c); return; }
+  gsap.to(mat.color, { r: c.r, g: c.g, b: c.b, duration: 0.9, ease: 'power2.out' });
+}
+function applyVisuals() {
+  tweenColor(paint, PAINTS.find(p => p.id === state.radio.pintura).hex);
+  tweenColor(caliperMat, CALIPERS.find(p => p.id === state.radio.pincas).hex);
+  paintSlots[1] = state.checks.has('capa-retro') ? carbon : paint;
+  paintSlots[2] = state.checks.has('blades') ? carbon : paint;
+}
+
+/* ---------- Painel ---------- */
+const groupsEl = document.getElementById('groups');
+const offInCasa = o => state.mode === 'casa' && o.onde === 'servico';
+function priceLabel(o) {
+  if (!o.price) return 'Incluso';
+  if (o.onde === 'ambos') return state.mode === 'complexo' ? `${brl(o.price + o.inst)}` : brl(o.price);
+  return brl(o.price);
+}
+function optDetail(o) {
+  const bits = [];
+  if (o.detail) bits.push(o.detail);
+  if (o.onde === 'ambos') bits.push(state.mode === 'complexo' ? `Peça ${brl(o.price)} + instalação ${brl(o.inst)}.` : 'Enviamos para todo o Brasil.');
+  if (o.onde === 'produto') bits.push('Enviamos para todo o Brasil.');
+  if (offInCasa(o)) bits.push('Serviço feito no Complexo South.');
+  return bits.join(' ');
+}
+function renderGroups() {
+  groupsEl.innerHTML = '';
+  for (const g of GROUPS.filter(g => g.layer === state.layer)) {
+    const sec = document.createElement('section');
+    sec.className = 'group' + (state.active === g.id ? ' is-active' : '');
+    sec.dataset.layer = g.layer; sec.id = 'g-' + g.id;
+    const groupOff = state.mode === 'casa' && g.onde === 'servico';
+    const count = g.kind === 'check' ? g.options.filter(o => state.checks.has(o.id)).length : 0;
+    sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : 'Ver no carro'}</span></button>`;
+    sec.querySelector('.group-head').addEventListener('click', () => focusGroup(g.id, false));
+    const note = state.notes[g.id] || (groupOff ? 'Serviço feito no Complexo South. Fica fora do orçamento de envio.' : g.note);
+    if (note) sec.insertAdjacentHTML('beforeend', `<p class="group-note${state.notes[g.id] || groupOff ? ' warn' : ''}">${note}</p>`);
+
+    if (g.kind === 'swatch') {
+      const wrap = document.createElement('div'); wrap.className = 'swatches';
+      wrap.setAttribute('role', 'radiogroup'); wrap.setAttribute('aria-label', g.title());
+      for (const it of g.items) {
+        const id = `${g.id}-${it.id}`;
+        wrap.insertAdjacentHTML('beforeend', `<label class="sw" title="${it.label}"><input type="radio" name="${g.id}" id="${id}" value="${it.id}" ${state.radio[g.id] === it.id ? 'checked' : ''} aria-label="${it.label}"><i style="background:${it.hex}"></i></label>`);
+      }
+      wrap.addEventListener('change', e => { state.radio[g.id] = e.target.value; state.active = g.id; update(); });
+      sec.append(wrap);
+      const cur = g.items.find(i => i.id === state.radio[g.id]);
+      sec.insertAdjacentHTML('beforeend', `<div class="sw-caption"><b>${cur.label}</b><span>${cur.price ? brl(cur.price) : 'Sem custo'}</span></div>`);
+    } else {
+      const wrap = document.createElement('div'); wrap.className = 'opts';
+      for (const o of g.options) {
+        const id = `${g.id}-${o.id}`;
+        const checked = g.kind === 'radio' ? state.radio[g.id] === o.id : state.checks.has(o.id);
+        const off = offInCasa(o);
+        const detail = optDetail(o);
+        wrap.insertAdjacentHTML('beforeend', `<label class="opt${off ? ' is-off' : ''}" for="${id}">
+          <input type="${g.kind === 'radio' ? 'radio' : 'checkbox'}" name="${g.id}" id="${id}" value="${o.id}" ${checked ? 'checked' : ''} ${off ? 'disabled' : ''}>
+          <span class="box"></span><span class="name">${o.name}</span><span class="price">${priceLabel(o)}</span>
+          ${detail ? `<span class="detail">${detail}</span>` : ''}</label>`);
+      }
+      wrap.addEventListener('change', e => {
+        const o = g.options.find(x => x.id === e.target.value);
+        delete state.notes[g.id];
+        if (g.kind === 'radio') state.radio[g.id] = o.id;
+        else if (e.target.checked) {
+          state.checks.add(o.id);
+          for (const x of o.excl || []) if (state.checks.delete(x)) state.notes[g.id] = `${o.name} já cobre ${g.options.find(y => y.id === x).name.toLowerCase()}, então tiramos o item repetido.`;
+        } else state.checks.delete(o.id);
+        state.active = g.id;
+        update();
+      });
+      sec.append(wrap);
+    }
+    groupsEl.append(sec);
+  }
+  for (const s of spots) s.el.classList.toggle('is-active', s.g.id === state.active);
+}
+
+function focusGroup(id, fromSpot) {
+  const g = GROUPS.find(x => x.id === id);
+  if (g.layer !== state.layer) setLayer(g.layer);
+  state.active = id;
+  viewport.classList.add('is-focused');
+  fly(g.view);
+  renderGroups();
+  const el = document.getElementById('g-' + id);
+  if (el && fromSpot) el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' });
+}
+
+/* ---------- Orçamento ---------- */
+function lineItems() {
+  const lines = [], skipped = [];
+  for (const g of GROUPS) {
+    const brand = g.layer === 'marchand' ? 'Marchand' : 'South';
+    let picks = [];
+    if (g.kind === 'check') picks = g.options.filter(o => state.checks.has(o.id));
+    else if (g.kind === 'radio') picks = g.options.filter(o => o.id === state.radio[g.id] && o.price);
+    else {
+      const it = g.items.find(i => i.id === state.radio[g.id]);
+      if (it.price) picks = [{ name: `${g.title()}: ${it.label}`, price: it.price, onde: g.onde }];
+    }
+    for (const o of picks) {
+      const name = g.kind === 'radio' ? `${g.title()}, ${o.name}` : o.name;
+      if (offInCasa(o)) { skipped.push(name); continue; }
+      const p = o.price + (state.mode === 'complexo' && o.inst ? o.inst : 0);
+      lines.push({ name, p, brand });
+    }
+  }
+  return { lines, skipped };
+}
+function renderSummary() {
+  const { lines, skipped } = lineItems();
+  const total = lines.reduce((s, l) => s + l.p, 0);
+  document.getElementById('lines').innerHTML = lines.length
+    ? lines.map(l => `<li class="${l.brand === 'Marchand' ? 'm' : ''}"><span>${l.name} <span class="k">${l.brand}</span></span><span class="p">${brl(l.p)}</span></li>`).join('')
+    : '<li><span class="k">Nada escolhido ainda. Toque num ponto do carro para começar.</span><span></span></li>';
+  const sk = document.getElementById('skipped');
+  sk.hidden = !skipped.length;
+  sk.textContent = skipped.length === 1 ? 'Um serviço ficou de fora porque só é feito no Complexo South.' : skipped.length ? `${skipped.length} serviços ficaram de fora porque só são feitos no Complexo South.` : '';
+  document.getElementById('total').textContent = brl(total);
+  document.getElementById('cta').textContent = state.mode === 'complexo' ? 'Agendar no Complexo South' : 'Finalizar pedido';
+  return { lines, total };
+}
+function summaryText() {
+  const { lines, total } = renderSummary();
+  return [`Garagem South: Porsche Macan 2020, ${state.km} km`,
+    state.mode === 'complexo' ? 'Atendimento no Complexo South' : 'Receber em casa',
+    '', ...lines.map(l => `- ${l.name} (${l.brand}): ${brl(l.p)}`), '', `Total estimado: ${brl(total)}`, '(valores de exemplo)'].join('\n');
+}
+
+const feedback = document.getElementById('feedback');
+document.getElementById('copy').addEventListener('click', () => {
+  const text = summaryText();
+  const fb = document.getElementById('copy-fallback');
+  navigator.clipboard.writeText(text).then(() => {
+    feedback.textContent = 'Orçamento copiado. Dá para colar direto no WhatsApp.'; fb.hidden = true;
+  }).catch(() => {
+    feedback.textContent = 'Não deu para copiar automaticamente. Selecione o texto abaixo.';
+    fb.value = text; fb.hidden = false; fb.select();
+  });
+});
+document.getElementById('cta').addEventListener('click', () => {
+  feedback.textContent = state.mode === 'complexo'
+    ? 'No site real, este botão abre a agenda do Complexo South com o orçamento preenchido.'
+    : 'No site real, este botão leva os produtos para o carrinho da Nuvemshop.';
+});
+
+/* ---------- Controles do topo ---------- */
+function setLayer(layer) {
+  state.layer = layer;
+  for (const b of document.querySelectorAll('.layers button')) b.setAttribute('aria-selected', b.dataset.layer === layer);
+}
+for (const b of document.querySelectorAll('.layers button')) b.addEventListener('click', () => { setLayer(b.dataset.layer); state.active = null; renderGroups(); });
+for (const b of document.querySelectorAll('.mode button')) b.addEventListener('click', () => {
+  state.mode = b.dataset.mode;
+  for (const x of document.querySelectorAll('.mode button')) x.setAttribute('aria-pressed', x === b);
+  update();
+});
+document.getElementById('km').addEventListener('change', e => { state.km = e.target.value; update(); });
+
+function update() { applyVisuals(); renderGroups(); renderSummary(); feedback.textContent = ''; }
+
+/* ---------- Abertura + loop ---------- */
+renderGroups(); renderSummary();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); if (!spotsEl.hidden) placeSpots(); });
+await loadCar.catch(err => {
+  console.error(err);
+  document.getElementById('loading').textContent = 'Não foi possível carregar o modelo 3D. Recarregue a página.';
+  throw err;
+});
+document.getElementById('loading').remove();
+spotsEl.hidden = false;
+applyVisuals();
+if (reduced) { headMat.emissiveIntensity = 3; tailMat.emissiveIntensity = 2.2; }
+else {
+  camera.position.set(-7.5, 1.4, 4.5);
+  gsap.to(camera.position, { x: HOME.pos[0], y: HOME.pos[1], z: HOME.pos[2], duration: 2.6, ease: 'power3.out' });
+  gsap.to(headMat, { emissiveIntensity: 3, duration: 0.5, delay: 1.3 });
+  gsap.to(tailMat, { emissiveIntensity: 2.2, duration: 0.5, delay: 1.5 });
+}
+</script>
+</body>
+</html>
