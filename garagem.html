@@ -185,6 +185,10 @@ button, select { font: inherit; color: inherit; }
 .opt:has(input:checked) { border-color: color-mix(in srgb, var(--c, var(--south)) 70%, transparent); background: rgba(255,255,255,.03); }
 .opt .name { font-weight: 500; }
 .opt .price { font: 600 16px/1.3 var(--cond); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.incl { grid-column: 2 / 4; list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 14px; }
+.incl li { position: relative; padding-left: 14px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.incl li::before { content: "✓"; position: absolute; left: 0; color: var(--south); font-size: 11px; }
+@media (max-width: 560px) { .incl { grid-template-columns: 1fr; } }
 .opt .detail { grid-column: 2 / 4; color: var(--muted); font-size: 13px; line-height: 1.45; }
 .opt.is-off { opacity: .45; cursor: not-allowed; }
 .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
@@ -399,11 +403,19 @@ const GROUPS = [
   // Serviços conforme southcar.com.br (03/10/2026). Lavação e películas: preços do site (películas usam o valor "a partir de" do site como preço).
   // Coating, PPF, rodas e pinças: o site diz "sob consulta"; valores ESTIMADOS a pedido do Eduardo. Só o martelinho fica sob consulta (price: null).
   { id: 'lavacao', layer: 'south', title: () => 'Lavação premium', kind: 'check', linePrefix: 'Lavação premium',
-    note: 'Produtos CarPro. O Nível 03 inclui retirada e limpeza das 4 rodas.',
+    note: 'Produtos oficiais CarPro.',
     options: [
-      { id: 'lav-1', name: 'Nível 01', price: 450, onde: 'servico', troca: ['lav-2', 'lav-3'] },
-      { id: 'lav-2', name: 'Nível 02', price: 750, onde: 'servico', troca: ['lav-1', 'lav-3'] },
-      { id: 'lav-3', name: 'Nível 03', price: 1490, onde: 'servico', troca: ['lav-1', 'lav-2'] },
+      { id: 'lav-1', name: 'Nível 01', price: 450, onde: 'servico', troca: ['lav-2', 'lav-3'],
+        includes: ['Pré-lavagem técnica detalhada', 'Limpeza interna', 'Aspiração interna', 'Limpeza dos vidros', 'Limpeza das rodas e caixa de rodas',
+          'Condicionamento de pneus', 'Condicionamento de plásticos externos', 'Limpeza do cofre de motor', 'Aplicação de selante CarPro'] },
+      { id: 'lav-2', name: 'Nível 02', price: 750, onde: 'servico', troca: ['lav-1', 'lav-3'],
+        includes: ['Pré-lavagem técnica detalhada', 'Limpeza interna', 'Limpeza do teto e forrações', 'Aspiração interna', 'Limpeza dos vidros',
+          'Limpeza das rodas e caixa de rodas', 'Condicionamento de pneus', 'Condicionamento de plásticos internos e externos', 'Limpeza do cofre de motor',
+          'Aplicação de selante CarPro Reload'] },
+      { id: 'lav-3', name: 'Nível 03', price: 1490, onde: 'servico', troca: ['lav-1', 'lav-2'],
+        includes: ['Pré-lavagem técnica detalhada', 'Limpeza interna', 'Limpeza do teto e forrações', 'Aspiração interna', 'Limpeza dos vidros',
+          'Retirada das 4 rodas', 'Limpeza das rodas por dentro e por fora', 'Limpeza da caixa de rodas', 'Condicionamento de pneus',
+          'Condicionamento de plásticos internos e externos', 'Aplicação de selante CarPro Reload'] },
     ] },
   { id: 'pintura', layer: 'south', title: () => 'Pintura', badge: 'PPG à base d’água', kind: 'swatch', items: PAINTS, onde: 'servico',
     note: 'Repintura completa feita pela South Paint.',
@@ -901,6 +913,7 @@ function renderGroups() {
           <input type="${g.kind === 'radio' ? 'radio' : 'checkbox'}" name="${g.id}" id="${id}" value="${o.id}" ${checked ? 'checked' : ''} ${off ? 'disabled' : ''}>
           <span class="box"></span><span class="name">${o.name}</span><span class="price">${priceLabel(o, qtyOf(o))}</span>
           ${detail ? `<span class="detail">${detail}</span>` : ''}
+          ${o.includes ? `<ul class="incl">${o.includes.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
           ${o.qty && checked && !off ? qtyControl(o) : ''}</label>`);
       }
       // Botões de quantidade ficam dentro do item: o clique neles não marca/desmarca o item.
