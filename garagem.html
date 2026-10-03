@@ -175,6 +175,7 @@ button, select { font: inherit; color: inherit; }
 .opt input:focus-visible + .box { outline: 2px solid var(--white); outline-offset: 2px; }
 .opt:has(input:checked) { border-color: color-mix(in srgb, var(--c, var(--south)) 70%, transparent); background: rgba(255,255,255,.03); }
 .opt .name { font-weight: 500; }
+.opt .price small { display: block; font: 500 10px/1.2 var(--sans); color: var(--muted); }
 .opt .price { font: 600 16px/1.3 var(--cond); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .opt .detail { grid-column: 2 / 4; color: var(--muted); font-size: 13px; line-height: 1.45; }
 .opt.is-off { opacity: .45; cursor: not-allowed; }
@@ -341,11 +342,20 @@ const PAINTS = [
   { id: 'onix', label: 'Preto Ônix', hex: '#0b0c0f', price: 34000 },
   { id: 'custom', label: 'Cor personalizada', hex: '#5a3e2b', price: 38000, custom: true },
 ];
+// Pinças e rodas: o site da South Car informa "sob consulta" (price: null).
 const CALIPERS = [
   { id: 'original', label: 'Original (preto)', hex: '#141518', price: 0 },
-  { id: 'vermelho', label: 'Vermelho', hex: '#b3121f', price: 2400 },
-  { id: 'amarelo', label: 'Amarelo', hex: '#e1ad01', price: 2400 },
-  { id: 'azul', label: 'Azul', hex: '#2b59d6', price: 2400 },
+  { id: 'vermelho', label: 'Vermelho', hex: '#b3121f', price: null },
+  { id: 'amarelo', label: 'Amarelo', hex: '#e1ad01', price: null },
+  { id: 'azul', label: 'Azul', hex: '#2b59d6', price: null },
+];
+const RIMS = [
+  { id: 'original', label: 'Original (prata)', hex: '#d2d6dc', price: 0 },
+  { id: 'preto', label: 'Preto brilhante', hex: '#111215', price: null },
+  { id: 'grafite', label: 'Grafite acetinado', hex: '#3d4046', price: null },
+  { id: 'bronze', label: 'Bronze', hex: '#6e4c2c', price: null },
+  { id: 'branco', label: 'Branco', hex: '#e9ebee', price: null },
+  { id: 'lpf-fume', label: 'LPF Fumê (reversível)', hex: '#5a5e66', price: null },
 ];
 const partsNote = () => (state.mode === 'casa' ? 'Peças originais, enviamos para todo o Brasil.' : 'Peças originais com instalação inclusa.');
 const GROUPS = [
@@ -375,6 +385,14 @@ const GROUPS = [
       { id: 'amort', name: 'Par de amortecedores dianteiros originais', price: 7200, inst: 1200, onde: 'ambos' },
       { id: 'buchas', name: 'Buchas e bieletas', price: 1600, inst: 600, onde: 'ambos' },
     ] },
+  // Serviços e preços conforme southcar.com.br (03/10/2026). price: null = "sob consulta" no site; from = "a partir de".
+  { id: 'lavacao', layer: 'south', title: () => 'Lavação premium', kind: 'check', linePrefix: 'Lavação premium',
+    note: 'Produtos CarPro. O Nível 03 inclui retirada e limpeza das 4 rodas.',
+    options: [
+      { id: 'lav-1', name: 'Nível 01', price: 450, onde: 'servico', troca: ['lav-2', 'lav-3'] },
+      { id: 'lav-2', name: 'Nível 02', price: 750, onde: 'servico', troca: ['lav-1', 'lav-3'] },
+      { id: 'lav-3', name: 'Nível 03', price: 1490, onde: 'servico', troca: ['lav-1', 'lav-2'] },
+    ] },
   { id: 'pintura', layer: 'south', title: () => 'Pintura', badge: 'PPG à base d’água', kind: 'swatch', items: PAINTS, onde: 'servico',
     note: 'Repintura completa feita pela South Paint.',
     spot: { label: 'Pintura', p: [-0.3, 0.72, 1.06], n: [0, 0.1, 1] },
@@ -389,17 +407,46 @@ const GROUPS = [
       { id: 'reparo-m', name: 'Médio, até 15 cm', price: 650, onde: 'servico', qty: 'ponto' },
       { id: 'reparo-g', name: 'Grande, até 30 cm', price: 1100, onde: 'servico', qty: 'ponto' },
       { id: 'reparo-peca', name: 'Peça inteira', price: 2200, onde: 'servico', qty: 'peça' },
+      { id: 'martelinho', name: 'Martelinho de ouro (sem repintura)', lineName: 'Martelinho de ouro', price: null, onde: 'servico' },
     ] },
-  { id: 'protecao', layer: 'south', title: () => 'Proteção', kind: 'check',
-    spot: { label: 'Proteção', p: [2.28, 0.6, 0.5], n: [1, 0.1, 0.3] },
-    view: { pos: [5.4, 1.5, 1.9], target: [1.8, 0.75, 0] },
+  { id: 'coating', layer: 'south', title: () => 'Coating cerâmico CarPro', kind: 'check', linePrefix: 'Coating',
+    note: 'Credenciado oficial CarPro.',
     options: [
-      { id: 'ppf-frente', name: 'PPF frontal', price: 7900, onde: 'servico', excl: ['ppf-total'],
-        detail: 'Para-choque, capô, faróis e retrovisores.' },
-      { id: 'ppf-total', name: 'PPF no carro inteiro', price: 24000, onde: 'servico', excl: ['ppf-frente'] },
-      { id: 'cquartz-apl', name: 'Vitrificação CarPro CQuartz aplicada', price: 3500, onde: 'servico' },
+      { id: 'coat-d', name: 'D.Quartz Pro (1 a 2 anos)', price: null, onde: 'servico', troca: ['coat-c', 'coat-f'] },
+      { id: 'coat-c', name: 'C.Quartz Professional (2 a 3 anos)', price: null, onde: 'servico', troca: ['coat-d', 'coat-f'] },
+      { id: 'coat-f', name: 'C.Quartz Finest Reserve (até 5 anos)', price: null, onde: 'servico', troca: ['coat-d', 'coat-c'] },
       { id: 'cquartz-kit', name: 'Kit CarPro CQuartz para aplicar em casa', price: 890, onde: 'produto' },
     ] },
+  { id: 'ppf', layer: 'south', title: () => 'PPF', kind: 'check', linePrefix: 'PPF',
+    note: 'Paint Protection Film contra riscos, pedras e seiva.',
+    spot: { label: 'PPF', p: [2.28, 0.6, 0.5], n: [1, 0.1, 0.3] },
+    view: { pos: [5.4, 1.5, 1.9], target: [1.8, 0.75, 0] },
+    options: [
+      { id: 'ppf-frente', name: 'Transparente frontal', price: null, onde: 'servico', troca: ['ppf-total'] },
+      { id: 'ppf-total', name: 'Transparente no carro inteiro', price: null, onde: 'servico', troca: ['ppf-frente'] },
+      { id: 'ppf-gloss', name: 'Colorido brilhante (Gloss)', price: null, onde: 'servico', troca: ['ppf-matte'] },
+      { id: 'ppf-matte', name: 'Colorido fosco (Matte)', price: null, onde: 'servico', troca: ['ppf-gloss'] },
+      { id: 'ppf-sunroof', name: 'Teto solar (Sunroof)', price: null, onde: 'servico' },
+      { id: 'ppf-antitrinco', name: 'Parabrisa anti-trinco', price: null, onde: 'servico' },
+      { id: 'smoke-30', name: 'Faróis smoke 30% (escuro)', price: null, onde: 'servico', troca: ['smoke-50', 'smoke-70'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
+      { id: 'smoke-50', name: 'Faróis smoke 50% (médio)', price: null, onde: 'servico', troca: ['smoke-30', 'smoke-70'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
+      { id: 'smoke-70', name: 'Faróis smoke 70% (claro)', price: null, onde: 'servico', troca: ['smoke-30', 'smoke-50'], view: { pos: [4.2, 1.1, 1.6], target: [2.1, 0.75, 0.4] } },
+    ] },
+  { id: 'peliculas', layer: 'south', title: () => 'Películas', kind: 'check', linePrefix: 'Película',
+    note: 'Laterais e traseira: escolha uma. O parabrisa tem película própria.',
+    spot: { label: 'Películas', p: [-0.45, 1.18, 0.86], n: [0, 0.35, 1] },
+    view: { pos: [0.6, 1.5, 4.6], target: [-0.3, 1.0, 0.4] },
+    options: [
+      { id: 'film-carbono', name: 'Nano-carbono', price: 900, from: true, onde: 'servico', troca: ['film-ceramica', 'film-refletiva', 'film-seguranca'] },
+      { id: 'film-ceramica', name: 'Nano-cerâmica', price: 1500, from: true, onde: 'servico', troca: ['film-carbono', 'film-refletiva', 'film-seguranca'] },
+      { id: 'film-refletiva', name: 'Semi-refletiva metalizada', price: 1000, from: true, onde: 'servico', troca: ['film-carbono', 'film-ceramica', 'film-seguranca'] },
+      { id: 'film-seguranca', name: 'Segurança PS4 a PS16', price: 1500, from: true, onde: 'servico', troca: ['film-carbono', 'film-ceramica', 'film-refletiva'] },
+      { id: 'film-parabrisa', name: 'Parabrisa nano-cerâmica', price: 1200, from: true, onde: 'servico' },
+    ] },
+  { id: 'rodas', layer: 'south', title: () => 'Rodas', kind: 'swatch', items: RIMS, onde: 'servico',
+    note: 'Pintura automotiva ou LPF Liquid Armor PRO, que é reversível.',
+    spot: { label: 'Rodas', p: [-1.42, 0.37, 0.98], n: [0, 0, 1] },
+    view: { pos: [-2.9, 0.75, 3.0], target: [-1.42, 0.4, 0.7] } },
   { id: 'carbono', layer: 'south', title: () => 'Carbono', kind: 'check',
     note: () => (state.mode === 'casa' ? 'Peças em carbono, enviamos para todo o Brasil.' : 'Peças em carbono com instalação inclusa.'),
     spot: { label: 'Carbono', p: [0.45, 1.0, 1.1], n: [0.2, 0.3, 1] },
@@ -416,7 +463,7 @@ const GROUPS = [
 
 const state = {
   layer: 'marchand', mode: 'complexo', active: null, qty: {},
-  radio: { pintura: 'original', pincas: 'original' },
+  radio: { pintura: 'original', pincas: 'original', rodas: 'original' },
   checks: new Set(),
   notes: {},
 };
@@ -709,7 +756,7 @@ resize();
 
 /* ---------- Pontos clicáveis ---------- */
 const spotsEl = document.getElementById('spots');
-const spots = GROUPS.map(g => {
+const spots = GROUPS.filter(g => g.spot).map(g => {
   const b = document.createElement('button');
   b.type = 'button'; b.className = 'spot'; b.dataset.layer = g.layer;
   b.innerHTML = `<span class="dot"></span><span class="tag">${g.spot.label}</span>`;
@@ -747,7 +794,20 @@ function tweenColor(mat, hex) {
   if (reduced) { mat.color.copy(c); return; }
   gsap.to(mat.color, { r: c.r, g: c.g, b: c.b, duration: 0.9, ease: 'power2.out' });
 }
+// Películas escurecem os vidros; a semi-refletiva espelha. Smoke escurece a capa dos faróis. Matte tira o brilho da pintura.
+const FILMS = { 'film-carbono': [0.86, 0], 'film-ceramica': [0.7, 0], 'film-refletiva': [0.78, 0.75], 'film-seguranca': [0.58, 0] };
+const SMOKE = { 'smoke-30': 0.82, 'smoke-50': 0.62, 'smoke-70': 0.42 };
 function applyVisuals() {
+  const film = Object.keys(FILMS).find(id => state.checks.has(id));
+  [glassMat.opacity, glassMat.metalness] = film ? FILMS[film] : [0.5, 0];
+  const smoke = Object.keys(SMOKE).find(id => state.checks.has(id));
+  lensMat.color.set(smoke ? 0x08090b : 0xffffff); lensMat.opacity = smoke ? SMOKE[smoke] : 0.12;
+  const matte = state.checks.has('ppf-matte');
+  paint.roughness = matte ? 0.62 : 0.38; paint.clearcoat = matte ? 0 : 1;
+  paint.envMapIntensity = ['coat-d', 'coat-c', 'coat-f'].some(id => state.checks.has(id)) ? 1.3 : 1;
+  const rim = RIMS.find(r => r.id === state.radio.rodas);
+  tweenColor(rimMat, rim.hex);
+  rimMat.metalness = rim.id === 'original' ? 0.75 : rim.id === 'lpf-fume' ? 0.6 : 0.25;
   tweenColor(paint, swatchItem(GROUPS.find(g => g.id === 'pintura'), PAINTS.find(p => p.id === state.radio.pintura)).hex);
   tweenColor(caliperMat, CALIPERS.find(p => p.id === state.radio.pincas).hex);
   paintSlots[1] = state.checks.has('capa-retro') ? carbon : paint;
@@ -758,6 +818,8 @@ function applyVisuals() {
 const groupsEl = document.getElementById('groups');
 const offInCasa = o => state.mode === 'casa' && o.onde === 'servico';
 function priceLabel(o, n = 1) {
+  if (o.price === null) return 'Sob consulta';
+  if (o.from) return `<small>a partir de</small>${brl(o.price)}`;
   if (!o.price) return 'Incluso';
   if (n > 1) return brl(o.price * n);
   if (o.onde === 'ambos') return state.mode === 'complexo' ? `${brl(o.price + o.inst)}` : brl(o.price);
@@ -783,7 +845,7 @@ function renderGroups() {
     sec.dataset.layer = g.layer; sec.id = 'g-' + g.id;
     const groupOff = state.mode === 'casa' && g.onde === 'servico';
     const count = g.kind === 'check' ? g.options.filter(o => state.checks.has(o.id)).length : 0;
-    sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}${g.badge ? `<span class="badge">${g.badge}</span>` : ''}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : g.layer === 'marchand' ? '' : 'Ver no carro'}</span></button>`;
+    sec.innerHTML = `<button type="button" class="group-head"><h3>${g.title()}${g.badge ? `<span class="badge">${g.badge}</span>` : ''}</h3><span>${count ? count + ' escolhido' + (count > 1 ? 's' : '') : g.layer === 'marchand' || !g.spot ? '' : 'Ver no carro'}</span></button>`;
     sec.querySelector('.group-head').addEventListener('click', () => focusGroup(g.id, false));
     const note = state.notes[g.id] || (groupOff ? 'Serviço feito no Complexo South. Fica fora do orçamento de envio.' : typeof g.note === 'function' ? g.note() : g.note);
     if (note) sec.insertAdjacentHTML('beforeend', `<p class="group-note${state.notes[g.id] || groupOff ? ' warn' : ''}">${note}</p>`);
@@ -816,7 +878,7 @@ function renderGroups() {
       });
       sec.append(wrap);
       const cur = swatchItem(g, g.items.find(i => i.id === state.radio[g.id]));
-      sec.insertAdjacentHTML('beforeend', `<div class="sw-caption"><b>${esc(cur.label)}</b><span>${cur.price ? brl(cur.price) : 'Sem custo'}</span></div>`);
+      sec.insertAdjacentHTML('beforeend', `<div class="sw-caption"><b>${esc(cur.label)}</b><span>${cur.price === null ? 'Sob consulta' : cur.price ? brl(cur.price) : 'Sem custo'}</span></div>`);
     } else {
       const wrap = document.createElement('div'); wrap.className = 'opts';
       for (const o of g.options) {
@@ -864,8 +926,7 @@ function focusGroup(id, fromSpot) {
   const g = GROUPS.find(x => x.id === id);
   if (g.layer !== state.layer) setLayer(g.layer);
   state.active = id;
-  viewport.classList.add('is-focused');
-  fly(g.view);
+  if (g.view) { viewport.classList.add('is-focused'); fly(g.view); }
   renderGroups();
   const el = document.getElementById('g-' + id);
   if (el && fromSpot) el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' });
@@ -881,15 +942,15 @@ function lineItems() {
     else if (g.kind === 'radio') picks = g.options.filter(o => o.id === state.radio[g.id] && o.price);
     else {
       const it = swatchItem(g, g.items.find(i => i.id === state.radio[g.id]));
-      if (it.price) picks = [{ name: `${g.title()}: ${it.label}`, price: it.price, onde: g.onde }];
+      if (it.id !== 'original') picks = [{ name: `${g.title()}: ${it.label}`, price: it.price, onde: g.onde }];
     }
     for (const o of picks) {
       const name = g.kind === 'radio' || g.id === 'revisao' ? `${g.title()}, ${o.name}` : o.name;
       if (offInCasa(o)) { skipped.push(name); continue; }
       const n = qtyOf(o);
-      const p = (o.price + (state.mode === 'complexo' && o.inst ? o.inst : 0)) * n;
-      const label = g.id === 'reparo' ? `Reparo ${o.name.toLowerCase()}` : name;
-      lines.push({ id: o.id || `${g.id}-${state.radio[g.id]}`, name: n > 1 ? `${label} × ${n}` : label, p, brand });
+      const p = o.price === null ? null : (o.price + (state.mode === 'complexo' && o.inst ? o.inst : 0)) * n;
+      const label = o.lineName || (g.linePrefix ? `${g.linePrefix} ${o.name.charAt(0).toLowerCase()}${o.name.slice(1)}` : g.id === 'reparo' ? `Reparo ${o.name.toLowerCase()}` : name);
+      lines.push({ id: o.id || `${g.id}-${state.radio[g.id]}`, name: n > 1 ? `${label} × ${n}` : label, p, brand, from: !!o.from });
     }
   }
   return { lines, skipped };
@@ -897,9 +958,10 @@ function lineItems() {
 const totalEl = document.getElementById('total'), totalShown = { v: 0 };
 function renderSummary() {
   const { lines, skipped } = lineItems();
-  const total = lines.reduce((s, l) => s + l.p, 0);
+  const total = lines.reduce((s, l) => s + (l.p || 0), 0);
+  const fmt = l => (l.p === null ? 'Sob consulta' : (l.from ? 'a partir de ' : '') + brl(l.p));
   document.getElementById('lines').innerHTML = lines.length
-    ? lines.map(l => `<li class="${l.brand === 'Marchand' ? 'm' : ''}"><span>${l.name} <span class="k">${l.brand}</span></span><span class="p">${brl(l.p)}</span></li>`).join('')
+    ? lines.map(l => `<li class="${l.brand === 'Marchand' ? 'm' : ''}"><span>${l.name} <span class="k">${l.brand}</span></span><span class="p">${fmt(l)}</span></li>`).join('')
     : '<li><span class="k">Nada escolhido ainda. Toque num ponto do carro para começar.</span><span></span></li>';
   const sk = document.getElementById('skipped');
   sk.hidden = !skipped.length;
@@ -913,7 +975,7 @@ function renderSummary() {
   document.getElementById('cta-label').textContent = casa ? 'Finalizar compra' : 'Agendar no Complexo South';
   if (casa) {
     // Compra online: leva os produtos ao checkout da South Shop (mesmo formato de carrinho das outras páginas).
-    const cart = lines.map(l => ({ id: l.id, name: l.name, price: l.p, variant: l.brand === 'Marchand' ? 'Marchand Peças' : 'South Shop', qty: 1 }));
+    const cart = lines.filter(l => l.p !== null).map(l => ({ id: l.id, name: l.name, price: l.p, variant: l.brand === 'Marchand' ? 'Marchand Peças' : 'South Shop', qty: 1 }));
     cta.href = 'checkout-redirect.html?cart=' + encodeURIComponent(JSON.stringify(cart));
     cta.target = '_self';
     cta.setAttribute('aria-disabled', !lines.length);
@@ -930,7 +992,7 @@ function orderMessage(lines, total) {
   const car = carLabel(currentCar());
   if (!lines.length) return `Olá, South! Quero agendar um atendimento no Complexo South para o meu ${car}.`;
   return [`Olá, South! Quero agendar no Complexo South para o meu ${car}:`, '',
-    ...lines.map(l => `• ${l.name} (${l.brand}): ${brl(l.p)}`), '',
+    ...lines.map(l => `• ${l.name} (${l.brand}): ${l.p === null ? 'sob consulta' : (l.from ? 'a partir de ' : '') + brl(l.p)}`), '',
     state.mode === 'casa' ? 'Prefiro receber os produtos em casa.' : '',
     `Total estimado: ${brl(total)}`].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
 }
