@@ -631,6 +631,7 @@ const HOME = { pos: [0, 3.3, 10.65], target: [0, 0.6, 0] }; // vista padrão: la
 // Tela em pé (celular) é estreita: a vista padrão se afasta o quanto precisar pro carro caber de ponta a ponta.
 const HOME_BASE = new THREE.Vector3(...HOME.pos).sub(new THREE.Vector3(...HOME.target));
 let homeExtra = 0; // metros a mais que a vista padrão se afastou (a névoa recua junto)
+const homeV = new THREE.Vector3();
 camera.position.set(...HOME.pos);
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(...HOME.target);
@@ -966,6 +967,8 @@ function resize() {
   homeExtra = d - HOME_BASE.length();
   HOME.pos = HOME_BASE.clone().setLength(d).add(new THREE.Vector3(...HOME.target)).toArray();
   controls.maxDistance = Math.max(14, d * 1.25);
+  // Ninguém mexeu na câmera ainda (girando sozinha): reajusta a distância pra nova vista padrão (ex.: girar o celular).
+  if (controls.autoRotate && !state.panelOpen) camera.position.sub(controls.target).setLength(d).add(controls.target);
   if (state.panelOpen) requestAnimationFrame(placeCarForPanel); // depois do novo layout
   applyViewShift();
   camera.updateProjectionMatrix();
@@ -1782,8 +1785,10 @@ document.getElementById('loading').remove();
 
 if (reduced) setLights(true);
 else {
-  camera.position.set(-7.5, 1.4, 4.5);
-  gsap.to(camera.position, { x: HOME.pos[0], y: HOME.pos[1], z: HOME.pos[2], duration: 2.6, ease: 'power3.out' });
+  // Entrada: a câmera desliza até a vista padrão; o destino é lido a cada quadro (se a tela mudar no meio, acompanha).
+  const from = new THREE.Vector3(-7.5, 1.4, 4.5), k = { v: 0 };
+  camera.position.copy(from);
+  gsap.to(k, { v: 1, duration: 2.6, ease: 'power3.out', onUpdate: () => camera.position.lerpVectors(from, homeV.set(...HOME.pos), k.v) });
   setLights(true, 1.3);
 }
 </script>
