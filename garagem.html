@@ -962,7 +962,7 @@ function resize() {
   camera.aspect = w / h;
   camera.fov = w < 600 ? 42 : 32;
   const halfW = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect; // meia largura visível por metro de distância
-  const d = Math.max(HOME_BASE.length(), 7.4 / (2 * halfW)); // 7,4 m: carro + folga
+  const d = Math.max(HOME_BASE.length(), 8.2 / (2 * halfW)); // 8,2 m: plataforma inteira (7,6 m) + folga
   homeExtra = d - HOME_BASE.length();
   HOME.pos = HOME_BASE.clone().setLength(d).add(new THREE.Vector3(...HOME.target)).toArray();
   controls.maxDistance = Math.max(14, d * 1.25);
