@@ -263,21 +263,57 @@ button, select { font: inherit; color: inherit; }
 .cta svg { width: 20px; height: 20px; flex: none; }
 .cta[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 
+.sheet-grip { display: none; } /* alça da gaveta: só no celular */
+/* Celular e tablet: jeito de app. O 3D ocupa a tela, os dois botões ficam lado a lado embaixo e o painel
+   vira uma gaveta que sobe de baixo (arrastar pra baixo fecha); o carro sobe pra parte visível. */
 @media (max-width: 980px) {
-  .viewport { height: 58vh; min-height: 360px; }
-  .panel { position: static; width: auto; margin-top: 16px; box-shadow: none; }
-  .app.is-collapsed .panel { display: none; }
-  .chooser { top: auto; bottom: 72px; right: 16px; left: 16px; width: auto; grid-template-columns: 1fr 1fr; }
-  .groups { overflow: visible; }
-  .summary { position: sticky; bottom: 0; background: rgba(5,8,16,.96); }
+  html { scrollbar-gutter: auto; }
+  .app { height: 100dvh; min-height: 0; padding-inline: 10px; overflow: hidden; }
+  .top { gap: 8px 10px; padding-block: 8px; }
+  .car-switch { padding: 5px 10px 5px 10px; min-height: 44px; }
+  .mode { order: 3; width: 100%; }
+  .mode button { flex: 1; white-space: nowrap; padding: 8px 10px; }
+  .stage { display: flex; flex-direction: column; padding-block: 8px 10px; }
+  .viewport { flex: 1; height: auto; min-height: 0; border-radius: 18px; }
+  .stage-caption { left: 14px; top: 12px; }
+  .stage-caption h2 { font-size: 21px; gap: 8px; }
+  .app:not(.is-collapsed) .stage-caption { opacity: 0; } /* gaveta aberta: o carro sobe e o nome sairia por cima dele */
+  .no-3d { left: 12px; right: 12px; top: 50px; max-width: none; font-size: 12px; }
+  .drag-hint { display: none; }
+  .chooser { top: auto; bottom: 10px; left: 10px; right: 10px; width: auto; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .app:not(.is-collapsed) .chooser { transform: translateY(20px); }
+  .chooser button { grid-template-columns: minmax(0, 1fr) auto; padding: 12px; gap: 2px 8px; min-height: 64px; }
+  .chooser button:hover { transform: none; }
+  .chooser strong { font-size: 12.5px; letter-spacing: .03em; white-space: nowrap; }
+  .chooser span { font-size: 12.5px; }
+  .chooser .count { display: block; }
+  .chooser .pick { height: 18px; width: 26px; }
+  .car-controls { bottom: 96px; }
+  .car-controls button { padding: 6px 12px; min-height: 36px; font-size: 12.5px; white-space: nowrap; }
+  .panel { position: fixed; z-index: 20; top: auto; left: 0; right: 0; bottom: 0; width: auto; height: min(64dvh, 640px);
+    border-radius: 22px 22px 0 0; border-bottom: 0; box-shadow: 0 -18px 50px rgba(0,0,0,.55); padding-bottom: env(safe-area-inset-bottom, 0px);
+    transition: transform .5s cubic-bezier(.22, 1, .36, 1), visibility 0s; touch-action: pan-y; }
+  .app.is-collapsed .panel { transform: translateY(105%); opacity: 1; transition: transform .4s cubic-bezier(.55, 0, .75, .2), visibility 0s .4s; }
+  .panel.is-dragging { transition: none; }
+  .sheet-grip { display: block; position: relative; height: 22px; flex: none; cursor: grab; touch-action: none; }
+  .sheet-grip::before { content: ""; position: absolute; left: 50%; top: 9px; width: 42px; height: 5px; margin-left: -21px; border-radius: 3px; background: rgba(244,246,249,.28); }
+  .panel-close { top: 6px; right: 8px; }
+  .layers button { min-height: 54px; padding: 10px 14px; }
+  .layers button strong { font-size: 13px; }
+  .group { padding: 13px 16px; }
+  .summary { padding: 12px 16px 14px; }
+  .summary-lines { max-height: 92px; }
+  .total { margin-bottom: 10px; }
+  .total strong { font-size: 28px; }
+  .cta { min-height: 48px; padding: 12px 14px; }
 }
 @media (max-width: 560px) {
-  .drag-hint { display: none; }
-  .car-controls { left: 16px; transform: none; }
-  .mode { width: 100%; }
-  .mode button { flex: 1; }
-  .lockup .south { height: 34px; }
+  .m-long { display: none; } /* "Levar ao Complexo South" vira "Complexo South" */
+  .lockup .south { height: 30px; }
   .brand { gap: 14px; }
+  .car-switch small { display: none; }
+  .car-switch strong { font-size: 15px; }
+  .chip-crest { height: 24px; }
   .add-form { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -302,7 +338,7 @@ button, select { font: inherit; color: inherit; }
     </button>
     <div class="mode" role="group" aria-label="Como você quer o orçamento">
       <span class="mode-thumb" aria-hidden="true"></span>
-      <button type="button" data-mode="complexo" aria-pressed="true">Levar ao Complexo South</button>
+      <button type="button" data-mode="complexo" aria-pressed="true"><span class="m-long">Levar ao </span>Complexo South</button>
       <button type="button" data-mode="casa" aria-pressed="false">Receber em casa</button>
     </div>
   </header>
@@ -332,6 +368,7 @@ button, select { font: inherit; color: inherit; }
     </section>
 
     <aside class="panel" id="panel" aria-label="Configuração e orçamento">
+      <div class="sheet-grip" id="sheet-grip" aria-hidden="true"></div>
       <button type="button" class="panel-close" id="panel-close" aria-label="Recolher e ver só o carro">×</button>
       <div class="layers" role="tablist" aria-label="Camadas" data-active="marchand">
         <span class="layer-thumb" aria-hidden="true"></span>
@@ -591,6 +628,9 @@ scene.environment = studioEnvironment();
 
 const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 120);
 const HOME = { pos: [0, 3.3, 10.65], target: [0, 0.6, 0] }; // vista padrão: lateral do carro (frente para a direita), pódio inteiro e as plataformas do fundo
+// Tela em pé (celular) é estreita: a vista padrão se afasta o quanto precisar pro carro caber de ponta a ponta.
+const HOME_BASE = new THREE.Vector3(...HOME.pos).sub(new THREE.Vector3(...HOME.target));
+let homeExtra = 0; // metros a mais que a vista padrão se afastou (a névoa recua junto)
 camera.position.set(...HOME.pos);
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(...HOME.target);
@@ -859,9 +899,9 @@ const loadCar = import('./assets/models/macan-model.js').then(({ default: b64 })
   car.position.y = -new THREE.Box3().setFromObject(car).min.y; // pneus apoiados no pódio
 });
 
-const viewShift = { x: 0 }; // px que o carro anda para a esquerda quando o painel está aberto
+const viewShift = { x: 0, y: 0 }; // px que o carro anda: pra esquerda (painel lateral) ou pra cima (gaveta no celular)
 function applyViewShift(jx = 0, jy = 0) {
-  if (viewShift.x || jx || jy) camera.setViewOffset(vw, vh, viewShift.x + jx, jy, vw, vh); else camera.clearViewOffset();
+  if (viewShift.x || viewShift.y || jx || jy) camera.setViewOffset(vw, vh, viewShift.x + jx, viewShift.y + jy, vw, vh); else camera.clearViewOffset();
 }
 // Desfoque de lente (bokeh): o carro em foco fica nítido e as outras plataformas desfocam com a distância.
 // O pass devolve a imagem opaca, então o degradê do fundo (antes CSS) é desenhado na própria cena.
@@ -921,6 +961,12 @@ function resize() {
   invalidate();
   camera.aspect = w / h;
   camera.fov = w < 600 ? 42 : 32;
+  const halfW = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect; // meia largura visível por metro de distância
+  const d = Math.max(HOME_BASE.length(), 7.4 / (2 * halfW)); // 7,4 m: carro + folga
+  homeExtra = d - HOME_BASE.length();
+  HOME.pos = HOME_BASE.clone().setLength(d).add(new THREE.Vector3(...HOME.target)).toArray();
+  controls.maxDistance = Math.max(14, d * 1.25);
+  if (state.panelOpen) requestAnimationFrame(placeCarForPanel); // depois do novo layout
   applyViewShift();
   camera.updateProjectionMatrix();
 }
@@ -979,9 +1025,19 @@ document.getElementById('reset-view').addEventListener('click', () => { state.ac
 /* ---------- Interface retrátil ---------- */
 const appEl = document.querySelector('.app');
 const wide = () => matchMedia('(min-width: 981px)').matches;
-function shiftCar(px) {
-  if (reduced) { viewShift.x = px; applyViewShift(); camera.updateProjectionMatrix(); return; }
-  gsap.to(viewShift, { x: px, duration: 0.7, ease: 'power3.inOut', overwrite: true, onUpdate: () => { applyViewShift(); camera.updateProjectionMatrix(); } });
+function shiftCar(x, y = 0) {
+  if (reduced) { Object.assign(viewShift, { x, y }); applyViewShift(); camera.updateProjectionMatrix(); return; }
+  gsap.to(viewShift, { x, y, duration: 0.7, ease: 'power3.inOut', overwrite: true, onUpdate: () => { applyViewShift(); camera.updateProjectionMatrix(); } });
+}
+// Painel aberto: carro anda pra esquerda (painel lateral) ou pra cima (gaveta no celular). Refeito ao girar a tela.
+function placeCarForPanel() {
+  if (wide()) shiftCar(Math.round(document.getElementById('panel').offsetWidth / 2) + 6);
+  else shiftCar(0, Math.round(sheetCover() / 2));
+}
+// Celular: quanto da tela do 3D a gaveta cobre; o carro sobe metade disso para ficar no meio da parte visível.
+function sheetCover() {
+  const panel = document.getElementById('panel').getBoundingClientRect(), view = viewport.getBoundingClientRect();
+  return Math.max(0, view.bottom - (innerHeight - panel.height));
 }
 function openPanel(layer) {
   const wasOpen = state.panelOpen;
@@ -992,7 +1048,7 @@ function openPanel(layer) {
     else { let i = 0; for (const s of spots) s.el.style.transitionDelay = s.g.layer === layer && !reduced ? `${0.25 + 0.06 * i++}s` : '0s'; setTimeout(() => { for (const s of spots) s.el.style.transitionDelay = ''; }, 1400); }
     state.active = null; state.open = null; renderGroups(); animateGroupsIn();
   }
-  if (wide()) shiftCar(Math.round(document.getElementById('panel').offsetWidth / 2) + 6);
+  placeCarForPanel();
   setFocusFog(true); // os outros carros somem na névoa enquanto este é configurado
   if (showroom.ready) setLights(false);
 }
@@ -1015,6 +1071,19 @@ function updateChooserCounts() {
 }
 for (const b of document.querySelectorAll('#chooser button')) b.addEventListener('click', () => openPanel(b.dataset.layer));
 document.getElementById('panel-close').addEventListener('click', closePanel);
+{
+  const panel = document.getElementById('panel'), grip = document.getElementById('sheet-grip');
+  let y0 = null;
+  grip.addEventListener('pointerdown', e => { y0 = e.clientY; grip.setPointerCapture(e.pointerId); panel.classList.add('is-dragging'); });
+  grip.addEventListener('pointermove', e => { if (y0 !== null) panel.style.transform = `translateY(${Math.max(0, e.clientY - y0)}px)`; });
+  const end = e => {
+    if (y0 === null) return;
+    const dy = e.clientY - y0; y0 = null;
+    panel.classList.remove('is-dragging'); panel.style.transform = '';
+    if (dy > 80) closePanel(); // arrastou mais de 80 px pra baixo: fecha
+  };
+  grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+}
 addEventListener('keydown', e => { if (e.key === 'Escape' && state.panelOpen && !document.getElementById('garage').open) closePanel(); });
 
 /* ---------- Visual do carro conforme escolhas ---------- */
@@ -1534,11 +1603,11 @@ function update() { applyVisuals(); renderGroups(); renderSummary(); updateChoos
 // (Na prática quem gira é a sala inteira em volta da câmera: tudo que já está ancorado no pódio — bolinhas,
 // vistas dos serviços, faróis — continua valendo sem mudança.)
 const FOG_SHOWROOM = { near: 16, far: 60 }, FOG_FOCUS = { near: 15, far: 24 }; // focado: só o pódio do carro fica visível
-scene.fog = new THREE.Fog(0x0a1224, FOG_SHOWROOM.near, FOG_SHOWROOM.far);
+scene.fog = new THREE.Fog(0x0a1224, FOG_SHOWROOM.near + homeExtra, FOG_SHOWROOM.far + homeExtra);
 // Com o painel aberto os outros carros somem na névoa; quando a névoa fecha, eles deixam de ser desenhados e o
 // desfoque (que só servia pra eles) é desligado: configurar o carro fica mais leve.
 function setFocusFog(on) {
-  const f = on ? FOG_FOCUS : FOG_SHOWROOM;
+  const base = on ? FOG_FOCUS : FOG_SHOWROOM, f = { near: base.near + homeExtra, far: base.far + homeExtra };
   showroom.focused = on;
   if (!on) { showOthers(true); bokeh.enabled = true; }
   const done = () => { if (showroom.focused && !showroom.busy) { showOthers(false); bokeh.enabled = false; } invalidate(); };
